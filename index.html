@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RBX RUBRICA - ULTIMATE EDITION</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;font-family:'Courier New',monospace} body{margin:0;background:#0a0a0a;color:#fff;padding:8px}
 .header{border:1px solid #ff7b00;padding:8px;color:#00d4ff;font-size:13px;font-weight:bold}
@@ -27,7 +26,7 @@ input,select{background:#000;border:1px solid #ff7b00;color:#00ff00;padding:10px
 .tabs{display:flex;gap:8px;margin:15px 0} .tab{flex:1;padding:10px;border:1px solid #00d4ff;background:#000;color:#00d4ff;cursor:pointer} .tab.active{background:#00d4ff;color:#000}
 .login input{margin:7px 0;border:2px solid #00ff00;background:rgba(0,255,0,.08);color:#fff}
 .btn-login{width:100%;background:#00e600;color:#fff;border:none;padding:13px;margin-top:10px} .btn-ghost{width:100%;background:transparent;color:#aaa;border:1px solid #555;padding:10px;margin-top:8px}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;justify-content:center;align-items:center;padding:15px} .overlay.open{display:flex}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;justify-content:center;align-items:center;padding:15px}
 .modal{background:#0d0d0d;border:2px solid #ff7b00;width:100%;max-width:520px;max-height:90vh;overflow:auto} .modal-head{background:#111;border-bottom:1px solid #ff7b00;padding:10px 14px;color:#ff8c00;font-weight:bold;display:flex;justify-content:space-between} .modal-body{padding:16px} .modal-body label{font-size:12px;color:#ff8c00;display:block;margin:10px 0 4px} .modal-body select,.modal-body input{border:1px solid #00ff00;background:#000;color:#fff} .row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px} .anno-box{background:#1a1a1a;border:1px dashed #ff8c00;color:#ff8c00;text-align:center;font-weight:bold;padding:10px} .preview{background:#000;border:1px solid #00d4ff;color:#00d4ff;padding:10px;font-size:13px;margin-top:14px;text-align:center} .btn-salva{width:100%;background:#00e600;color:#fff;border:none;padding:14px;margin-top:14px}
 .admin-row{display:flex;justify-content:space-between;background:#000;border:1px solid #333;padding:8px;margin:5px 0;font-size:12px}
 </style>
@@ -42,7 +41,6 @@ input,select{background:#000;border:1px solid #ff7b00;color:#00ff00;padding:10px
 <input type="password" id="adminPass2" placeholder="🔒 Ripeti password">
 <button class="btn-login" onclick="loginAdmin()">ACCEDI COME ADMIN 🔒</button>
 <div id="msgLogin" style="margin-top:10px;font-size:13px;"></div>
-<button class="btn-ghost" onclick="resetTutto()">⚠️ SE NON CLICCA, PREMI QUI PER SBLOCCARE</button>
 </div>
 <div id="paneUtente" style="display:none;">
 <p style="color:#aaa;font-size:12px;">Hai ricevuto un codice a 4 cifre dall'admin?<br>Inseriscilo per creare il tuo account.</p>
@@ -87,7 +85,7 @@ input,select{background:#000;border:1px solid #ff7b00;color:#00ff00;padding:10px
 <label>RUOLO ▼</label><select id="fRuolo" onchange="aggiornaPreview()"><option>preposto terzo</option><option>preposto secondo</option><option>preposto primo</option><option>agente</option><option>sorvegliante</option><option>piantone</option><option>portineria</option><option>sezione</option><option>— nessuno —</option></select>
 <label>NOTA LIBERA</label><input type="text" id="fNota" placeholder="Es: colloquio..." oninput="aggiornaPreview()">
 <div class="preview" id="preview"></div>
-<button class="btn-salva" onclick="salvaNuovo()">💾 SALVA TURNO</button><button onclick="chiudiNuovo()" style="width:100%;background:transparent;color:#f44;border:1px solid #f44;padding:10px;margin-top:8px;">ANNULLA</button>
+<button id="btnSalva" class="btn-salva" onclick="salvaNuovo()">💾 SALVA TURNO</button><button onclick="chiudiNuovo()" style="width:100%;background:transparent;color:#f44;border:1px solid #f44;padding:10px;margin-top:8px;">ANNULLA</button>
 </div></div></div>
 <div class="overlay" id="overlayAdmin"><div class="modal" style="max-width:600px;"><div class="modal-head"><span>⚙️ AREA ADMIN - AUTORIZZA UTENTI</span><span onclick="chiudiAdmin()" style="cursor:pointer;color:#f44;">✕</span></div><div class="modal-body">
 <p style="font-size:13px;color:#aaa;">Crea un codice per un collega. Daglielo tu a voce / messaggio. Lui lo userà una sola volta per creare il suo account.</p>
@@ -100,108 +98,143 @@ input,select{background:#000;border:1px solid #ff7b00;color:#00ff00;padding:10px
 <h3 style="color:#ff8c00;font-size:14px;">CODICI CREATI</h3><div id="listaCodici"></div>
 </div></div></div>
 <script>
-// LOGIN SEMPRE ATTIVO - definito per primo, non dipende da Supabase
-const ADMIN_PASSWORD = "astrea.astrea2423";
+var turni=[],selezionato=null,undoStack=[],modalMode='nuovo',modalId=null;
+var utenteCorrente=null, ruoloCorrente=null;
+var oggi=new Date(); var anno=oggi.getFullYear(), mese=oggi.getMonth(), giornoSel=oggi.getDate();
+var ADMIN_PASSWORD="astrea.astrea2423";
+var MESI=["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
+var MESI_MIN=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+(function(){var s=document.getElementById('fGiorno');for(var i=1;i<=31;i++){var o=document.createElement('option');o.value=i;o.text=i;s.appendChild(o);}})();
+function hashPwd(t){var h=5381;for(var i=0;i<t.length;i++){h=((h<<5)+h)+t.charCodeAt(i);h=h|0;}return 'rbx_'+Math.abs(h)+'_'+t.length+'_'+t.charCodeAt(0);}
+function getUtenti(){try{return JSON.parse(localStorage.getItem('rbx_utenti')||"[]");}catch(e){return [];}}
+function setUtenti(u){localStorage.setItem('rbx_utenti',JSON.stringify(u));}
+function getCodici(){try{return JSON.parse(localStorage.getItem('rbx_codici')||"[]");}catch(e){return [];}}
+function setCodici(c){localStorage.setItem('rbx_codici',JSON.stringify(c));}
+function salvaTurni(){localStorage.setItem('turni_'+utenteCorrente,JSON.stringify(turni));}
 function showTab(t){document.getElementById('tabAdmin').classList.toggle('active',t==='admin');document.getElementById('tabUtente').classList.toggle('active',t==='utente');document.getElementById('paneAdmin').style.display=t==='admin'?'block':'none';document.getElementById('paneUtente').style.display=t==='utente'?'block':'none';}
 function loginAdmin(){
-  try{
-    var p=document.getElementById('adminPass').value;
-    var p2=document.getElementById('adminPass2').value;
-    if(!p || !p2){ alert('Scrivi la password in tutte e 2 le caselle'); return; }
-    if(p!==ADMIN_PASSWORD || p2!==ADMIN_PASSWORD){ document.getElementById('msgLogin').innerHTML='<span style="color:red">Password errata</span>'; return; }
-    utenteCorrente='samax'; ruoloCorrente='admin';
-    localStorage.setItem('rbx_session',JSON.stringify({u:'samax',r:'admin'}));
-    entra();
-  }catch(e){ alert('Errore login: '+e.message); }
+  var p=document.getElementById('adminPass').value;
+  var p2=document.getElementById('adminPass2').value;
+  if(!p || !p2){alert('Scrivi la password in tutte e 2 le caselle');return;}
+  if(p!==ADMIN_PASSWORD || p2!==ADMIN_PASSWORD){document.getElementById('msgLogin').innerHTML='<span style="color:red">Password errata</span>';return;}
+  utenteCorrente='samax'; ruoloCorrente='admin';
+  localStorage.setItem('rbx_session',JSON.stringify({u:'samax',r:'admin'}));
+  entra();
 }
-function resetTutto(){ localStorage.removeItem('rbx_session'); localStorage.removeItem('rbx_admin_hash'); alert('Sbloccato, ora riprova la password'); location.reload(); }
-
-// SUPABASE PROTETTO - se non carica, il login funziona lo stesso
-let supabaseClient=null;
-try{
-  const SUPABASE_URL="https://ndxlwxgtfvexoqwzucrg.supabase.co";
-  const SUPABASE_KEY="sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
-  if(window.supabase) supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-}catch(e){ console.log('Supabase non caricato, uso locale'); }
-let turni=[],selezionato=null,undoStack=[],modalMode='nuovo',modalId=null;
-let utenteCorrente=null, ruoloCorrente=null;
-let oggi=new Date(); let anno=oggi.getFullYear(), mese=oggi.getMonth(), giornoSel=oggi.getDate();
-const MESI=["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
-const MESI_MIN=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
-(function(){let s=document.getElementById('fGiorno');for(let i=1;i<=31;i++){let o=document.createElement('option');o.value=i;o.text=i;s.appendChild(o);}})();
-function hashPwd(t){ let h=5381; for(let i=0;i<t.length;i++){ h=((h<<5)+h)+t.charCodeAt(i); h=h|0; } return 'rbx_'+Math.abs(h)+'_'+t.length+'_'+t.charCodeAt(0); }
-async function registraUtente(){
-  if(!supabaseClient) return alert('Database offline, entra come Admin e riprova dopo');
-  let user=document.getElementById('nuNomeUtente').value.trim().toLowerCase(); let codice=document.getElementById('nuCodice').value.trim(); let p=document.getElementById('nuPass').value; let p2=document.getElementById('nuPass2').value;
-  if(!user||!codice||!p) return alert('Compila tutto'); if(p!==p2) return alert('Password diverse'); if(p.length<4) return alert('Password minimo 4');
-  let {data:cod}=await supabaseClient.from('codici_accesso').select('*').eq('codice',codice).eq('usato',false).single();
-  if(!cod){document.getElementById('msgUtente').innerHTML='<span style="color:red">❌ Codice non valido o già usato.</span>'; return;}
-  let hash=hashPwd(p);
-  let {error}=await supabaseClient.from('utenti_app').insert([{username:user,nome:cod.nome,cognome:cod.cognome,password_hash:hash}]);
-  if(error){document.getElementById('msgUtente').innerHTML='<span style="color:red">Nome utente già esistente</span>'; return;}
-  await supabaseClient.from('codici_accesso').update({usato:true,utente_collegato:user}).eq('id',cod.id);
-  utenteCorrente=user; ruoloCorrente='utente'; localStorage.setItem('rbx_session',JSON.stringify({u:user,r:'utente'}));
-  alert('Benvenuto '+cod.nome+' '+cod.cognome+'!'); entra();
+function registraUtente(){
+  var user=document.getElementById('nuNomeUtente').value.trim().toLowerCase();
+  var codice=document.getElementById('nuCodice').value.trim();
+  var p=document.getElementById('nuPass').value; var p2=document.getElementById('nuPass2').value;
+  if(!user||!codice||!p) return alert('Compila tutto');
+  if(p!==p2) return alert('Password diverse');
+  if(p.length<4) return alert('Password minimo 4');
+  var codici=getCodici();
+  var idx=-1; for(var k=0;k<codici.length;k++){if(codici[k].codice===codice && !codici[k].usato) idx=k;}
+  if(idx===-1){document.getElementById('msgUtente').innerHTML='<span style="color:red">❌ Codice non valido o già usato.</span>';return;}
+  var utenti=getUtenti();
+  for(var q=0;q<utenti.length;q++){if(utenti[q].username===user){document.getElementById('msgUtente').innerHTML='<span style="color:red">Nome utente già esistente</span>';return;}}
+  utenti.push({username:user,nome:codici[idx].nome,cognome:codici[idx].cognome,password_hash:hashPwd(p)});
+  setUtenti(utenti);
+  codici[idx].usato=true; codici[idx].utente_collegato=user; setCodici(codici);
+  utenteCorrente=user; ruoloCorrente='utente';
+  localStorage.setItem('rbx_session',JSON.stringify({u:user,r:'utente'}));
+  alert('Benvenuto '+codici[idx].nome+' '+codici[idx].cognome+'! Account creato.');
+  entra();
 }
-async function loginUtente(){
-  if(!supabaseClient) return alert('Database offline');
-  let user=document.getElementById('exUser').value.trim().toLowerCase(); let p=document.getElementById('exPass').value;
-  let {data}=await supabaseClient.from('utenti_app').select('*').eq('username',user).single();
-  if(!data||hashPwd(p)!==data.password_hash){document.getElementById('msgEx').innerHTML='<span style="color:red">Utente o password errati</span>'; return;}
-  utenteCorrente=user; ruoloCorrente='utente'; localStorage.setItem('rbx_session',JSON.stringify({u:user,r:'utente'})); entra();
+function loginUtente(){
+  var user=document.getElementById('exUser').value.trim().toLowerCase();
+  var p=document.getElementById('exPass').value;
+  var utenti=getUtenti();
+  var found=null; for(var i=0;i<utenti.length;i++){if(utenti[i].username===user) found=utenti[i];}
+  if(!found || hashPwd(p)!==found.password_hash){document.getElementById('msgEx').innerHTML='<span style="color:red">Utente o password errati</span>';return;}
+  utenteCorrente=user; ruoloCorrente='utente';
+  localStorage.setItem('rbx_session',JSON.stringify({u:user,r:'utente'}));
+  entra();
 }
 function entra(){
-  document.getElementById('loginDiv').style.display='none'; document.getElementById('appDiv').style.display='block';
+  document.getElementById('loginDiv').style.display='none';
+  document.getElementById('appDiv').style.display='block';
   document.getElementById('utente').innerHTML='👤 <b>'+utenteCorrente+'</b> ('+ruoloCorrente+') • Rubrica personale';
   document.getElementById('btnAreaAdmin').style.display=ruoloCorrente==='admin'?'inline-block':'none';
   carica();
 }
 function logout(){localStorage.removeItem('rbx_session'); location.reload();}
-(function(){let s=localStorage.getItem('rbx_session'); if(s){try{let j=JSON.parse(s); utenteCorrente=j.u; ruoloCorrente=j.r; entra();}catch(e){}})})();
-async function carica(){
-  if(!supabaseClient){ turni=JSON.parse(localStorage.getItem('turni_'+utenteCorrente)||"[]"); document.getElementById('msg').innerText='MODALITA LOCALE - '+turni.length+' turni'; render(); return; }
-  let {data,error}=await supabaseClient.from('turni').select('*').eq('proprietario',utenteCorrente).order('giorno',{ascending:true});
-  if(error){document.getElementById('msg').innerText='ERRORE: '+error.message; return;}
-  turni=data||[]; document.getElementById('msg').innerText='SALVATO ONLINE ✅ - '+turni.length+' turni tuoi'; render();
+(function(){var s=localStorage.getItem('rbx_session'); if(s){try{var j=JSON.parse(s); utenteCorrente=j.u; ruoloCorrente=j.r; entra();}catch(e){}}})();
+function carica(){
+  try{turni=JSON.parse(localStorage.getItem('turni_'+utenteCorrente)||"[]");}catch(e){turni=[];}
+  document.getElementById('msg').innerText='SALVATO ✅ - '+turni.length+' turni tuoi';
+  render();
 }
-function getTurniMese(){return turni.filter(t=>{let m=t.mese??10; let a=t.anno??2026; return m===mese+1 && a===anno;});}
+function getTurniMese(){return turni.filter(function(t){var m=t.mese!=null?t.mese:10; var a=t.anno!=null?t.anno:2026; return m===mese+1 && a===anno;});}
 function render(){
   document.getElementById('dataHeader').innerText=' • OGGI: '+String(oggi.getDate()).padStart(2,'0')+'/'+String(oggi.getMonth()+1).padStart(2,'0')+'/'+oggi.getFullYear();
   document.getElementById('meseLabel').innerText=MESI[mese]; document.getElementById('meseChiusura').innerText=MESI[mese]; document.getElementById('meseChiusura2').innerText=MESI[mese]+' '+anno; document.getElementById('listaLabel').innerText=MESI[mese]+' '+anno+' ('+getTurniMese().length+')';
-  document.getElementById('dataInput').value=`${anno}-${String(mese+1).padStart(2,'0')}-${String(giornoSel).padStart(2,'0')} - ${giornoSel} ${MESI_MIN[mese]} ${anno}`;
-  const primo=new Date(anno,mese,1); let start=(primo.getDay()+6)%7; let gm=new Date(anno,mese+1,0).getDate(); let tm=getTurniMese(); let html="";
-  for(let i=0;i<start;i++) html+="<div></div>";
-  for(let d=1; d<=gm; d++){let has=tm.some(t=>t.giorno===d); let isToday=(d===oggi.getDate()&&mese===oggi.getMonth()&&anno===oggi.getFullYear()); let cls="cal-day"+(d===giornoSel?" sel":"")+(has?" has":"")+(isToday?" today":""); html+=`<div class="${cls}" onclick="selezionaGiorno(${d})">${d}</div>`;}
+  document.getElementById('dataInput').value=anno+'-'+String(mese+1).padStart(2,'0')+'-'+String(giornoSel).padStart(2,'0')+' - '+giornoSel+' '+MESI_MIN[mese]+' '+anno;
+  var primo=new Date(anno,mese,1); var start=(primo.getDay()+6)%7; var gm=new Date(anno,mese+1,0).getDate(); var tm=getTurniMese(); var html="";
+  for(var i=0;i<start;i++) html+="<div></div>";
+  for(var d=1; d<=gm; d++){var has=false; for(var h=0;h<tm.length;h++){if(tm[h].giorno===d) has=true;} var isToday=(d===oggi.getDate()&&mese===oggi.getMonth()&&anno===oggi.getFullYear()); var cls="cal-day"+(d===giornoSel?" sel":"")+(has?" has":"")+(isToday?" today":""); html+='<div class="'+cls+'" onclick="selezionaGiorno('+d+')">'+d+'</div>';}
   document.getElementById('calendario').innerHTML=html;
-  let sorted=[...tm].sort((a,b)=>a.giorno-b.giorno); let lh="";
-  sorted.forEach(t=>{let cls=(selezionato&&selezionato.id===t.id)?"riga sel":"riga"; lh+=`<div class="${cls}" onclick="selezionaTurno(${t.id})">● ${String(t.giorno).padStart(2,'0')} ${MESI[mese]} ${anno} &nbsp; ${t.testo.toUpperCase()}</div>`;});
-  if(!sorted.length) lh=`<div style="color:#666;padding:10px;">Nessun turno in ${MESI_MIN[mese]} ${anno}<br>La tua rubrica è vuota, clicca NUOVO</div>`;
+  var sorted=tm.slice().sort(function(a,b){return a.giorno-b.giorno;}); var lh="";
+  sorted.forEach(function(t){var cls=(selezionato&&selezionato.id===t.id)?"riga sel":"riga"; lh+='<div class="'+cls+'" onclick="selezionaTurno('+t.id+')">● '+String(t.giorno).padStart(2,'0')+' '+MESI[mese]+' '+anno+' &nbsp; '+t.testo.toUpperCase()+'</div>';});
+  if(!sorted.length) lh='<div style="color:#666;padding:10px;">Nessun turno in '+MESI_MIN[mese]+' '+anno+'<br>La tua rubrica è vuota, clicca NUOVO</div>';
   document.getElementById('lista').innerHTML=lh;
-  let matt=0,pom=0,sere=0,notti=0,riposi=0,stra=0;
-  tm.forEach(t=>{let s=t.testo.toUpperCase(); if(s.includes('06:00')||s.includes('07:00')||s.includes('08:00')) matt++; else if(s.includes('14:00')) pom++; else if(s.includes('15:00')||s.includes('16:00')) sere++; else if(s.includes('22:00')) notti++; if(s.includes('RIPOSO')) riposi++; let m=s.match(/(\d{1,2}):00\s*-\s*(\d{1,2}):00/); if(m){let h=parseInt(m[2])-parseInt(m[1]); if(h<0)h+=24; if(h>6)stra+=(h-6);}});
+  var matt=0,pom=0,sere=0,notti=0,riposi=0,stra=0;
+  tm.forEach(function(t){var s=t.testo.toUpperCase(); if(s.indexOf('06:00')>=0||s.indexOf('07:00')>=0||s.indexOf('08:00')>=0) matt++; else if(s.indexOf('14:00')>=0) pom++; else if(s.indexOf('15:00')>=0||s.indexOf('16:00')>=0) sere++; else if(s.indexOf('22:00')>=0) notti++; if(s.indexOf('RIPOSO')>=0) riposi++; var m=s.match(/(\d{1,2}):00\s*-\s*(\d{1,2}):00/); if(m){var h=parseInt(m[2])-parseInt(m[1]); if(h<0)h+=24; if(h>6)stra+=(h-6);}});
   document.getElementById('cMatt').innerText=matt; document.getElementById('cPom').innerText=pom; document.getElementById('cSere').innerText=sere; document.getElementById('cNotti').innerText=notti; document.getElementById('cRiposi').innerText=riposi; document.getElementById('cStra').innerText=stra.toFixed(1)+'h';
 }
 function cambiaMese(d){mese+=d; if(mese<0){mese=11;anno--;} if(mese>11){mese=0;anno++;} giornoSel=1; selezionato=null; render();}
-function selezionaGiorno(d){giornoSel=d; let t=getTurniMese().find(x=>x.giorno===d); if(t) selezionaTurno(t.id); else{selezionato=null; document.getElementById('selezionatoTxt').innerText=`${d} ${MESI[mese]} ${anno} - Nessun turno`; document.getElementById('selezionatoDett').innerText='';} render();}
-function selezionaTurno(id){selezionato=turni.find(t=>t.id===id); if(selezionato){document.getElementById('selezionatoTxt').innerText=`${selezionato.giorno} ${MESI[mese]} ${anno} ${selezionato.testo.toUpperCase()}`; document.getElementById('selezionatoDett').innerText='ID: '+selezionato.id+' - MOD per modificare'; document.getElementById('testo').value=selezionato.testo; giornoSel=selezionato.giorno;} render();}
-function apriNuovo(){modalMode='nuovo'; modalId=null; document.getElementById('modalTitolo').innerText='+ NUOVO TURNO'; document.getElementById('btnSalva').innerText='💾 SALVA TURNO'; document.getElementById('fGiorno').value=giornoSel; document.getElementById('fMese').value=mese; document.getElementById('fAnno').innerText=anno; document.getElementById('fOrario').value='08:00 - 16:00'; document.getElementById('fRuolo').value='preposto terzo'; document.getElementById('fNota').value=''; aggiornaPreview(); document.getElementById('overlayNuovo').classList.add('open');}
-function apriModifica(){if(!selezionato) return alert('Seleziona prima un turno'); modalMode='modifica'; modalId=selezionato.id; document.getElementById('modalTitolo').innerText='✏️ MODIFICA TURNO - Giorno '+selezionato.giorno; document.getElementById('btnSalva').innerText='💾 SALVA MODIFICA'; document.getElementById('fGiorno').value=selezionato.giorno; document.getElementById('fMese').value=(selezionato.mese??mese+1)-1; document.getElementById('fAnno').innerText=selezionato.anno??anno; let txt=selezionato.testo; let orari=['08:00 - 16:00','06:00 - 14:00','07:00 - 15:00','14:00 - 22:00','15:00 - 23:00','16:00 - 00:00','22:00 - 06:00','RIPOSO SETTIMANALE','FERIE','PERMESSO','MALATTIA']; let ot='08:00 - 16:00'; for(let o of orari){if(txt.includes(o)){ot=o;break;}} document.getElementById('fOrario').value=ot; let ruoli=['preposto terzo','preposto secondo','preposto primo','agente','sorvegliante','piantone','portineria','sezione']; let rt='preposto terzo'; for(let r of ruoli){if(txt.toLowerCase().includes(r)){rt=r;break;}} document.getElementById('fRuolo').value=rt; document.getElementById('fNota').value=''; aggiornaPreview(); document.getElementById('overlayNuovo').classList.add('open');}
-function chiudiNuovo(){document.getElementById('overlayNuovo').classList.remove('open');}
-function aggiornaPreview(){let g=document.getElementById('fGiorno').value; let m=MESI_MIN[parseInt(document.getElementById('fMese').value)]; let a=document.getElementById('fAnno').innerText; let o=document.getElementById('fOrario').value; let r=document.getElementById('fRuolo').value; let n=document.getElementById('fNota').value.trim(); let txt=`${g} | ${m} | ${a} | ${o} | ${r}`; if(n) txt+=` | ${n}`; document.getElementById('preview').innerText=txt;}
-async function salvaNuovo(){let g=parseInt(document.getElementById('fGiorno').value); let mIdx=parseInt(document.getElementById('fMese').value); let aVal=parseInt(document.getElementById('fAnno').innerText); let o=document.getElementById('fOrario').value; let r=document.getElementById('fRuolo').value; let n=document.getElementById('fNota').value.trim(); let testo=o; if(r!=='— nessuno —') testo+=' - '+r; if(n) testo+=' - '+n; if(['RIPOSO SETTIMANALE','FERIE','PERMESSO','MALATTIA'].includes(o)){testo=o+(r!=='— nessuno —'?' - '+r:''); if(n) testo+=' - '+n;}
-if(!supabaseClient){ let nt={id:Date.now(),giorno:g,mese:mIdx+1,anno:aVal,testo,proprietario:utenteCorrente}; if(modalMode==='nuovo') turni.push(nt); else {let idx=turni.findIndex(t=>t.id===modalId); if(idx>=0) turni[idx]={...turni[idx],giorno:g,mese:mIdx+1,anno:aVal,testo};} localStorage.setItem('turni_'+utenteCorrente,JSON.stringify(turni)); mese=mIdx; anno=aVal; giornoSel=g; chiudiNuovo(); render(); return; }
-if(modalMode==='nuovo'){let {error}=await supabaseClient.from('turni').insert([{giorno:g,mese:mIdx+1,anno:aVal,testo,proprietario:utenteCorrente}]); if(error) return alert(error.message); mese=mIdx; anno=aVal; giornoSel=g;} else{undoStack.push({...selezionato}); let {error}=await supabaseClient.from('turni').update({giorno:g,mese:mIdx+1,anno:aVal,testo}).eq('id',modalId); if(error) return alert(error.message); mese=mIdx; anno=aVal; giornoSel=g;}
-document.getElementById('fNota').value=""; chiudiNuovo(); carica();}
-async function eliminaSelezionato(){if(!selezionato) return alert('Seleziona un turno'); if(!confirm('Eliminare: '+selezionato.testo+'?')) return; undoStack.push({...selezionato,_deleted:true}); if(!supabaseClient){ turni=turni.filter(t=>t.id!==selezionato.id); localStorage.setItem('turni_'+utenteCorrente,JSON.stringify(turni)); selezionato=null; render(); return; } await supabaseClient.from('turni').delete().eq('id',selezionato.id); selezionato=null; carica();}
-async function undo(){if(!undoStack.length) return alert('Niente da annullare'); let u=undoStack.pop(); if(!supabaseClient){ turni.push(u); render(); return; } if(u._deleted) await supabaseClient.from('turni').insert([{giorno:u.giorno,mese:u.mese||mese+1,anno:u.anno||anno,testo:u.testo,proprietario:utenteCorrente}]); else await supabaseClient.from('turni').update({testo:u.testo}).eq('id',u.id); carica();}
-function backup(){let b=new Blob([JSON.stringify(turni,null,2)],{type:'application/json'}); let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup-rbx-'+utenteCorrente+'.json'; a.click();}
-async function ripristino(e){let f=e.target.files[0]; if(!f) return; let t=await f.text(); let arr=JSON.parse(t); if(!supabaseClient){ turni=arr; localStorage.setItem('turni_'+utenteCorrente,JSON.stringify(turni)); render(); return; } for(let x of arr) await supabaseClient.from('turni').insert([{giorno:x.giorno,mese:x.mese||10,anno:x.anno||2026,testo:x.testo,proprietario:utenteCorrente}]); alert('Ripristinato '+arr.length); carica();}
-function apriAdmin(){document.getElementById('overlayAdmin').classList.add('open'); caricaCodici();}
-function chiudiAdmin(){document.getElementById('overlayAdmin').classList.remove('open');}
+function selezionaGiorno(d){giornoSel=d; var t=null; var tm=getTurniMese(); for(var i=0;i<tm.length;i++){if(tm[i].giorno===d) t=tm[i];} if(t) selezionaTurno(t.id); else{selezionato=null; document.getElementById('selezionatoTxt').innerText=d+' '+MESI[mese]+' '+anno+' - Nessun turno'; document.getElementById('selezionatoDett').innerText='';} render();}
+function selezionaTurno(id){for(var i=0;i<turni.length;i++){if(turni[i].id===id) selezionato=turni[i];} if(selezionato){document.getElementById('selezionatoTxt').innerText=selezionato.giorno+' '+MESI[mese]+' '+anno+' '+selezionato.testo.toUpperCase(); document.getElementById('selezionatoDett').innerText='ID: '+selezionato.id+' - MOD per modificare'; document.getElementById('testo').value=selezionato.testo; giornoSel=selezionato.giorno;} render();}
+function apriNuovo(){
+  modalMode='nuovo'; modalId=null;
+  document.getElementById('modalTitolo').innerText='+ NUOVO TURNO';
+  var bs=document.getElementById('btnSalva'); if(bs) bs.innerText='💾 SALVA TURNO';
+  document.getElementById('fGiorno').value=giornoSel;
+  document.getElementById('fMese').value=mese;
+  document.getElementById('fAnno').innerText=anno;
+  document.getElementById('fOrario').value='08:00 - 16:00';
+  document.getElementById('fRuolo').value='preposto terzo';
+  document.getElementById('fNota').value='';
+  aggiornaPreview();
+  document.getElementById('overlayNuovo').style.display='flex';
+}
+function apriModifica(){
+  if(!selezionato){alert('Seleziona prima un turno dalla lista');return;}
+  modalMode='modifica'; modalId=selezionato.id;
+  document.getElementById('modalTitolo').innerText='✏️ MODIFICA TURNO - Giorno '+selezionato.giorno;
+  var bs=document.getElementById('btnSalva'); if(bs) bs.innerText='💾 SALVA MODIFICA';
+  document.getElementById('fGiorno').value=selezionato.giorno;
+  document.getElementById('fMese').value=(selezionato.mese!=null?selezionato.mese:mese+1)-1;
+  document.getElementById('fAnno').innerText=selezionato.anno!=null?selezionato.anno:anno;
+  var txt=selezionato.testo;
+  var orari=['08:00 - 16:00','06:00 - 14:00','07:00 - 15:00','14:00 - 22:00','15:00 - 23:00','16:00 - 00:00','22:00 - 06:00','RIPOSO SETTIMANALE','FERIE','PERMESSO','MALATTIA'];
+  var ot='08:00 - 16:00'; for(var k=0;k<orari.length;k++){if(txt.indexOf(orari[k])>=0){ot=orari[k];break;}}
+  document.getElementById('fOrario').value=ot;
+  var ruoli=['preposto terzo','preposto secondo','preposto primo','agente','sorvegliante','piantone','portineria','sezione'];
+  var rt='preposto terzo'; for(var j=0;j<ruoli.length;j++){if(txt.toLowerCase().indexOf(ruoli[j])>=0){rt=ruoli[j];break;}}
+  document.getElementById('fRuolo').value=rt;
+  document.getElementById('fNota').value='';
+  aggiornaPreview();
+  document.getElementById('overlayNuovo').style.display='flex';
+}
+function chiudiNuovo(){document.getElementById('overlayNuovo').style.display='none';}
+function aggiornaPreview(){var g=document.getElementById('fGiorno').value; var m=MESI_MIN[parseInt(document.getElementById('fMese').value)]; var a=document.getElementById('fAnno').innerText; var o=document.getElementById('fOrario').value; var r=document.getElementById('fRuolo').value; var n=document.getElementById('fNota').value.trim(); var txt=g+' | '+m+' | '+a+' | '+o+' | '+r; if(n) txt+=' | '+n; document.getElementById('preview').innerText=txt;}
+function salvaNuovo(){
+  var g=parseInt(document.getElementById('fGiorno').value); var mIdx=parseInt(document.getElementById('fMese').value); var aVal=parseInt(document.getElementById('fAnno').innerText); var o=document.getElementById('fOrario').value; var r=document.getElementById('fRuolo').value; var n=document.getElementById('fNota').value.trim(); var testo=o; if(r!=='— nessuno —') testo+=' - '+r; if(n) testo+=' - '+n; if(['RIPOSO SETTIMANALE','FERIE','PERMESSO','MALATTIA'].indexOf(o)>=0){testo=o+(r!=='— nessuno —'?' - '+r:''); if(n) testo+=' - '+n;}
+  if(modalMode==='nuovo'){turni.push({id:Date.now(),giorno:g,mese:mIdx+1,anno:aVal,testo:testo,proprietario:utenteCorrente});}
+  else{for(var i=0;i<turni.length;i++){if(turni[i].id===modalId){undoStack.push({id:turni[i].id,giorno:turni[i].giorno,mese:turni[i].mese,anno:turni[i].anno,testo:turni[i].testo}); turni[i].giorno=g; turni[i].mese=mIdx+1; turni[i].anno=aVal; turni[i].testo=testo;}}}
+  mese=mIdx; anno=aVal; giornoSel=g; salvaTurni(); document.getElementById('fNota').value=""; chiudiNuovo(); carica();
+}
+function eliminaSelezionato(){if(!selezionato) return alert('Seleziona un turno'); if(!confirm('Eliminare: '+selezionato.testo+'?')) return; var copia={id:selezionato.id,giorno:selezionato.giorno,mese:selezionato.mese,anno:selezionato.anno,testo:selezionato.testo,_deleted:true}; undoStack.push(copia); var nt=[]; for(var i=0;i<turni.length;i++){if(turni[i].id!==selezionato.id) nt.push(turni[i]);} turni=nt; selezionato=null; salvaTurni(); carica();}
+function undo(){if(!undoStack.length) return alert('Niente da annullare'); var u=undoStack.pop(); if(u._deleted){turni.push({id:u.id,giorno:u.giorno,mese:u.mese||mese+1,anno:u.anno||anno,testo:u.testo,proprietario:utenteCorrente});} else {for(var i=0;i<turni.length;i++){if(turni[i].id===u.id) turni[i].testo=u.testo;}} salvaTurni(); carica();}
+function backup(){var b=new Blob([JSON.stringify(turni,null,2)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='backup-rbx-'+utenteCorrente+'.json'; a.click();}
+function ripristino(e){var f=e.target.files[0]; if(!f) return; var reader=new FileReader(); reader.onload=function(){try{var arr=JSON.parse(reader.result); for(var i=0;i<arr.length;i++){if(!arr[i].id) arr[i].id=Date.now()+i; if(!arr[i].proprietario) arr[i].proprietario=utenteCorrente;} turni=arr; salvaTurni(); alert('Ripristinato '+arr.length); carica();}catch(err){alert('File non valido');}}; reader.readAsText(f);}
+function apriAdmin(){document.getElementById('overlayAdmin').style.display='flex'; caricaCodici();}
+function chiudiAdmin(){document.getElementById('overlayAdmin').style.display='none';}
 function generaCodice(){document.getElementById('aCodice').value=String(Math.floor(1000+Math.random()*9000));}
-async function creaCodice(){let nome=document.getElementById('aNome').value.trim(); let cogn=document.getElementById('aCognome').value.trim(); let cod=document.getElementById('aCodice').value.trim(); if(!nome||!cogn||cod.length!==4) return alert('Nome, cognome e codice 4 cifre'); if(!supabaseClient) return alert('Database offline, riprova dopo'); let {error}=await supabaseClient.from('codici_accesso').insert([{nome,cognome:cogn,codice:cod}]); if(error) return alert(error.message); document.getElementById('msgAdmin').innerHTML='<span style="color:#0f0">✅ Codice creato per '+nome+' '+cogn+': <b>'+cod+'</b></span>'; document.getElementById('aNome').value=''; document.getElementById('aCognome').value=''; document.getElementById('aCodice').value=''; caricaCodici();}
-async function caricaCodici(){if(!supabaseClient){document.getElementById('listaCodici').innerHTML='Database offline'; return;} let {data}=await supabaseClient.from('codici_accesso').select('*').order('created_at',{ascending:false}); let h=''; (data||[]).forEach(c=>{h+=`<div class="admin-row"><span><b>${c.nome} ${c.cognome}</b> - Codice: <b style="color:#ff8c00">${c.codice}</b></span><span>${c.usato?'✅ USATO da '+c.utente_collegato:'⏳ IN ATTESA'}</span></div>`;}); document.getElementById('listaCodici').innerHTML=h||'Nessun codice';}
-document.addEventListener('keydown',e=>{if(e.key==='PageUp')cambiaMese(-1); if(e.key==='PageDown')cambiaMese(1); if(e.key==='Escape'){chiudiNuovo(); chiudiAdmin();}});
+function creaCodice(){var nome=document.getElementById('aNome').value.trim(); var cogn=document.getElementById('aCognome').value.trim(); var cod=document.getElementById('aCodice').value.trim(); if(!nome||!cogn||cod.length!==4) return alert('Nome, cognome e codice 4 cifre'); var codici=getCodici(); codici.unshift({nome:nome,cognome:cogn,codice:cod,usato:false,utente_collegato:''}); setCodici(codici); document.getElementById('msgAdmin').innerHTML='<span style="color:#0f0">✅ Codice creato per '+nome+' '+cogn+': <b>'+cod+'</b> - Daglielo tu</span>'; document.getElementById('aNome').value=''; document.getElementById('aCognome').value=''; document.getElementById('aCodice').value=''; caricaCodici();}
+function caricaCodici(){var data=getCodici(); var h=''; data.forEach(function(c){h+='<div class="admin-row"><span><b>'+c.nome+' '+c.cognome+'</b> - Codice: <b style="color:#ff8c00">'+c.codice+'</b></span><span>'+(c.usato?'✅ USATO da '+c.utente_collegato:'⏳ IN ATTESA')+'</span></div>';}); document.getElementById('listaCodici').innerHTML=h||'Nessun codice';}
+document.addEventListener('keydown',function(e){if(e.key==='PageUp')cambiaMese(-1); if(e.key==='PageDown')cambiaMese(1); if(e.key==='Escape'){chiudiNuovo(); chiudiAdmin();}});
 </script>
 </body>
 </html>
