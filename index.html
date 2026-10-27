@@ -163,13 +163,8 @@ label{font-size:12px;color:#aaa}
 <div class="hero-text"><div id="oraOnda">NESSUN PROGRAMMA IN ONDA</div><div id="titoloOnda">Radio Samax</div><div id="descOnda">Premi PLAY e ascolta</div></div>
 </div>
 <button class="play-big" id="playBtn" onclick="toggleRadio()">▶ PLAY</button>
-
-<!-- ===== SPIKER IN PAGINA INIZIALE - NASCOSTO AL PUBBLICO, SOLO ADMIN ===== -->
-<!-- Di base display:none -> pubblico non lo vede -->
 <button class="play-big" id="spikerBtn" onclick="toggleMic()" style="background:#ffcc00;color:#000;border:2px solid #ff0000;margin-top:8px;display:none;font-size:16px">🎤 SPIKER - PARLA IN DIRETTA</button>
 <div id="spikerStatus" style="text-align:center;font-size:12px;color:#888;display:none">🎙️ Microfono spento - Premi SPIKER per parlare. Premi di nuovo o tasto M per spegnere.</div>
-<!-- ================================================================ -->
-
 <div class="vol-box">
   <button onclick="toggleMute()" id="muteBtn" style="background:none;border:none;font-size:18px;cursor:pointer">🔉</button>
   <input type="range" id="volPubblico" min="0" max="100" value="21" oninput="setVolumePubblico(this.value)">
@@ -238,17 +233,25 @@ label{font-size:12px;color:#aaa}
 <button class="btn-admin" style="background:#ff0000;color:#fff" onclick="apriStima()">⏱️ CALCOLA DURATA TOTALE</button>
 <h3 style="margin-top:18px">📻 MANDA IN ONDA - SOLO TU</h3>
 <div id="adminOnda"></div>
+
 <h3 style="margin-top:18px">+ Crea Nuovo Programma</h3>
 <label>Nome programma</label><input id="fTitolo" placeholder="Es: Show Live Music">
 <label>Descrizione</label><input id="fDesc" placeholder="Musica live">
 <label>Orario</label><input id="fOra" placeholder="18:00 - 20:00">
-<label>Primo file MP3</label><input id="fFileName" placeholder="01-intro.mp3" value="01-intro.mp3">
+<!-- PRIMO FILE MP3 - LEGGE CARTELLA PROVA E SCEGLIE IL PRIMO DA SOLO -->
+<label>Primo file MP3 - lo sceglie da solo dalla cartella prova</label>
+<select id="fFileName"><option value="01-intro.mp3">01-intro.mp3</option></select>
+<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="document.getElementById('adminFolderInput').click()">📂 LEGGI CARTELLA PROVA E SCEGLI PRIMO</button>
+<input type="file" id="adminFolderInput" webkitdirectory directory multiple style="display:none">
+<div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5"></div>
 <button class="btn-admin" onclick="creaProgramma()">💾 CREA PROGRAMMA</button>
+
 <h3 style="margin-top:18px">+ Aggiungi Brano</h3>
 <label>Scegli programma</label><select id="selProg"></select>
 <label>Nome brano</label><input id="fEpNome" placeholder="Es: Brano 2">
 <label>Nome file MP3</label><input id="fEpFile" placeholder="02-vasco.mp3">
 <button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="aggiungiEpisodio()">+ AGGIUNGI BRANO</button>
+<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="aggiungiTuttiDaProva()">📂 AGGIUNGI TUTTI I RESTANTI DA PROVA</button>
 <h3 style="margin-top:18px">📰 Notizia Flash</h3><input id="fNews" placeholder="Scrivi notizia..."><button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="aggiungiNews()">Pubblica</button>
 <button class="btn-admin" style="background:#ff0000;color:#fff" onclick="logout()">Esci</button>
 </div>
@@ -384,7 +387,47 @@ function render(){
 function inviaDedica(){ let n=document.getElementById('dedNome').value.trim()||"Anonimo"; let t=document.getElementById('dedTesto').value.trim(); if(!t) return alert("Scrivi la dedica"); dediche.unshift({nome:n,testo:t}); save(); render(); document.getElementById('dedTesto').value=''; let wa = _getWhatsApp(); let msg = `💌 NUOVA DEDICA - RADIO SAMAX 🔥\n\n👤 Da: ${n}\n🎵 Dedica / Richiesta: ${t}\n\n--- Inviata dal sito Radio Samax ---`; window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank'); }
 function vota(i){voti[i]++; save(); render(); alert("✅ Voto registrato!");}
 function salvaPal(){palinsestoTxt=document.getElementById('fPal').value; localStorage.setItem('samax_pal',palinsestoTxt); render(); alert("Programmi di oggi salvati");}
-function creaProgramma(){let titolo=document.getElementById('fTitolo').value.trim(); if(!titolo) return alert("Metti il nome!"); let cartella=slugify(titolo); let file=document.getElementById('fFileName').value.trim()||'01-intro.mp3'; programmi.push({titolo, desc:document.getElementById('fDesc').value, ora:document.getElementById('fOra').value, cartella, episodi:[{nome:'Brano 1', file:file, path:`audio/${cartella}/${file}`, dur:0}]}); save(); render(); alert("✅ Creato: "+titolo+" - Ora puoi mandarlo in onda e il pubblico potrà votarlo.");}
+
+// ===== LEGGE CARTELLA PROVA E SCEGLIE IL PRIMO DA SOLO =====
+window._listaProva = [];
+let _adminFolderEl = document.getElementById('adminFolderInput');
+if(_adminFolderEl){
+  _adminFolderEl.addEventListener('change', e => {
+    let files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.mp3'));
+    files.sort((a,b) => a.name.localeCompare(b.name));
+    if(files.length === 0){ alert("Nessun MP3 nella cartella prova"); return; }
+    window._listaProva = files.map(f => f.name);
+    let sel = document.getElementById('fFileName');
+    sel.innerHTML = "";
+    files.forEach(f => {
+      let opt = document.createElement('option');
+      opt.value = f.name;
+      opt.textContent = f.name;
+      sel.appendChild(opt);
+    });
+    sel.value = files[0].name;
+    document.getElementById('adminMp3List').innerHTML = "✅ Trovati " + files.length + " brani in prova.<br>Primo scelto da solo: <b style='color:#ff0000'>" + files[0].name + "</b><br>" + files.map(f=>"🎵 "+f.name).join("<br>");
+    alert("✅ Fatto! Primo file scelto da solo: " + files[0].name + "\nOra premi CREA PROGRAMMA");
+  });
+}
+function aggiungiTuttiDaProva(){
+  let idx = document.getElementById('selProg').value;
+  if(idx === "") return alert("Prima crea un programma");
+  if(!window._listaProva || window._listaProva.length === 0) return alert("Prima premi LEGGI CARTELLA PROVA");
+  let p = programmi[idx];
+  let esistenti = new Set(p.episodi.map(e => e.file));
+  let aggiunti = 0;
+  window._listaProva.forEach((nome, i) => {
+    if(i === 0) return; // il primo è già nel programma
+    if(esistenti.has(nome)) return;
+    p.episodi.push({nome: nome.replace('.mp3',''), file: nome, path: `audio/${p.cartella}/${nome}`, dur: 0});
+    aggiunti++;
+  });
+  save(); render();
+  alert("✅ Aggiunti " + aggiunti + " brani restanti da prova!");
+}
+
+function creaProgramma(){let titolo=document.getElementById('fTitolo').value.trim(); if(!titolo) return alert("Metti il nome!"); let cartella=slugify(titolo); let file=document.getElementById('fFileName').value.trim()||'01-intro.mp3'; programmi.push({titolo, desc:document.getElementById('fDesc').value, ora:document.getElementById('fOra').value, cartella, episodi:[{nome:'Brano 1', file:file, path:`audio/${cartella}/${file}`, dur:0}]}); save(); render(); alert("✅ Creato: "+titolo+" - Primo file: "+file+" - Ora premi AGGIUNGI TUTTI I RESTANTI DA PROVA"); }
 function aggiungiEpisodio(){let idx=document.getElementById('selProg').value; if(idx==="") return alert("Prima crea un programma"); let nome=document.getElementById('fEpNome').value.trim()||('Brano '+(programmi[idx].episodi.length+1)); let file=document.getElementById('fEpFile').value.trim()||'brano.mp3'; let p=programmi[idx]; p.episodi.push({nome, file, path:`audio/${p.cartella}/${file}`, dur:0}); save(); render(); alert("✅ Aggiunto!");}
 function mandaInOnda(i,ei){currentIdx=i; currentEp=ei; let p=programmi[i]; let e=p.episodi[ei]; document.getElementById('titoloOnda').innerText=p.titolo+" - "+e.nome; document.getElementById('descOnda').innerText=(p.desc||'')+" • Brano "+(ei+1)+" di "+p.episodi.length+" • "+(p.ora||''); audio.src=e.path; audio.volume = document.getElementById('volPubblico').value / 100; audio.play().catch(()=>{}); isPlaying=true; isOnline=true; liveStartTime=Date.now(); save(); pubblicaProgrammaSuFirebase(); document.getElementById('playBtn').innerText="⏸ PAUSA"; document.getElementById('vinyl').classList.add('spin'); render();}
 audio.addEventListener('ended', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
