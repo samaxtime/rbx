@@ -81,13 +81,13 @@ label{font-size:12px;color:#aaa}
 .dedica span{color:#ddd}
 .mic-on{animation:micPulse 1s infinite}
 @keyframes micPulse{50%{box-shadow:0 0 20px #ff0000}}
-.countdown-bar{background:linear-gradient(90deg,#ff0000,#cc0000,#ff0000);background-size:200% 100%;animation:gradMove 3s linear infinite;border-radius:14px;padding:10px 12px;margin:8px 0;text-align:center;box-shadow:0 0 20px #ff000088}
+.countdown-bar{background:linear-gradient(90deg,#ff9900,#ff6600,#ff9900);background-size:200% 100%;animation:gradMove 3s linear infinite;border:3px solid #ffcc00;border-radius:18px;padding:16px 12px;margin:10px 0;text-align:center;box-shadow:0 0 30px #ff9900aa}
 @keyframes gradMove{to{background-position:200% 0}}
-.countdown-bar.live{background:linear-gradient(90deg,#00aa00,#00cc44,#00aa00);background-size:200% 100%;box-shadow:0 0 20px #00ff0088}
-.countdown-label{font-size:11px;font-weight:900;letter-spacing:2px}
-.countdown-time{font-size:32px;font-weight:900;letter-spacing:2px;line-height:1;font-variant-numeric:tabular-nums}
-.countdown-sub{font-size:12px;opacity:.9;margin-top:2px}
-.listeners-pill{background:rgba(0,0,0,.35);border-radius:20px;padding:6px 10px;display:flex;justify-content:center;gap:12px;font-size:12px;font-weight:800;margin-top:6px;flex-wrap:wrap}
+.countdown-label{font-size:14px;font-weight:900;letter-spacing:2px}
+.countdown-time{font-size:44px;font-weight:900;letter-spacing:2px;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 0 15px rgba(0,0,0,.5)}
+.countdown-sub{font-size:14px;font-weight:700;margin-top:4px}
+.countdown-durata{background:rgba(0,0,0,.45);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:13px;font-weight:800}
+.listeners-pill{background:rgba(0,0,0,.35);border-radius:20px;padding:6px 10px;display:flex;justify-content:center;gap:12px;font-size:12px;font-weight:800;margin-top:8px;flex-wrap:wrap}
 .clock-bar{background:linear-gradient(90deg,#0a0a0a,#1a1a1a,#0a0a0a);border:1px solid #333;border-radius:14px;padding:8px 12px;margin:8px 0;text-align:center}
 .clock-date{font-size:11px;letter-spacing:2px;color:#aaa;font-weight:800;text-transform:uppercase}
 .clock-time{font-size:34px;font-weight:900;letter-spacing:3px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
@@ -106,6 +106,12 @@ label{font-size:12px;color:#aaa}
 .vote-prog-box{background:linear-gradient(145deg,#1a0000,#000);border:2px solid #ff0000;border-radius:14px;padding:12px;text-align:center}
 .vote-prog-btn{background:#ff0000;color:#fff;border:none;padding:12px;border-radius:12px;font-weight:900;cursor:pointer;width:100%;font-size:15px;margin-top:8px}
 .vote-prog-btn:disabled{background:#333;color:#888}
+.step-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:16px;padding:14px;margin:10px 0}
+.step-num{background:#ff0000;color:#fff;font-weight:900;font-size:12px;padding:4px 10px;border-radius:20px;display:inline-block}
+.clock-input{font-size:28px !important;text-align:center;font-weight:900;letter-spacing:3px;padding:14px !important;background:#000 !important;border:2px solid #ff0000 !important;color:#ff0000 !important}
+.prog-select{border:2px solid #333;border-radius:12px;padding:10px;margin:6px 0;cursor:pointer;background:#111}
+.prog-select.sel{border-color:#ff0000;background:#2a0000}
+.btn-vai-onda{background:#ff9900 !important;color:#fff !important;font-size:22px !important;padding:18px !important;border-radius:16px !important;box-shadow:0 0 25px #ff990088}
 </style>
 </head>
 <body>
@@ -120,6 +126,7 @@ label{font-size:12px;color:#aaa}
 <div style="font-size:10px;color:#ff0000;font-weight:800">⏭️ PROSSIMO:</div>
 <div style="font-weight:900;font-size:13px" id="nextTitoloSide">--</div>
 <div style="font-size:11px;color:#aaa"><span id="nextOraSide">--:--</span> • <span id="nextDescSide">--</span></div>
+<div style="font-size:11px;color:#ffcc00;margin-top:2px" id="nextDurataSide">--</div>
 </div>
 </div>
 <div class="side-card">
@@ -127,7 +134,7 @@ label{font-size:12px;color:#aaa}
 <div id="voteProgBox"></div>
 <div id="firebaseStatus" style="font-size:10px;color:#888;text-align:center;margin-top:6px">🔄 Connessione Firebase...</div>
 </div>
-<div class="side-card"><h3>🎙️ PROSSIMO IN ONDA</h3><div style="background:#1a0000;border:1px solid #ff000033;border-radius:12px;padding:10px"><div style="font-size:11px;color:#ff0000;font-weight:800" id="nextOra">--:--</div><div style="font-weight:900;font-size:14px" id="nextTitolo">--</div><div style="font-size:12px;color:#aaa" id="nextDesc">Imposta da Admin</div></div></div>
+<div class="side-card"><h3>🎙️ PROSSIMO IN ONDA</h3><div style="background:#1a0000;border:1px solid #ff000033;border-radius:12px;padding:10px"><div style="font-size:11px;color:#ff0000;font-weight:800" id="nextOra">--:--</div><div style="font-weight:900;font-size:14px" id="nextTitolo">--</div><div style="font-size:12px;color:#aaa" id="nextDesc">Imposta da Admin</div><div style="font-size:11px;color:#ffcc00;margin-top:3px" id="nextDurata">--</div></div></div>
 </aside>
 <main class="wrap">
 <div class="top"><div class="live-badge off" id="liveBadge">● OFF-LINE</div><button class="admin-btn" onclick="openAdmin()">🔐 ADMIN</button></div>
@@ -137,18 +144,11 @@ label{font-size:12px;color:#aaa}
   <div class="clock-time" id="clockTime">--<span>:</span>--<span>:</span>--</div>
   <div style="font-size:10px;color:#00ccff;letter-spacing:1px;font-weight:800">📍 PORTO AZZURRO • ISOLA D'ELBA • ORA ESATTA</div>
 </div>
-<div class="ferry-bar">
-  <div class="ferry-title">⛴️ TRAGHETTI <span>ELBA</span> • PROSSIME PARTENZE</div>
-  <div class="ferry-grid">
-    <div class="ferry-card"><b>🚢 Piombino → Portoferraio</b><div class="big" id="ferry1Time">--:--</div><div class="small" id="ferry1Countdown">Tra -- min • Moby / Toremar • 1h traversata</div></div>
-    <div class="ferry-card"><b>🚢 Piombino → Porto Azzurro / Rio Marina</b><div class="big" id="ferry2Time">--:--</div><div class="small" id="ferry2Countdown">Tra -- min • Toremar • 45 min traversata</div></div>
-  </div>
-  <div style="text-align:center;font-size:11px;color:#aaa;margin-top:8px">⚓ Prossimo traghetto in partenza tra <b id="ferryNext" style="color:#00ccff">--</b> • Aggiornato in tempo reale</div>
-</div>
 <div class="countdown-bar" id="countdownBar">
   <div class="countdown-label" id="countdownLabel">⏳ PROSSIMA DIRETTA TRA</div>
   <div class="countdown-time" id="countdownTime">--:--:--</div>
   <div class="countdown-sub" id="countdownSub">Caricamento...</div>
+  <div class="countdown-durata" id="countdownDurata">⏱️ Durata: -- • -- brani</div>
   <div class="listeners-pill"><span>👥 <b id="liveListeners">0</b> IN ASCOLTO ORA</span><span>•</span><span>🟢 <b id="liveJoined">--</b></span></div>
 </div>
 <div class="hero">
@@ -167,13 +167,22 @@ label{font-size:12px;color:#aaa}
 <div style="text-align:center;font-size:10px;color:#666;margin-top:3px">🔊 Parti piano al 21% • Alza tu fino a quanto vuoi</div>
 <div id="micBox" style="display:none;border:2px solid #ff0000;border-radius:12px;padding:8px;margin-top:8px;background:#1a0000">
   <div style="text-align:center;font-size:11px;font-weight:900;color:#ff0000;letter-spacing:1px">🔐 SOLO ADMIN - MICROFONO IN DIRETTA</div>
-  <button id="micBtn" onclick="toggleMic()" style="margin-top:6px;background:#222;color:#fff;border:1px solid #444;width:100%;padding:12px;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer">🎤 PARLA IN DIRETTA</button>
+  <div style="text-align:center;font-size:11px;color:#aaa;margin-top:3px">🎵 Musica resta sotto • 🎤 Voce sopra • Come in radio</div>
+  <button id="micBtn" onclick="toggleMic()" style="margin-top:6px;background:#222;color:#fff;border:1px solid #444;width:100%;padding:12px;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer">🎤 PARLA SOPRA LA MUSICA</button>
   <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:#aaa"><span>🎚️ Voce:</span><input type="range" id="micVol" min="0" max="100" value="85" oninput="setMicVol(this.value)" style="flex:1;margin:0"><span id="micLevel" style="color:#888;font-weight:800">● SPENTO</span></div>
-  <div id="micStatus" style="text-align:center;font-size:11px;color:#888;margin-top:4px">Microfono spento - Premi per parlare. Premi di nuovo o tasto M per spegnere subito.</div>
+  <div id="micStatus" style="text-align:center;font-size:11px;color:#888;margin-top:4px">Microfono spento - Premi per parlare sopra la musica. Premi di nuovo o tasto M per spegnere subito.</div>
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-top:5px"><span id="cur">0:00</span><span>RADIO SAMAX</span><span id="dur">0:00</span></div>
 <audio id="radio" preload="metadata"></audio>
+</div>
+<div class="ferry-bar">
+  <div class="ferry-title">⛴️ TRAGHETTI <span>ELBA</span> • PROSSIME PARTENZE</div>
+  <div class="ferry-grid">
+    <div class="ferry-card"><b>🚢 Piombino → Portoferraio</b><div class="big" id="ferry1Time">--:--</div><div class="small" id="ferry1Countdown">Tra -- min • Moby / Toremar • 1h traversata</div></div>
+    <div class="ferry-card"><b>🚢 Piombino → Porto Azzurro / Rio Marina</b><div class="big" id="ferry2Time">--:--</div><div class="small" id="ferry2Countdown">Tra -- min • Toremar • 45 min traversata</div></div>
+  </div>
+  <div style="text-align:center;font-size:11px;color:#aaa;margin-top:8px">⚓ Prossimo traghetto in partenza tra <b id="ferryNext" style="color:#00ccff">--</b> • Aggiornato in tempo reale</div>
 </div>
 <div class="meteo-hero">
 <div class="meteo-top"><div><div style="font-size:11px;letter-spacing:2px;color:#00ccff;font-weight:800">📍 PORTO AZZURRO • ISOLA D'ELBA</div><div class="meteo-temp"><span id="tNow">--</span><small>°C</small></div><div id="tCond" style="font-weight:700;font-size:13px">Caricamento...</div><div id="tFeels" style="font-size:11px;color:#aaa">Percepita --°</div></div><div style="text-align:right"><div style="font-size:32px" id="tIcon">🌤️</div><div style="font-size:10px;color:#aaa" id="tUpdate">Aggiornato ora</div></div></div>
@@ -205,43 +214,55 @@ label{font-size:12px;color:#aaa}
 <button class="close" onclick="closeAdmin()">✕</button>
 <div id="loginBox"><h2>🔐 Area Admin</h2><input type="password" id="pass" placeholder="Password"><button class="btn-admin" onclick="login()">ENTRA</button></div>
 <div id="adminBox" style="display:none">
-<h2>🎛️ Pannello Samax</h2><p style="color:#00ff00">✅ Sei Admin - Solo tu comandi</p>
-<p style="font-size:12px;color:#888;text-align:center;margin-top:6px">Stato: <b id="adminStato">OFF-LINE</b> • Se mandi in onda sei ON LINE, altrimenti OFF LINE</p>
-<h3 style="margin-top:16px">🎙️ JINGLE CHE SPACCA</h3>
-<label>Testo del jingle</label><input id="fJingle" value="Radio Samax! La radio che spacca!">
-<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="playJingle()">🎙️ PROVA JINGLE ORA</button>
-<h3 style="margin-top:18px">⏭️ PROSSIMO IN ONDA - LO IMPOSTI TU</h3>
-<label>Orario</label><input id="fNextOra" placeholder="Es: 21:00">
-<label>Titolo</label><input id="fNextTitolo" placeholder="Es: Show Live Music">
-<label>Descrizione / Ospiti</label><input id="fNextDesc" placeholder="Es: Con Samax da Porto Azzurro">
-<button class="btn-admin" style="background:#ffcc00;color:#000" onclick="salvaProssimo()">💾 SALVA PROSSIMO IN ONDA</button>
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="playJingleProssimo()">🔊 ANNUNCIA PROSSIMO IN ONDA</button>
-<h3 style="margin-top:18px">📻 OGGI ELBA RADIO SAMAX IN: PROGRAMMA CHE ANDRÀ IN ONDA</h3>
-<label>Programmi di oggi (una riga: ORA | Titolo)</label>
-<textarea id="fPal" rows="4" placeholder="08:00 | Buongiorno Elba&#10;18:00 | Show Live Music&#10;21:00 | Notte Elba"></textarea>
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="salvaPal()">Salva Programmi di Oggi</button>
-<h3 style="margin-top:18px">📻 MANDA IN ONDA - SOLO TU</h3>
+<h2 style="text-align:center">🎛️ Pannello Samax</h2>
+<p style="color:#00ff00;text-align:center;font-size:13px">✅ Sei Admin - Solo tu comandi</p>
+<p style="font-size:12px;color:#888;text-align:center;margin-top:4px">Stato: <b id="adminStato">OFF-LINE</b></p>
+<div id="programmatoBox" style="display:none;background:#2a1a00;border:2px solid #ff9900;border-radius:14px;padding:10px;margin:10px 0;text-align:center">
+<div style="font-weight:900;color:#ff9900">⏰ PROGRAMMATO - PARTE DA SOLO</div>
+<div id="programmatoTesto" style="font-size:13px;margin-top:4px"></div>
+<div id="programmatoDurata" style="font-size:12px;color:#ffcc00;margin-top:2px"></div>
+<button class="btn-admin" style="background:#111;color:#ff5555;border:1px solid #333;margin-top:6px" onclick="annullaProgrammazione()">❌ ANNULLA PROGRAMMAZIONE</button>
+</div>
+<div class="step-box">
+<span class="step-num">PASSO 1 • CREA</span>
+<h3 style="margin:8px 0 4px">📂 Crea Programma da cartella mp3</h3>
+<label>Nome programma - A PIACERE, es: VASCO</label>
+<input id="fTitolo" placeholder="Es: VASCO">
+<label>Cartella - sempre mp3</label>
+<input id="fCartella" value="mp3" readonly style="background:#2a2a00;color:#ffcc00;font-weight:900;text-align:center">
+<div style="font-size:11px;color:#aaa;margin-top:4px">Prende <b style="color:#fff">TUTTO</b> quello che c'è dentro <b style="color:#ffcc00">audio/mp3/</b><br>Qualsiasi file musicale: mp3, m4a, wav, ogg, flac, aac, opus, wma, aiff, ecc.<br>Non devi scegliere niente, li carica tutti da solo.</div>
+<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="caricaDaServer()">📂 CARICA TUTTO DA CARTELLA MP3</button>
+<div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5;max-height:200px;overflow-y:auto"></div>
+</div>
+<div class="step-box">
+<span class="step-num">PASSO 2 • ORA DIRETTA</span>
+<h3 style="margin:8px 0 4px">🕐 A che ora va in onda?</h3>
+<p style="font-size:12px;color:#aaa">Tocca l'orologio. L'onda partirà DA SOLA a quell'ora.</p>
+<input type="time" id="fNextOra" class="clock-input" value="21:00" onchange="salvaOraDiretta()">
+<input id="fNextTitolo" placeholder="Titolo diretta - Es: Tributo Vasco Rossi">
+<input id="fNextDesc" placeholder="Descrizione - Es: Con Samax da Porto Azzurro">
+<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="salvaProssimo()">💾 SALVA ORA E TITOLO</button>
+<div style="text-align:center;font-size:12px;color:#888;margin-top:6px">Ora impostata: <b id="oraSceltaLabel" style="color:#ff0000;font-size:16px">21:00</b></div>
+</div>
+<div class="step-box">
+<span class="step-num">PASSO 3 • SCEGLI</span>
+<h3 style="margin:8px 0 4px">📻 Quale programma mandi in onda?</h3>
+<p style="font-size:12px;color:#aaa">Tocca un programma per sceglierlo. Vedi anche quanto durerà.</p>
 <div id="adminOnda"></div>
-
-<h3 style="margin-top:18px">+ Crea Nuovo Programma</h3>
-<label>Nome programma</label><input id="fTitolo" placeholder="Es: Show Live Music">
-<label>Descrizione</label><input id="fDesc" placeholder="Musica live">
-<label>Orario</label><input id="fOra" placeholder="18:00 - 20:00">
-<label>Primo file MP3 - lo sceglie da solo dalla cartella prova</label>
-<select id="fFileName"><option value="01-intro.mp3">01-intro.mp3</option></select>
-<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="document.getElementById('adminFolderInput').click()">📂 LEGGI CARTELLA PROVA E SCEGLI PRIMO</button>
-<input type="file" id="adminFolderInput" webkitdirectory directory multiple style="display:none">
-<div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5"></div>
-<button class="btn-admin" onclick="creaProgramma()">💾 CREA PROGRAMMA</button>
-
-<h3 style="margin-top:18px">+ Aggiungi Brano</h3>
-<label>Scegli programma</label><select id="selProg"></select>
-<label>Nome brano</label><input id="fEpNome" placeholder="Es: Brano 2">
-<label>Nome file MP3</label><input id="fEpFile" placeholder="02-vasco.mp3">
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="aggiungiEpisodio()">+ AGGIUNGI BRANO</button>
-<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="aggiungiTuttiDaProva()">📂 AGGIUNGI TUTTI I RESTANTI DA PROVA</button>
-<h3 style="margin-top:18px">📰 Notizia Flash</h3><input id="fNews" placeholder="Scrivi notizia..."><button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="aggiungiNews()">Pubblica</button>
-<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="logout()">Esci</button>
+</div>
+<button class="btn-admin btn-vai-onda" onclick="vaiInOnda()">🔴 VAI IN ONDA</button>
+<div style="text-align:center;font-size:11px;color:#888;margin-top:6px">Premilo e NON parte subito. Si programma e parte da solo all'ora che hai messo. Nel sito vedrai il conto alla rovescia + durata.</div>
+<button class="btn-admin" style="background:#00aa00;color:#fff;margin-top:8px" onclick="vaiInOndaOra()">▶ PARTI SUBITO ADESSO</button>
+<details style="margin-top:12px"><summary style="cursor:pointer;color:#888;font-size:12px">⚙️ Altro - Jingle / Notizie / Palinsesto</summary>
+<div style="margin-top:8px">
+<label>Jingle</label><input id="fJingle" value="Radio Samax! La radio che spacca!">
+<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="playJingle()">🎙️ PROVA JINGLE</button>
+<label>Programmi di oggi (ORA | Titolo)</label><textarea id="fPal" rows="3"></textarea>
+<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="salvaPal()">Salva Programmi di Oggi</button>
+<input id="fNews" placeholder="Notizia flash..."><button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="aggiungiNews()">Pubblica Notizia</button>
+</div>
+</details>
+<button class="btn-admin" style="background:#111;color:#888;border:1px solid #222;margin-top:12px" onclick="logout()">Esci</button>
 </div>
 </div></div>
 <script>
@@ -254,33 +275,48 @@ const firebaseConfig = { apiKey: "INCOLLA_QUI_APIKEY", authDomain: "INCOLLA_QUI.
 let db = null; let firebaseOn = false;
 try{ if(firebaseConfig.apiKey !== "INCOLLA_QUI_APIKEY"){ firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseOn = true; } }catch(e){ firebaseOn = false; }
 const VOLUME_INIZIALE = 21;
+// ESTENSIONI MUSICALI ACCETTATE - TUTTE
+const AUDIO_EXT = /\.(mp3|m4a|mp4|wav|wave|ogg|oga|opus|flac|aac|wma|aif|aiff|mid|midi|webm)$/i;
+function nomeSenzaExt(name){ return name.replace(/\.[^.]+$/,''); }
 let programmi = JSON.parse(localStorage.getItem('samax_prog_v3')||'[]');
 let notizie = JSON.parse(localStorage.getItem('samax_news')||'[{"tag":"ELBA","testo":"Benvenuti su Radio Samax da Porto Azzurro - Isola d\'Elba"}]');
 let dediche = JSON.parse(localStorage.getItem('samax_ded')||'[]');
 let palinsestoTxt = localStorage.getItem('samax_pal')||"08:00 | Buongiorno Elba ☀️\n13:00 | Pranzo con Samax\n18:00 | Show Live Music 🔥\n22:00 | Notte Elba 🌙";
 let voti = JSON.parse(localStorage.getItem('samax_voti')||'[0,0,0,0]');
 let prossimo = JSON.parse(localStorage.getItem('samax_next')||'{"ora":"21:00","titolo":"Show Live Music","desc":"Con Samax da Porto Azzurro - La radio che spacca!"}');
+let programmato = JSON.parse(localStorage.getItem('samax_programmato')||'null');
 let audio=document.getElementById('radio'); let isPlaying=false; let currentIdx=-1; let currentEp=-1;
-let jingleInCorso=false; let isAdmin = false;
+let jingleInCorso=false; let isAdmin = false; let programmaSelezionato = 0;
 let isOnline = false;
 function aggiornaOnline(){ isOnline = isPlaying && currentIdx!==-1; localStorage.setItem('samax_online', isOnline?'1':'0'); }
 audio.volume = VOLUME_INIZIALE / 100; let isMuted = false; let lastVol = VOLUME_INIZIALE;
 function setVolumePubblico(v){ v = parseInt(v); audio.volume = v / 100; document.getElementById('volLabel').innerText = v + "%"; document.getElementById('muteBtn').innerText = v == 0 ? "🔇" : v < 50 ? "🔉" : "🔊"; if(v > 0){ lastVol = v; isMuted = false; } }
 function toggleMute(){ if(isMuted){ setVolumePubblico(lastVol); document.getElementById('volPubblico').value = lastVol; isMuted = false; } else { lastVol = document.getElementById('volPubblico').value; setVolumePubblico(0); document.getElementById('volPubblico').value = 0; isMuted = true; } }
-let programmaOnlineFB = null; let votiProgrammaFB = 0;
+let programmaOnlineFB = null; let votiProgrammaFB = 0; let votiSondaggioFB = [0,0,0,0]; let votiSondaggioListenerOn = false;
 function programmaIdCorrente(){ if(programmaOnlineFB && programmaOnlineFB.id) return programmaOnlineFB.id; if(currentIdx>=0 && programmi[currentIdx]) return 'prog_' + slugify(programmi[currentIdx].titolo); return null; }
+function calcolaDurataMinuti(prog){ if(!prog || !prog.episodi) return 0; let totale = 0; prog.episodi.forEach(e=>{ if(e.dur && e.dur>0) totale += e.dur/60; else totale += 3.5; }); return Math.round(totale); }
+function formatDurata(minuti){ if(!minuti) return "--"; let h = Math.floor(minuti/60); let m = minuti%60; if(h===0) return m + " min"; if(m===0) return h + "h"; return h + "h " + m + "m"; }
+function durataTesto(prog){ if(!prog) return "⏱️ Durata: --"; let min = calcolaDurataMinuti(prog); return "⏱️ Durata: " + formatDurata(min) + " • " + prog.episodi.length + " brani • Finisce circa alle " + calcolaOraFine(prossimo.ora||programmato?.ora||"21:00", min); }
+function calcolaOraFine(oraInizio, minuti){ let parts = (oraInizio||"21:00").split(':'); let d = new Date(); d.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); d.setMinutes(d.getMinutes()+minuti); return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
+function programmaCorrentePerCountdown(){ if(programmato){ let idx = programmi.findIndex(p=>p.titolo===programmato.titolo); if(idx>=0) return programmi[idx]; if(programmato.indice!=null && programmi[programmato.indice]) return programmi[programmato.indice]; } if(currentIdx>=0 && programmi[currentIdx]) return programmi[currentIdx]; let idx2 = programmi.findIndex(p=>p.titolo===prossimo.titolo); if(idx2>=0) return programmi[idx2]; if(programmi[programmaSelezionato]) return programmi[programmaSelezionato]; return null; }
 function renderVoteProg(){
   let box = document.getElementById('voteProgBox'); let status = document.getElementById('firebaseStatus');
-  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato - voti veri per tutti" : "🟡 Firebase non collegato - incolla la config per voti veri per tutti";
+  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato - voti e countdown uguali su PC e iPhone" : "🟡 Firebase non collegato - incolla la config per sincronizzare PC e iPhone";
   if(!isOnline || currentIdx===-1){
-    if(programmaOnlineFB && programmaOnlineFB.titolo){ let pid = programmaOnlineFB.id; let votato = localStorage.getItem('samax_votato_'+pid)==='1'; box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA DA FIREBASE</div><div style="font-weight:900;font-size:16px;margin-top:4px">${programmaOnlineFB.titolo}</div><div style="font-size:12px;color:#aaa">${programmaOnlineFB.desc||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti gli ascoltatori</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`; return; }
+    if(programmaOnlineFB && programmaOnlineFB.titolo){ let pid = programmaOnlineFB.id; let votato = localStorage.getItem('samax_votato_'+pid)==='1'; box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA DA FIREBASE</div><div style="font-weight:900;font-size:16px;margin-top:4px">${programmaOnlineFB.titolo}</div><div style="font-size:12px;color:#aaa">${programmaOnlineFB.desc||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti - PC e iPhone uguali</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`; return; }
     box.innerHTML = `<div style="text-align:center;padding:14px;background:#111;border:1px dashed #333;border-radius:12px"><div style="font-size:22px">📻</div><div style="font-weight:800;margin-top:4px">Nessun programma in onda</div><div style="font-size:12px;color:#aaa;margin-top:3px">Quando Samax manderà in onda un programma, qui potrai votarlo.</div></div>`; return;
   }
   let p = programmi[currentIdx]; let pid = programmaIdCorrente(); let votato = localStorage.getItem('samax_votato_'+pid)==='1';
-  box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA - VOTA!</div><div style="font-weight:900;font-size:16px;margin-top:4px">${p.titolo}</div><div style="font-size:12px;color:#aaa">${p.desc||''} • ${p.ora||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti gli ascoltatori</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`;
+  box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA - VOTA!</div><div style="font-weight:900;font-size:16px;margin-top:4px">${p.titolo}</div><div style="font-size:12px;color:#aaa">${p.desc||''} • ${p.ora||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti - PC e iPhone uguali</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`;
 }
-function votaProgrammaOnline(){ let pid = programmaIdCorrente(); if(!pid) return alert("Nessun programma in onda da votare"); if(localStorage.getItem('samax_votato_'+pid)==='1') return alert("Hai già votato questo programma!"); localStorage.setItem('samax_votato_'+pid,'1'); if(firebaseOn && db){ db.ref('samax/voti/' + pid).transaction(v => (v||0)+1); } else { votiProgrammaFB++; } renderVoteProg(); alert("✅ Voto vero registrato!"); }
-function syncFirebase(){ if(!firebaseOn || !db) { renderVoteProg(); return; } db.ref('samax/programmaOnline').on('value', snap=>{ programmaOnlineFB = snap.val(); if(programmaOnlineFB && programmaOnlineFB.id){ db.ref('samax/voti/' + programmaOnlineFB.id).on('value', s=>{ votiProgrammaFB = s.val() || 0; renderVoteProg(); }); } else { renderVoteProg(); } }); }
+function votaProgrammaOnline(){ let pid = programmaIdCorrente(); if(!pid) return alert("Nessun programma in onda da votare"); if(localStorage.getItem('samax_votato_'+pid)==='1') return alert("Hai già votato questo programma!"); localStorage.setItem('samax_votato_'+pid,'1'); if(firebaseOn && db){ db.ref('samax/voti/' + pid).transaction(v => (v||0)+1); } else { votiProgrammaFB++; renderVoteProg(); } alert("✅ Voto vero registrato! Si vede anche su iPhone e PC"); }
+function syncFirebase(){
+  if(!firebaseOn || !db) { renderVoteProg(); return; }
+  db.ref('samax/prossimo').on('value', snap=>{ let val = snap.val(); if(val){ prossimo = val; localStorage.setItem('samax_next', JSON.stringify(prossimo)); render(); updateCountdown(); } });
+  db.ref('samax/programmato').on('value', snap=>{ let val = snap.val(); if(val){ programmato = val; localStorage.setItem('samax_programmato', JSON.stringify(programmato)); render(); updateCountdown(); } });
+  db.ref('samax/programmaOnline').on('value', snap=>{ programmaOnlineFB = snap.val(); if(programmaOnlineFB && programmaOnlineFB.id){ db.ref('samax/voti/' + programmaOnlineFB.id).on('value', s=>{ votiProgrammaFB = s.val() || 0; renderVoteProg(); }); } else { renderVoteProg(); } });
+  if(!votiSondaggioListenerOn){ votiSondaggioListenerOn = true; db.ref('samax/sondaggio').on('value', snap=>{ let val = snap.val(); if(val && Array.isArray(val) && val.length===4){ votiSondaggioFB = val; voti = val; localStorage.setItem('samax_voti', JSON.stringify(voti)); render(); } }); }
+}
 function pubblicaProgrammaSuFirebase(){ if(!firebaseOn || !db || currentIdx<0) return; let p = programmi[currentIdx]; let pid = 'prog_' + slugify(p.titolo); db.ref('samax/programmaOnline').set({ id: pid, titolo: p.titolo, desc: p.desc||'', ora: p.ora||'', online: true, aggiornato: Date.now() }); }
 function rimuoviProgrammaDaFirebase(){ if(!firebaseOn || !db) return; db.ref('samax/programmaOnline').set(null); }
 function updateClockAndFerry(){
@@ -311,10 +347,49 @@ function updateListeners(){
 setInterval(updateListeners, 3000);
 window.addEventListener('storage', updateListeners);
 window.addEventListener('beforeunload', ()=>{ try{ let list = JSON.parse(localStorage.getItem('samax_live_users') || '{}'); delete list[myId]; localStorage.setItem('samax_live_users', JSON.stringify(list)); }catch(e){} });
+function controllaOrarioProgrammazione(){
+  if(!programmato || isOnline) return;
+  let now = new Date();
+  let parts = (programmato.ora||"21:00").split(':');
+  let target = new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0);
+  let diffSec = (now - target)/1000;
+  if(diffSec >= 0 && diffSec < 120){
+    let idx = programmi.findIndex(p=>p.titolo===programmato.titolo);
+    if(idx===-1 && programmato.indice!=null) idx = programmato.indice;
+    if(idx>=0 && programmi[idx]){
+      programmato = null; localStorage.removeItem('samax_programmato');
+      if(firebaseOn && db) db.ref('samax/programmato').set(null);
+      mandaInOnda(idx, 0);
+    }
+  }
+}
 function updateCountdown(){
-  let bar=document.getElementById('countdownBar'); let label=document.getElementById('countdownLabel'); let timeEl=document.getElementById('countdownTime'); let sub=document.getElementById('countdownSub'); if(!bar) return; updateListeners();
-  if(isOnline && isPlaying && currentIdx!==-1){ bar.classList.add('live'); label.innerText="🔴 IN ONDA ORA - ASCOLTATORI AGGANCIATI"; if(!liveStartTime) liveStartTime = Date.now(); let elapsed = Math.floor((Date.now()-liveStartTime)/1000); let h=Math.floor(elapsed/3600), m=Math.floor((elapsed%3600)/60), s=elapsed%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); sub.innerText = (programmi[currentIdx]?.titolo||prossimo.titolo) + " • In diretta da Porto Azzurro • Timer da quanto sei in onda"; return; } else { liveStartTime = null; }
-  bar.classList.remove('live'); label.innerText="⏳ PROSSIMA DIRETTA TRA"; let now=new Date(); let parts=(prossimo.ora||"21:00").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); let domani = target.getDate()!==now.getDate() ? " (domani)" : ""; sub.innerText = (prossimo.titolo||"Show Live Music") + " • alle " + (prossimo.ora||"21:00") + domani + " • " + (prossimo.desc||"");
+  let bar=document.getElementById('countdownBar'); let label=document.getElementById('countdownLabel'); let timeEl=document.getElementById('countdownTime'); let sub=document.getElementById('countdownSub'); let durEl=document.getElementById('countdownDurata'); if(!bar) return; updateListeners(); controllaOrarioProgrammazione();
+  let prog = programmaCorrentePerCountdown();
+  if(isOnline && isPlaying && currentIdx!==-1){
+    let p = programmi[currentIdx];
+    let minTot = calcolaDurataMinuti(p);
+    if(!liveStartTime) liveStartTime = Date.now();
+    let elapsedMin = Math.floor((Date.now()-liveStartTime)/60000);
+    let resto = Math.max(0, minTot - elapsedMin);
+    let hR = Math.floor(resto/60), mR = resto%60;
+    label.innerText="⏳ FINE DIRETTA TRA - " + p.titolo;
+    let elapsed = Math.floor((Date.now()-liveStartTime)/1000); let s=elapsed%60;
+    timeEl.innerText = String(hR).padStart(2,'0')+":"+String(mR).padStart(2,'0')+":"+String(60 - (s%60) === 60 ? 0 : 60 - (s%60)).padStart(2,'0');
+    sub.innerText = p.titolo + " • Iniziata alle " + (prossimo.ora||"") + " • Finisce circa alle " + calcolaOraFine(prossimo.ora||"21:00", minTot);
+    if(durEl) durEl.innerText = "⏱️ Durata totale: " + formatDurata(minTot) + " • " + p.episodi.length + " brani • Mancano " + formatDurata(resto);
+    return;
+  } else { liveStartTime = null; }
+  if(programmato){
+    label.innerText="⏳ PROSSIMA DIRETTA TRA - " + programmato.titolo;
+    let now=new Date(); let parts=(programmato.ora||"21:00").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); sub.innerText = programmato.titolo + " • alle " + programmato.ora + " • Parte da sola, lascia la pagina aperta";
+    if(durEl && prog) durEl.innerText = durataTesto(prog);
+    else if(durEl) durEl.innerText = "⏱️ Durata: --";
+    return;
+  }
+  label.innerText="⏳ PROSSIMA DIRETTA TRA"; let now=new Date(); let parts=(prossimo.ora||"21:00").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); let domani = target.getDate()!==now.getDate() ? " (domani)" : ""; sub.innerText = (prossimo.titolo||"Show Live Music") + " • alle " + (prossimo.ora||"21:00") + domani + " • " + (prossimo.desc||"");
+  if(durEl && prog) durEl.innerText = durataTesto(prog);
+  else if(durEl) durEl.innerText = "⏱️ Durata: --";
 }
 setInterval(updateCountdown, 1000);
 let audioCtx=null, micStream=null, micSource=null, micGain=null, micComp=null, musicGain=null, musicSource=null, micOn=false, micAnalyser=null, micLevelTimer=null;
@@ -324,87 +399,124 @@ async function toggleMic(){
   initMixer(); await audioCtx.resume(); if(micOn){ stopMic(); return; }
   try{
     micStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
-    micSource = audioCtx.createMediaStreamSource(micStream); let filter = audioCtx.createBiquadFilter(); filter.type="highpass"; filter.frequency.value=80; micComp = audioCtx.createDynamicsCompressor(); micComp.threshold.value=-18; micComp.knee.value=20; micComp.ratio.value=8; micComp.attack.value=0.003; micComp.release.value=0.25; micGain = audioCtx.createGain(); micGain.gain.value = document.getElementById('micVol').value/50; micAnalyser = audioCtx.createAnalyser(); micAnalyser.fftSize=512; micSource.connect(filter); filter.connect(micComp); micComp.connect(micGain); micGain.connect(audioCtx.destination); micSource.connect(micAnalyser); if(musicGain) musicGain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime+0.3); micOn=true;
-    let b=document.getElementById('micBtn'); if(b){ b.innerText="🔴 IN ONDA - PREMI PER SPEGNERE"; b.style.background="#ff0000"; b.classList.add('mic-on'); }
-    let sp=document.getElementById('spikerBtn'); if(sp){ sp.innerText="🔴 SPIKER IN ONDA - PREMI PER SPEGNERE"; sp.style.background="#ff0000"; sp.style.color="#fff"; sp.classList.add('mic-on'); }
-    let st2=document.getElementById('spikerStatus'); if(st2){ st2.innerText="🔴 SEI IN DIRETTA - Parla pure! Premi di nuovo o tasto M per spegnere."; st2.style.color="#ff0000"; }
-    document.getElementById('micStatus').innerText="🔴 SEI IN DIRETTA - Parla pure. Premi di nuovo il bottone o tasto M per spegnere subito."; document.getElementById('micStatus').style.color="#ff0000";
+    micSource = audioCtx.createMediaStreamSource(micStream); let filter = audioCtx.createBiquadFilter(); filter.type="highpass"; filter.frequency.value=80; micComp = audioCtx.createDynamicsCompressor(); micComp.threshold.value=-18; micComp.knee.value=20; micComp.ratio.value=8; micComp.attack.value=0.003; micComp.release.value=0.25; micGain = audioCtx.createGain(); micGain.gain.value = document.getElementById('micVol').value/40; micAnalyser = audioCtx.createAnalyser(); micAnalyser.fftSize=512; micSource.connect(filter); filter.connect(micComp); micComp.connect(micGain); micGain.connect(audioCtx.destination); micSource.connect(micAnalyser);
+    if(musicGain) musicGain.gain.linearRampToValueAtTime(0.55, audioCtx.currentTime+0.3); micOn=true;
+    let b=document.getElementById('micBtn'); if(b){ b.innerText="🔴 PARLI SOPRA LA MUSICA - PREMI PER SPEGNERE"; b.style.background="#ff0000"; b.classList.add('mic-on'); }
+    let sp=document.getElementById('spikerBtn'); if(sp){ sp.innerText="🔴 SPIKER IN ONDA - MUSICA SOTTO, VOCE SOPRA"; sp.style.background="#ff0000"; sp.style.color="#fff"; sp.classList.add('mic-on'); }
+    let st2=document.getElementById('spikerStatus'); if(st2){ st2.innerText="🔴 SEI IN DIRETTA - Parli sopra la musica! Premi di nuovo o tasto M per spegnere."; st2.style.color="#ff0000"; }
+    document.getElementById('micStatus').innerText="🔴 SEI IN DIRETTA - Parli sopra la musica. Premi di nuovo il bottone o tasto M per spegnere."; document.getElementById('micStatus').style.color="#ff0000";
     micLevelTimer=setInterval(()=>{ let d=new Uint8Array(micAnalyser.fftSize); micAnalyser.getByteTimeDomainData(d); let max=0; for(let i=0;i<d.length;i++){ let v=Math.abs(d[i]-128); if(v>max) max=v; } let el=document.getElementById('micLevel'); if(max>20){ el.innerText="●●● VOCE OK"; el.style.color="#00ff00"; } else if(max>5){ el.innerText="●● BASSO"; el.style.color="#ffcc00"; } else { el.innerText="● MUTO?"; el.style.color="#ff0000"; } },200);
   }catch(e){ alert("⚠️ Microfono bloccato! Devi usare HTTPS e dare il permesso al browser."); }
 }
 function stopMic(){
   let sp2=document.getElementById('spikerBtn'); if(sp2){ sp2.innerText="🎤 SPIKER - PARLA IN DIRETTA"; sp2.style.background="#ffcc00"; sp2.style.color="#000"; sp2.classList.remove('mic-on'); }
   let st3=document.getElementById('spikerStatus'); if(st3){ st3.innerText="🎙️ Microfono spento - Premi SPIKER per parlare."; st3.style.color="#888"; }
-  if(micStream) micStream.getTracks().forEach(t=>t.stop()); try{ if(micGain) micGain.disconnect(); if(micComp) micComp.disconnect(); }catch(e){} if(musicGain && audioCtx) musicGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime+0.4); micOn=false; clearInterval(micLevelTimer); let b=document.getElementById('micBtn'); if(b){ b.innerText="🎤 PARLA IN DIRETTA"; b.style.background="#222"; b.classList.remove('mic-on'); } let st=document.getElementById('micStatus'); if(st){ st.innerText="Microfono spento - Premi per parlare. Premi di nuovo o tasto M per spegnere subito."; st.style.color="#888"; } let lv=document.getElementById('micLevel'); if(lv){ lv.innerText="● SPENTO"; lv.style.color="#888"; }
+  if(micStream) micStream.getTracks().forEach(t=>t.stop()); try{ if(micGain) micGain.disconnect(); if(micComp) micComp.disconnect(); }catch(e){} if(musicGain && audioCtx) musicGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime+0.4); micOn=false; clearInterval(micLevelTimer); let b=document.getElementById('micBtn'); if(b){ b.innerText="🎤 PARLA SOPRA LA MUSICA"; b.style.background="#222"; b.classList.remove('mic-on'); } let st=document.getElementById('micStatus'); if(st){ st.innerText="Microfono spento - Premi per parlare sopra la musica. Premi di nuovo o tasto M per spegnere subito."; st.style.color="#888"; } let lv=document.getElementById('micLevel'); if(lv){ lv.innerText="● SPENTO"; lv.style.color="#888"; }
 }
-function setMicVol(v){ if(micGain && audioCtx) micGain.gain.value=v/50; }
+function setMicVol(v){ if(micGain && audioCtx) micGain.gain.value=v/40; }
 document.addEventListener('keydown', (e)=>{ if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return; if(e.key.toLowerCase()==='m' && isAdmin){ toggleMic(); } });
-function save(){localStorage.setItem('samax_prog_v3',JSON.stringify(programmi)); localStorage.setItem('samax_news',JSON.stringify(notizie)); localStorage.setItem('samax_ded',JSON.stringify(dediche)); localStorage.setItem('samax_voti',JSON.stringify(voti)); localStorage.setItem('samax_next',JSON.stringify(prossimo)); localStorage.setItem('samax_online', isOnline?'1':'0');}
+function save(){localStorage.setItem('samax_prog_v3',JSON.stringify(programmi)); localStorage.setItem('samax_news',JSON.stringify(notizie)); localStorage.setItem('samax_ded',JSON.stringify(dediche)); localStorage.setItem('samax_voti',JSON.stringify(voti)); localStorage.setItem('samax_next',JSON.stringify(prossimo)); localStorage.setItem('samax_online', isOnline?'1':'0'); if(programmato) localStorage.setItem('samax_programmato', JSON.stringify(programmato)); else localStorage.removeItem('samax_programmato');}
 function updateLiveBadge(){ aggiornaOnline(); let b=document.getElementById('liveBadge'); let a=document.getElementById('adminStato'); let live = isOnline; if(live){ b.className="live-badge on"; b.innerText="● ON LINE"; if(a){ a.innerText="ON LINE 🟢"; a.style.color="#00ff00"; } document.getElementById('oraOnda').innerText="● IN ONDA ORA - "+(programmi[currentIdx]?.titolo||''); document.getElementById('oraOnda').style.color="#00ff00"; } else { b.className="live-badge off"; b.innerText="● OFF-LINE"; if(a){ a.innerText="OFF-LINE 🔴"; a.style.color="#ff0000"; } if(currentIdx===-1){ document.getElementById('oraOnda').innerText="OFF-LINE - NESSUN PROGRAMMA IN ONDA"; document.getElementById('oraOnda').style.color="#ff0000"; } else { document.getElementById('oraOnda').innerText="⏸ IN PAUSA - "+programmi[currentIdx].titolo; document.getElementById('oraOnda').style.color="#ff0000"; } } updateCountdown(); renderVoteProg(); }
 function parlaConEco(testo, volume=1, rate=0.95){ return new Promise(resolve=>{ if(!('speechSynthesis' in window)){ resolve(); return; } window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(testo); u.lang='it-IT'; u.rate=rate; u.pitch=0.7; u.volume=volume; let voices = window.speechSynthesis.getVoices(); let it = voices.find(v=>v.lang.startsWith('it') && v.name.toLowerCase().includes('male')) || voices.find(v=>v.lang.startsWith('it')) || voices[0]; if(it) u.voice=it; u.onend=()=>resolve(); u.onerror=()=>resolve(); window.speechSynthesis.speak(u); setTimeout(()=>{ let e1=new SpeechSynthesisUtterance(testo); e1.lang='it-IT'; e1.rate=rate; e1.pitch=0.7; e1.volume=volume*0.35; if(it) e1.voice=it; window.speechSynthesis.speak(e1); },350); setTimeout(()=>{ let e2=new SpeechSynthesisUtterance(testo); e2.lang='it-IT'; e2.rate=rate; e2.pitch=0.7; e2.volume=volume*0.15; if(it) e2.voice=it; window.speechSynthesis.speak(e2); },750); setTimeout(()=>resolve(), 3500); }); }
 async function playJingle(){ if(jingleInCorso) return; jingleInCorso=true; let testo = document.getElementById('fJingle') ? document.getElementById('fJingle').value.trim() : ""; if(!testo) testo="Radio Samax! La radio che spacca!"; let volOriginale = audio.volume || 1; audio.volume = 0.15; await parlaConEco(testo, 1, 0.92); await new Promise(r=>setTimeout(r, 900)); audio.volume = volOriginale; jingleInCorso=false; }
 async function playJingleProssimo(){ if(jingleInCorso) return; let testo = `Tra poco su Radio Samax... alle ${prossimo.ora}... ${prossimo.titolo}! ${prossimo.desc}. Radio Samax! La radio che spacca!`; let old = document.getElementById('fJingle') ? document.getElementById('fJingle').value : ""; if(document.getElementById('fJingle')) document.getElementById('fJingle').value = testo; await playJingle(); if(document.getElementById('fJingle')) document.getElementById('fJingle').value = old || "Radio Samax! La radio che spacca!"; }
-function salvaProssimo(){ prossimo = { ora: document.getElementById('fNextOra').value.trim()||"21:00", titolo: document.getElementById('fNextTitolo').value.trim()||"Show Live Music", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" }; save(); render(); updateCountdown(); alert("✅ Prossimo in onda salvato: "+prossimo.ora+" - "+prossimo.titolo); }
+function salvaOraDiretta(){ let ora = document.getElementById('fNextOra').value || "21:00"; document.getElementById('oraSceltaLabel').innerText = ora; prossimo.ora = ora; save(); if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); } updateCountdown(); render(); }
+function salvaProssimo(){
+  prossimo = { ora: document.getElementById('fNextOra').value||"21:00", titolo: document.getElementById('fNextTitolo').value.trim()||programmi[programmaSelezionato]?.titolo||"Show Live Music", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" };
+  save(); render(); updateCountdown();
+  if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); }
+  document.getElementById('oraSceltaLabel').innerText = prossimo.ora;
+  return prossimo;
+}
+function selezionaProgramma(i){ programmaSelezionato = i; let p = programmi[i]; if(p){ document.getElementById('fNextTitolo').value = p.titolo; document.getElementById('fNextDesc').value = p.desc || "Con Samax da Porto Azzurro"; } render(); }
+function vaiInOnda(){
+  if(programmi.length===0) return alert("Prima crea un programma nel PASSO 1");
+  let p = salvaProssimo();
+  let prog = programmi[programmaSelezionato];
+  programmato = { ora: p.ora, titolo: prog.titolo, desc: p.desc, indice: programmaSelezionato, durataMin: calcolaDurataMinuti(prog), numBrani: prog.episodi.length };
+  save();
+  if(firebaseOn && db){ db.ref('samax/programmato').set(programmato); db.ref('samax/prossimo').set(p); }
+  closeAdmin();
+  alert("⏰ PROGRAMMATO!\n\n" + prog.titolo + " partirà DA SOLO alle " + p.ora + "\nDurata: " + formatDurata(programmato.durataMin) + " • Finisce circa alle " + calcolaOraFine(p.ora, programmato.durataMin) + "\n\nNel sito ora vedi il conto alla rovescia.\nLascia questa pagina aperta sul PC.");
+  render(); updateCountdown();
+}
+function vaiInOndaOra(){
+  if(programmi.length===0) return alert("Prima crea un programma nel PASSO 1");
+  programmato = null; localStorage.removeItem('samax_programmato');
+  if(firebaseOn && db) db.ref('samax/programmato').set(null);
+  salvaProssimo();
+  mandaInOnda(programmaSelezionato, 0);
+  closeAdmin();
+  alert("🔴 SEI IN ONDA ORA! - " + programmi[programmaSelezionato].titolo);
+}
+function annullaProgrammazione(){
+  programmato = null; localStorage.removeItem('samax_programmato');
+  if(firebaseOn && db) db.ref('samax/programmato').set(null);
+  render(); updateCountdown(); alert("Programmazione annullata");
+}
 function render(){
   document.getElementById('newsList').innerHTML=notizie.map(n=>`<div style="padding:7px 0;border-bottom:1px solid #222;font-size:13px"><b style="color:#ffcc00">[${n.tag}]</b> ${n.testo}</div>`).join('');
   document.getElementById('emptyProg').style.display=programmi.length?'none':'block';
-  document.getElementById('listaProg').innerHTML=programmi.map((p,i)=>`<div class="prog ${i===currentIdx?'onair':''}"><b>${p.titolo}</b><p>${p.ora||''} • ${p.desc||''} • ${p.episodi.length} brani</p>${i===currentIdx ? `<div style="color:#00ff00;font-weight:800;font-size:12px;margin-top:5px">● IN ONDA ORA</div>` : `<div style="color:#666;font-size:11px;margin-top:5px">In programmazione</div>`}</div>`).join('');
-  document.getElementById('adminOnda').innerHTML=programmi.map((p,i)=>`<div style="background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:10px;margin:6px 0"><b>${p.titolo}</b> <span style="font-size:12px;color:#aaa">${p.episodi.length} brani</span><br><button class="btn-admin" style="background:#ff0000;color:#fff;margin-top:6px" onclick="mandaInOnda(${i},0)">▶ MANDA IN ONDA QUESTO</button><button class="btn-admin" style="background:#222;color:#ff5555;border:1px solid #333" onclick="eliminaProg(${i})">🗑️ ELIMINA</button></div>`).join('') || "Nessun programma";
-  document.getElementById('selProg').innerHTML=programmi.map((p,i)=>`<option value="${i}">${p.titolo}</option>`).join('');
+  document.getElementById('listaProg').innerHTML=programmi.map((p,i)=>`<div class="prog ${i===currentIdx?'onair':''}"><b>${p.titolo}</b><p>${p.ora||''} • ${p.desc||''} • ${p.episodi.length} brani • ⏱️ ${formatDurata(calcolaDurataMinuti(p))} • 📂 ${p.cartella||''}</p>${i===currentIdx ? `<div style="color:#00ff00;font-weight:800;font-size:12px;margin-top:5px">● IN ONDA ORA</div>` : `<div style="color:#666;font-size:11px;margin-top:5px">In programmazione</div>`}</div>`).join('');
+  document.getElementById('adminOnda').innerHTML=programmi.map((p,i)=>`<div class="prog-select ${i===programmaSelezionato?'sel':''}" onclick="selezionaProgramma(${i})"><b>${i===programmaSelezionato?'✅ ':''}${p.titolo}</b> <span style="font-size:12px;color:#aaa">${p.episodi.length} brani • ⏱️ ${formatDurata(calcolaDurataMinuti(p))}</span><br><span style="font-size:11px;color:#888">📂 Cartella: ${p.cartella||''}</span><br><span style="font-size:11px;color:#888">${p.desc||''}</span><button class="btn-admin" style="background:#111;color:#ff5555;border:1px solid #333;padding:6px;margin-top:4px;font-size:11px" onclick="event.stopPropagation();eliminaProg(${i})">🗑️ ELIMINA</button></div>`).join('') || "Nessun programma - creane uno nel PASSO 1";
+  let progBox = document.getElementById('programmatoBox');
+  if(progBox){ if(programmato){ progBox.style.display='block'; document.getElementById('programmatoTesto').innerText = programmato.titolo + " • alle " + programmato.ora + " • Parte da solo"; document.getElementById('programmatoDurata').innerText = "⏱️ Durata: " + formatDurata(programmato.durataMin||calcolaDurataMinuti(programmi[programmato.indice]||null)) + " • Finisce circa alle " + calcolaOraFine(programmato.ora, programmato.durataMin||0); } else { progBox.style.display='none'; } }
   document.getElementById('palinsesto').innerHTML=palinsestoTxt.split('\n').map((r)=>{let parts=r.split('|'); return `<div class="pal-row"><span class="pal-ora">${parts[0]?.trim()||''}</span><span>${parts[1]?.trim()||r}</span></div>`}).join('');
+  let progNext = programmaCorrentePerCountdown();
+  let durTxt = progNext ? "⏱️ Durata: " + formatDurata(calcolaDurataMinuti(progNext)) + " • Finisce circa alle " + calcolaOraFine(prossimo.ora, calcolaDurataMinuti(progNext)) : "⏱️ Durata: --";
   document.getElementById('nextOra').innerText=prossimo.ora||"--:--"; document.getElementById('nextTitolo').innerText=prossimo.titolo||"--"; document.getElementById('nextDesc').innerText=prossimo.desc||""; document.getElementById('nextOraSide').innerText=prossimo.ora||"--:--"; document.getElementById('nextTitoloSide').innerText=prossimo.titolo||"--"; document.getElementById('nextDescSide').innerText=prossimo.desc||"";
-  if(document.getElementById('fNextOra')){ document.getElementById('fNextOra').value=prossimo.ora; document.getElementById('fNextTitolo').value=prossimo.titolo; document.getElementById('fNextDesc').value=prossimo.desc; }
+  if(document.getElementById('nextDurata')) document.getElementById('nextDurata').innerText = durTxt;
+  if(document.getElementById('nextDurataSide')) document.getElementById('nextDurataSide').innerText = durTxt;
+  if(document.getElementById('fNextOra')){ document.getElementById('fNextOra').value=prossimo.ora; document.getElementById('fNextTitolo').value=prossimo.titolo; document.getElementById('fNextDesc').value=prossimo.desc; document.getElementById('oraSceltaLabel').innerText=prossimo.ora; }
   document.getElementById('dedicheList').innerHTML=dediche.slice(0,6).map(d=>`<div class="dedica"><b>${d.nome}</b><span>${d.testo}</span></div>`).join('') || `<div style="font-size:12px;color:#666;text-align:center;padding:8px">Nessuna dedica ancora.<br>Sii il primo!</div>`;
   let opts=["🎸 Rock Italiano","🎤 Pop Elba","🎷 Jazz & Chill","🔥 Solo Samax"]; let tot=voti.reduce((a,b)=>a+b,0);
   document.getElementById('pollBtns').innerHTML=opts.map((o,i)=>`<button class="vote-btn" onclick="vota(${i})">${o}</button>`).join('');
   document.getElementById('pollRes').innerHTML=opts.map((o,i)=>{let pc=tot?Math.round(voti[i]/tot*100):0; return `<div style="font-size:11px;margin:5px 0">${o} • ${pc}%<div class="vote-bar"><div style="width:${pc}%"></div></div></div>`}).join('');
-  document.getElementById('fPal').value=palinsestoTxt; updateLiveBadge();
+  if(document.getElementById('fPal')) document.getElementById('fPal').value=palinsestoTxt; updateLiveBadge();
 }
 function inviaDedica(){ let n=document.getElementById('dedNome').value.trim()||"Anonimo"; let t=document.getElementById('dedTesto').value.trim(); if(!t) return alert("Scrivi la dedica"); dediche.unshift({nome:n,testo:t}); save(); render(); document.getElementById('dedTesto').value=''; let wa = _getWhatsApp(); let msg = `💌 NUOVA DEDICA - RADIO SAMAX 🔥\n\n👤 Da: ${n}\n🎵 Dedica / Richiesta: ${t}\n\n--- Inviata dal sito Radio Samax ---`; window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank'); }
-function vota(i){voti[i]++; save(); render(); alert("✅ Voto registrato!");}
+function vota(i){ voti[i]++; save(); if(firebaseOn && db){ db.ref('samax/sondaggio').set(voti); } render(); alert("✅ Voto registrato! Ora si vede anche su iPhone e PC"); }
 function salvaPal(){palinsestoTxt=document.getElementById('fPal').value; localStorage.setItem('samax_pal',palinsestoTxt); render(); alert("Programmi di oggi salvati");}
-window._listaProva = [];
-let _adminFolderEl = document.getElementById('adminFolderInput');
-if(_adminFolderEl){
-  _adminFolderEl.addEventListener('change', e => {
-    let files = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.mp3'));
-    files.sort((a,b) => a.name.localeCompare(b.name));
-    if(files.length === 0){ alert("Nessun MP3 nella cartella prova"); return; }
-    window._listaProva = files.map(f => f.name);
-    let sel = document.getElementById('fFileName');
-    sel.innerHTML = "";
-    files.forEach(f => {
-      let opt = document.createElement('option');
-      opt.value = f.name;
-      opt.textContent = f.name;
-      sel.appendChild(opt);
+// CARICA TUTTO DA CARTELLA MP3 - QUALSIASI ESTENSIONE MUSICALE
+async function caricaDaServer(){
+  let titolo = document.getElementById('fTitolo').value.trim();
+  let cartella = (document.getElementById('fCartella').value.trim() || 'mp3');
+  if(!titolo){ alert("Prima scrivi il nome programma, es: VASCO"); return; }
+  try{
+    let res = await fetch(`audio/${encodeURIComponent(cartella)}/`);
+    let html = await res.text();
+    let doc = new DOMParser().parseFromString(html, 'text/html');
+    let raw = Array.from(doc.querySelectorAll('a')).map(a=>a.getAttribute('href')).filter(h=>h);
+    let links = [];
+    raw.forEach(h=>{
+      try{
+        let decoded = decodeURIComponent(h);
+        if(decoded.includes('../')) return;
+        let name = decoded.split('/').pop();
+        if(!name) return;
+        if(!AUDIO_EXT.test(name)) return;
+        if(!links.includes(name)) links.push(name);
+      }catch(e){}
     });
-    sel.value = files[0].name;
-    document.getElementById('adminMp3List').innerHTML = "✅ Trovati " + files.length + " brani in prova.<br>Primo scelto da solo: <b style='color:#ff0000'>" + files[0].name + "</b><br>" + files.map(f=>"🎵 "+f.name).join("<br>");
-    alert("✅ Fatto! Primo file scelto da solo: " + files[0].name + "\nOra premi CREA PROGRAMMA");
-  });
+    links.sort((a,b)=>a.localeCompare(b));
+    if(links.length===0){ alert("Nessun file musicale trovato in audio/"+cartella+"/\nMetti i file dentro quella cartella e riprova."); return; }
+    let episodi = links.map(name => ({nome: nomeSenzaExt(name), file: name, path: encodeURI(`audio/${cartella}/${name}`), dur: 0}));
+    // Se esiste già un programma con lo stesso nome, lo aggiorna invece di duplicarlo
+    let idxEsiste = programmi.findIndex(p=>p.titolo===titolo);
+    if(idxEsiste>=0){ programmi[idxEsiste].episodi = episodi; programmi[idxEsiste].cartella = cartella; programmaSelezionato = idxEsiste; }
+    else { programmi.push({titolo: titolo, desc: "Programma " + titolo, ora: "", cartella: cartella, episodi: episodi}); programmaSelezionato = programmi.length-1; }
+    document.getElementById('fNextTitolo').value = titolo;
+    save(); render();
+    let minStima = Math.round(episodi.length*3.5);
+    document.getElementById('adminMp3List').innerHTML = "✅ Caricato <b style='color:#ff0000'>" + titolo + "</b> con <b style='color:#ffcc00'>" + episodi.length + " file musicali</b> da <b style='color:#00ccff'>audio/" + cartella + "/</b><br>⏱️ Durata stimata: <b style='color:#ffcc00'>" + formatDurata(minStima) + "</b><br>" + episodi.map(e=>"🎵 "+e.file).join("<br>");
+    alert("✅ FATTO! " + titolo + " con " + episodi.length + " file musicali da audio/" + cartella + "\nDurata: " + formatDurata(minStima));
+  }catch(e){ alert("Non riesco a leggere la cartella. Apri il sito da http://localhost:8000 e riprova."); }
 }
-function aggiungiTuttiDaProva(){
-  let idx = document.getElementById('selProg').value;
-  if(idx === "") return alert("Prima crea un programma");
-  if(!window._listaProva || window._listaProva.length === 0) return alert("Prima premi LEGGI CARTELLA PROVA");
-  let p = programmi[idx];
-  let esistenti = new Set(p.episodi.map(e => e.file));
-  let aggiunti = 0;
-  window._listaProva.forEach((nome, i) => {
-    if(i === 0) return;
-    if(esistenti.has(nome)) return;
-    p.episodi.push({nome: nome.replace('.mp3',''), file: nome, path: `audio/${p.cartella}/${nome}`, dur: 0});
-    aggiunti++;
-  });
-  save(); render();
-  alert("✅ Aggiunti " + aggiunti + " brani restanti da prova!");
-}
-function creaProgramma(){let titolo=document.getElementById('fTitolo').value.trim(); if(!titolo) return alert("Metti il nome!"); let cartella=slugify(titolo); let file=document.getElementById('fFileName').value.trim()||'01-intro.mp3'; programmi.push({titolo, desc:document.getElementById('fDesc').value, ora:document.getElementById('fOra').value, cartella, episodi:[{nome:'Brano 1', file:file, path:`audio/${cartella}/${file}`, dur:0}]}); save(); render(); alert("✅ Creato: "+titolo+" - Primo file: "+file+" - Ora premi AGGIUNGI TUTTI I RESTANTI DA PROVA"); }
-function aggiungiEpisodio(){let idx=document.getElementById('selProg').value; if(idx==="") return alert("Prima crea un programma"); let nome=document.getElementById('fEpNome').value.trim()||('Brano '+(programmi[idx].episodi.length+1)); let file=document.getElementById('fEpFile').value.trim()||'brano.mp3'; let p=programmi[idx]; p.episodi.push({nome, file, path:`audio/${p.cartella}/${file}`, dur:0}); save(); render(); alert("✅ Aggiunto!");}
 function mandaInOnda(i,ei){currentIdx=i; currentEp=ei; let p=programmi[i]; let e=p.episodi[ei]; document.getElementById('titoloOnda').innerText=p.titolo+" - "+e.nome; document.getElementById('descOnda').innerText=(p.desc||'')+" • Brano "+(ei+1)+" di "+p.episodi.length+" • "+(p.ora||''); audio.src=e.path; audio.volume = document.getElementById('volPubblico').value / 100; audio.play().catch(()=>{}); isPlaying=true; liveStartTime=Date.now(); save(); pubblicaProgrammaSuFirebase(); document.getElementById('playBtn').innerText="⏸ PAUSA"; document.getElementById('vinyl').classList.add('spin'); render();}
 audio.addEventListener('ended', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
-function eliminaProg(i){if(confirm("Eliminare?")){programmi.splice(i,1); if(currentIdx===i){audio.pause(); currentIdx=-1; isPlaying=false; if(micOn) stopMic(); save(); rimuoviProgrammaDaFirebase();} save(); render();}}
+// Se un file non si apre (corrotto / codec), passa al prossimo invece di fermarsi
+audio.addEventListener('error', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
+function eliminaProg(i){if(confirm("Eliminare?")){programmi.splice(i,1); if(currentIdx===i){audio.pause(); currentIdx=-1; isPlaying=false; if(micOn) stopMic(); save(); rimuoviProgrammaDaFirebase();} if(programmaSelezionato>=programmi.length) programmaSelezionato=0; save(); render();}}
 function toggleRadio(){
   if(!audio.src){ if(programmi.length){ mandaInOnda(0,0); return; } return alert("Samax deve ancora mandare in onda un programma. Torna tra poco!"); }
   if(isPlaying){audio.pause(); isPlaying=false; document.getElementById('playBtn').innerText="▶ PLAY"; document.getElementById('vinyl').classList.remove('spin');}
