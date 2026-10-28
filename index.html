@@ -175,7 +175,6 @@ label{font-size:12px;color:#aaa}
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-top:5px"><span id="cur">0:00</span><span>RADIO SAMAX</span><span id="dur">0:00</span></div>
-<!-- COLLEGATO A ICECAST -->
 <audio id="radio" preload="none" crossorigin="anonymous">
   <source src="http://localhost:8000/stream" type="audio/mpeg">
 </audio>
@@ -244,11 +243,11 @@ label{font-size:12px;color:#aaa}
 <span class="step-num">PASSO 2 • ORA DIRETTA</span>
 <h3 style="margin:8px 0 4px">🕐 A che ora va in onda?</h3>
 <p style="font-size:12px;color:#aaa">Tocca l'orologio. L'onda partirà DA SOLA a quell'ora.</p>
-<input type="time" id="fNextOra" class="clock-input" value="21:00" onchange="salvaOraDiretta()">
+<input type="time" id="fNextOra" class="clock-input" value="14:50" onchange="salvaOraDiretta()">
 <input id="fNextTitolo" placeholder="Titolo diretta - Es: Tributo Vasco Rossi">
 <input id="fNextDesc" placeholder="Descrizione - Es: Con Samax da Porto Azzurro">
 <button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="salvaProssimo()">💾 SALVA ORA E TITOLO</button>
-<div style="text-align:center;font-size:12px;color:#888;margin-top:6px">Ora impostata: <b id="oraSceltaLabel" style="color:#ff0000;font-size:16px">21:00</b></div>
+<div style="text-align:center;font-size:12px;color:#888;margin-top:6px">Ora impostata: <b id="oraSceltaLabel" style="color:#ff0000;font-size:16px">14:50</b></div>
 </div>
 <div class="step-box">
 <span class="step-num">PASSO 3 • SCEGLI</span>
@@ -285,13 +284,21 @@ try{ if(firebaseConfig.apiKey !== "INCOLLA_QUI_APIKEY"){ firebase.initializeApp(
 const VOLUME_INIZIALE = 21;
 const AUDIO_EXT = /\.(mp3|m4a|mp4|wav|wave|ogg|oga|opus|flac|aac|wma|aif|aiff|mid|midi|webm)$/i;
 function nomeSenzaExt(name){ return name.replace(/\.[^.]+$/,''); }
+
+// *** PROGRAMMA VISIBILE PER TUTTI - SCRITTO NEL CODICE, NON SOLO IN localStorage ***
 let programmi = JSON.parse(localStorage.getItem('samax_prog_v3')||'[]');
+if(programmi.length===0){
+  programmi = [{titolo:"Tributo a Vasco Rossi", desc:"Con Samax da Porto Azzurro", ora:"14:50", cartella:"mp3", episodi:[{nome:"Vasco 1",file:"1.mp3",dur:210},{nome:"Vasco 2",file:"2.mp3",dur:210},{nome:"Vasco 3",file:"3.mp3",dur:210},{nome:"Vasco 4",file:"4.mp3",dur:210},{nome:"Vasco 5",file:"5.mp3",dur:210},{nome:"Vasco 6",file:"6.mp3",dur:210},{nome:"Vasco 7",file:"7.mp3",dur:210},{nome:"Vasco 8",file:"8.mp3",dur:210}]}];
+}
 let notizie = JSON.parse(localStorage.getItem('samax_news')||'[{"tag":"ELBA","testo":"Benvenuti su Radio Samax da Porto Azzurro - Isola d\'Elba"}]');
 let dediche = JSON.parse(localStorage.getItem('samax_ded')||'[]');
-let palinsestoTxt = localStorage.getItem('samax_pal')||"08:00 | Buongiorno Elba ☀️\n13:00 | Pranzo con Samax\n18:00 | Show Live Music 🔥\n22:00 | Notte Elba 🌙";
+let palinsestoTxt = localStorage.getItem('samax_pal')||"08:00 | Buongiorno Elba ☀️\n13:00 | Pranzo con Samax\n14:50 | Tributo a Vasco Rossi\n18:00 | Show Live Music 🔥\n22:00 | Notte Elba 🌙";
 let voti = JSON.parse(localStorage.getItem('samax_voti')||'[0,0,0,0]');
-let prossimo = JSON.parse(localStorage.getItem('samax_next')||'{"ora":"21:00","titolo":"Show Live Music","desc":"Con Samax da Porto Azzurro - La radio che spacca!"}');
+let prossimo = JSON.parse(localStorage.getItem('samax_next')||'{"ora":"14:50","titolo":"Tributo a Vasco Rossi","desc":"Con Samax da Porto Azzurro"}');
 let programmato = JSON.parse(localStorage.getItem('samax_programmato')||'null');
+if(!programmato){
+  programmato = {ora:"14:50", titolo:"Tributo a Vasco Rossi", desc:"Con Samax da Porto Azzurro", indice:0, durataMin:28, numBrani:8};
+}
 let audio=document.getElementById('radio'); let isPlaying=false; let currentIdx=-1; let currentEp=-1;
 let jingleInCorso=false; let isAdmin = false; let programmaSelezionato = 0;
 let isOnline = false;
@@ -303,12 +310,12 @@ let programmaOnlineFB = null; let votiProgrammaFB = 0; let votiSondaggioFB = [0,
 function programmaIdCorrente(){ if(programmaOnlineFB && programmaOnlineFB.id) return programmaOnlineFB.id; if(currentIdx>=0 && programmi[currentIdx]) return 'prog_' + slugify(programmi[currentIdx].titolo); return null; }
 function calcolaDurataMinuti(prog){ if(!prog || !prog.episodi) return 0; let totale = 0; prog.episodi.forEach(e=>{ if(e.dur && e.dur>0) totale += e.dur/60; else totale += 3.5; }); return Math.round(totale); }
 function formatDurata(minuti){ if(!minuti) return "--"; let h = Math.floor(minuti/60); let m = minuti%60; if(h===0) return m + " min"; if(m===0) return h + "h"; return h + "h " + m + "m"; }
-function durataTesto(prog){ if(!prog) return "⏱️ Durata: --"; let min = calcolaDurataMinuti(prog); return "⏱️ Durata: " + formatDurata(min) + " • " + prog.episodi.length + " brani • Finisce circa alle " + calcolaOraFine(prossimo.ora||programmato?.ora||"21:00", min); }
-function calcolaOraFine(oraInizio, minuti){ let parts = (oraInizio||"21:00").split(':'); let d = new Date(); d.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); d.setMinutes(d.getMinutes()+minuti); return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
+function durataTesto(prog){ if(!prog) return "⏱️ Durata: --"; let min = calcolaDurataMinuti(prog); return "⏱️ Durata: " + formatDurata(min) + " • " + prog.episodi.length + " brani • Finisce circa alle " + calcolaOraFine(prossimo.ora||programmato?.ora||"14:50", min); }
+function calcolaOraFine(oraInizio, minuti){ let parts = (oraInizio||"14:50").split(':'); let d = new Date(); d.setHours(parseInt(parts[0])||14, parseInt(parts[1])||50, 0, 0); d.setMinutes(d.getMinutes()+minuti); return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
 function programmaCorrentePerCountdown(){ if(programmato){ let idx = programmi.findIndex(p=>p.titolo===programmato.titolo); if(idx>=0) return programmi[idx]; if(programmato.indice!=null && programmi[programmato.indice]) return programmi[programmato.indice]; } if(currentIdx>=0 && programmi[currentIdx]) return programmi[currentIdx]; let idx2 = programmi.findIndex(p=>p.titolo===prossimo.titolo); if(idx2>=0) return programmi[idx2]; if(programmi[programmaSelezionato]) return programmi[programmaSelezionato]; return null; }
 function renderVoteProg(){
   let box = document.getElementById('voteProgBox'); let status = document.getElementById('firebaseStatus');
-  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato" : "🟡 Firebase non collegato";
+  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato" : "🟡 Programma fisso nel sito - visibile per tutti";
   let pollStatus = document.getElementById('pollFirebaseStatus'); if(pollStatus) pollStatus.innerText = firebaseOn ? "🟢 Sondaggio live per tutti" : "🟡 Sondaggio solo su questo dispositivo";
   if(!isOnline){
     if(programmaOnlineFB && programmaOnlineFB.titolo){ let pid = programmaOnlineFB.id; let votato = localStorage.getItem('samax_votato_'+pid)==='1'; box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA</div><div style="font-weight:900;font-size:16px;margin-top:4px">${programmaOnlineFB.titolo}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`; return; }
@@ -383,8 +390,8 @@ window.addEventListener('storage', updateListeners);
 function controllaOrarioProgrammazione(){
   if(!programmato || isOnline) return;
   let now = new Date();
-  let parts = (programmato.ora||"21:00").split(':');
-  let target = new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0);
+  let parts = (programmato.ora||"14:50").split(':');
+  let target = new Date(); target.setHours(parseInt(parts[0])||14, parseInt(parts[1])||50, 0, 0);
   let diffSec = (now - target)/1000;
   if(diffSec >= 0 && diffSec < 120){
     programmato = null; localStorage.removeItem('samax_programmato');
@@ -412,11 +419,11 @@ function updateCountdown(){
   }
   if(programmato){
     label.innerText="⏳ PROSSIMA DIRETTA TRA - " + programmato.titolo;
-    let now=new Date(); let parts=(programmato.ora||"21:00").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); sub.innerText = programmato.titolo + " • alle " + programmato.ora + " • Parte da sola, lascia la pagina aperta";
+    let now=new Date(); let parts=(programmato.ora||"14:50").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||14, parseInt(parts[1])||50, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); sub.innerText = programmato.titolo + " • alle " + programmato.ora + " • Parte da sola, lascia la pagina aperta";
     if(durEl && prog) durEl.innerText = durataTesto(prog);
     return;
   }
-  label.innerText="⏳ PROSSIMA DIRETTA TRA"; let now=new Date(); let parts=(prossimo.ora||"21:00").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||21, parseInt(parts[1])||0, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); let domani = target.getDate()!==now.getDate() ? " (domani)" : ""; sub.innerText = (prossimo.titolo||"Show Live Music") + " • alle " + (prossimo.ora||"21:00") + domani + " • " + (prossimo.desc||"");
+  label.innerText="⏳ PROSSIMA DIRETTA TRA"; let now=new Date(); let parts=(prossimo.ora||"14:50").split(':'); let target=new Date(); target.setHours(parseInt(parts[0])||14, parseInt(parts[1])||50, 0, 0); if(target <= now){ target.setDate(target.getDate()+1); } let diff=Math.floor((target-now)/1000); let h=Math.floor(diff/3600), m=Math.floor((diff%3600)/60), s=diff%60; timeEl.innerText = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0'); let domani = target.getDate()!==now.getDate() ? " (domani)" : ""; sub.innerText = (prossimo.titolo||"Show Live Music") + " • alle " + (prossimo.ora||"14:50") + domani + " • " + (prossimo.desc||"");
   if(durEl && prog) durEl.innerText = durataTesto(prog);
 }
 setInterval(updateCountdown, 1000);
@@ -447,9 +454,9 @@ function save(){localStorage.setItem('samax_prog_v3',JSON.stringify(programmi));
 function updateLiveBadge(){ aggiornaOnline(); let b=document.getElementById('liveBadge'); let a=document.getElementById('adminStato'); let live = isOnline; if(live){ b.className="live-badge on"; b.innerText="● ON LINE"; if(a){ a.innerText="ON LINE 🟢"; a.style.color="#00ff00"; } document.getElementById('oraOnda').innerText="● IN ONDA ORA - "+(prossimo.titolo||''); document.getElementById('oraOnda').style.color="#00ff00"; } else { b.className="live-badge off"; b.innerText="● OFF-LINE"; if(a){ a.innerText="OFF-LINE 🔴"; a.style.color="#ff0000"; } document.getElementById('oraOnda').innerText="⏸ IN PAUSA - "+prossimo.titolo; document.getElementById('oraOnda').style.color="#ff0000"; } updateCountdown(); renderVoteProg(); }
 function parlaConEco(testo, volume=1, rate=0.95){ return new Promise(resolve=>{ if(!('speechSynthesis' in window)){ resolve(); return; } window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(testo); u.lang='it-IT'; u.rate=rate; u.pitch=0.7; u.volume=volume; let voices = window.speechSynthesis.getVoices(); let it = voices.find(v=>v.lang.startsWith('it') && v.name.toLowerCase().includes('male')) || voices.find(v=>v.lang.startsWith('it')) || voices[0]; if(it) u.voice=it; u.onend=()=>resolve(); u.onerror=()=>resolve(); window.speechSynthesis.speak(u); setTimeout(()=>resolve(), 3500); }); }
 async function playJingle(){ if(jingleInCorso) return; jingleInCorso=true; let testo = document.getElementById('fJingle') ? document.getElementById('fJingle').value.trim() : ""; if(!testo) testo="Radio Samax! La radio che spacca!"; let volOriginale = audio.volume || 1; audio.volume = 0.15; await parlaConEco(testo, 1, 0.92); await new Promise(r=>setTimeout(r, 900)); audio.volume = volOriginale; jingleInCorso=false; }
-function salvaOraDiretta(){ let ora = document.getElementById('fNextOra').value || "21:00"; document.getElementById('oraSceltaLabel').innerText = ora; prossimo.ora = ora; save(); if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); } updateCountdown(); render(); }
+function salvaOraDiretta(){ let ora = document.getElementById('fNextOra').value || "14:50"; document.getElementById('oraSceltaLabel').innerText = ora; prossimo.ora = ora; save(); if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); } updateCountdown(); render(); }
 function salvaProssimo(){
-  prossimo = { ora: document.getElementById('fNextOra').value||"21:00", titolo: document.getElementById('fNextTitolo').value.trim()||programmi[programmaSelezionato]?.titolo||"Show Live Music", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" };
+  prossimo = { ora: document.getElementById('fNextOra').value||"14:50", titolo: document.getElementById('fNextTitolo').value.trim()||programmi[programmaSelezionato]?.titolo||"Show Live Music", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" };
   save(); render(); updateCountdown();
   if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); }
   document.getElementById('oraSceltaLabel').innerText = prossimo.ora;
@@ -547,8 +554,7 @@ function caricaDaFileScelti(ev){
   salvaProgrammaDaLista(titolo, cartella, episodi);
   ev.target.value='';
 }
-// --- NUOVO: PLAY DA ICECAST ---
-function mandaInOnda(i,ei){ /* tenuto per compatibilità, ora usa Icecast */ toggleRadio(); }
+function mandaInOnda(i,ei){ toggleRadio(); }
 function toggleRadio(){
   if(isPlaying){
     audio.pause(); isPlaying=false;
@@ -606,18 +612,15 @@ async function meteoElba(){
     document.getElementById('bike').innerText = cur.precipitation>0 ? "🌧️ Bagnato" : "✅ Perfetto";
     document.getElementById('bikeSub').innerText = "Strada asciutta";
     document.getElementById('tUpdate').innerText = "Aggiornato ora";
-    // Ore
     let hHtml = "";
     for(let i=0;i<12;i++){ let idx = new Date().getHours()+i; if(idx>=24) break; let t = j.hourly.temperature_2m[idx]; let c = codeToText(j.hourly.weather_code[idx]); hHtml += `<div class="hour-item"><div>${String(idx).padStart(2,'0')}:00</div><div style="font-size:16px">${c.icon}</div><div><b>${Math.round(t)}°</b></div></div>`; }
     document.getElementById('hourList').innerHTML = hHtml;
-    // Giorni
     let dHtml = ""; let giorni=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
     for(let i=0;i<7;i++){ let dt = new Date(j.daily.time[i]); let c = codeToText(j.daily.weather_code[i]); dHtml += `<div class="day-row"><span><b>${giorni[dt.getDay()]}</b> ${dt.getDate()}</span><span>${c.icon} ${c.t}</span><span><b>${Math.round(j.daily.temperature_2m_max[i])}°</b> / ${Math.round(j.daily.temperature_2m_min[i])}°</span></div>`; }
     document.getElementById('dayList').innerHTML = dHtml;
   }catch(e){ document.getElementById('tCond').innerText = "Meteo non disponibile"; }
 }
 meteoElba(); setInterval(meteoElba, 600000);
-// --- ICECAST LIVE CHECK ---
 async function checkIcecastLive(){
   try{
     const res = await fetch(ICECAST_STATUS);
@@ -637,23 +640,11 @@ async function checkIcecastLive(){
 }
 setInterval(checkIcecastLive, 5000);
 checkIcecastLive();
-// Avvio
 updateClockAndFerry();
 render();
 syncFirebase();
 updateCountdown();
 updateListeners();
-</script>
-<div id="box-prog" style="background:#ff2d55;color:#fff;padding:14px;border-radius:12px;text-align:center;margin:15px;font-weight:700;font-size:18px">Caricamento programmi...</div>
-<script>
-function proxProg(){
- let arr=JSON.parse(localStorage.getItem('samax_programmi')||'[]');
- let ora=new Date(); let oggi=(ora.getDay()+6)%7; let cands=[];
- cands.sort((a,b)=>a.d-b.d); let next=cands[0]; let diff=next.d-new Date();
- let hh=Math.floor(diff/3600000), mm=Math.floor(diff%3600000/60000), ss=Math.floor(diff%60000/1000);
- document.getElementById('box-prog').innerHTML='Prossimo: '+next.p.nome+' alle '+next.p.ora+' - tra '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
-}
-setInterval(proxProg,1000); proxProg();
 </script>
 </body>
 </html>
