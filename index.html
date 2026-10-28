@@ -158,9 +158,11 @@ label{font-size:12px;color:#aaa}
 <div class="hero-text"><div id="oraOnda">NESSUN PROGRAMMA IN ONDA</div><div id="titoloOnda">Radio Samax</div><div id="descOnda">Premi PLAY e ascolta</div></div>
 </div>
 
-<!-- ✅ PLAYER CASTER CHE SUONA - SOSTITUISCE IL VECCHIO PLAY -->
+<!-- ✅ PLAYER CASTER CHE SUONA + POWERED BY VISIBILE -->
 <div style="margin-top:10px">
-<div data-type="newStreamPlayer" data-publicToken="29545c38-6a9d-4769-ba93-474128dc1abc" data-theme="dark" data-color="e81e4d" data-channelId="" data-rendered="false" class="cstrEmbed"><a href="https://www.caster.fm">Shoutcast Hosting</a></div><script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
+<div data-type="newStreamPlayer" data-publicToken="29545c38-6a9d-4769-ba93-474128dc1abc" data-theme="dark" data-color="e81e4d" data-channelId="" data-rendered="false" class="cstrEmbed"><a href="https://www.caster.fm">Shoutcast Hosting</a></div>
+<div style="text-align:center;font-size:11px;margin-top:4px"><a href="https://www.caster.fm" style="color:#888;text-decoration:none">Powered by Caster.fm</a></div>
+<script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
 </div>
 
 <button class="play-big" id="spikerBtn" onclick="toggleMic()" style="background:#ffcc00;color:#000;border:2px solid #ff0000;margin-top:8px;display:none;font-size:16px">🎤 SPIKER - PARLA IN DIRETTA</button>
@@ -180,7 +182,6 @@ label{font-size:12px;color:#aaa}
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-top:5px"><span id="cur">0:00</span><span>RADIO SAMAX</span><span id="dur">0:00</span></div>
-<!-- AUDIO NASCOSTO PER NON ROMPERE IL CODICE - NON TOCCARE -->
 <audio id="radio" preload="none" style="display:none"></audio>
 </div>
 <div class="ferry-bar">
@@ -550,7 +551,6 @@ function caricaDaFileScelti(ev){
   salvaProgrammaDaLista(titolo, cartella, episodi);
   ev.target.value='';
 }
-// --- PLAY ORA USA IL PLAYER CASTER SOPRA, NON PIU' L'AUDIO VECCHIO ---
 function mandaInOnda(i,ei){ return; }
 function toggleRadio(){ return; }
 function eliminaProg(i){if(confirm("Eliminare?")){programmi.splice(i,1); if(programmaSelezionato>=programmi.length) programmaSelezionato=0; save(); render();}}
