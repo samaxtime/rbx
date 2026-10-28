@@ -43,9 +43,10 @@ body{background:#050505;color:#fff}
 input,select,textarea{width:100%;padding:9px;margin:5px 0;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:13px}
 label{font-size:12px;color:#aaa}
 .btn-admin{background:#fff;color:#000;border:none;padding:10px;border-radius:10px;font-weight:900;width:100%;cursor:pointer;margin-top:6px;font-size:13px}
-#adminModal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}
-.modal-box{background:#111;border:1px solid #333;border-radius:20px;padding:18px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto}
-.close{float:right;background:#222;border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer}
+#adminModal{position:fixed;inset:0;background:#0a0a0a;display:none;z-index:100;overflow-y:auto}
+.modal-box{background:#0a0a0a;width:100%;min-height:100vh;padding:14px 14px 40px;max-width:720px;margin:0 auto}
+.close{float:right;background:#222;border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;position:sticky;top:10px;z-index:10}
+@media(min-width:721px){.modal-box{padding:20px 20px 60px}}
 .meteo-hero{background:linear-gradient(145deg,#001a33,#002a4d,#000);border:1px solid #00aaff44;border-radius:16px;padding:12px;margin:10px 0}
 .meteo-top{display:flex;justify-content:space-between;align-items:flex-start}
 .meteo-temp{font-size:38px;font-weight:900;line-height:1}
@@ -141,7 +142,7 @@ label{font-size:12px;color:#aaa}
 <div class="logo"><h1>RADIO <span>SAMAX</span></h1><p>LA RADIO SENZA PUBBLICITÀ • DOVE C'È ROGNE CI SONO IO</p></div>
 <div class="clock-bar">
   <div class="clock-date" id="clockDate">-- • --</div>
-  <div class="clock-time" id="clockTime">--<span>:</span>--<span>:</span>--</div>
+  <div class="clock-time" id="clockTime">--<span>:</span>--</div>
   <div style="font-size:10px;color:#00ccff;letter-spacing:1px;font-weight:800">📍 PORTO AZZURRO • ISOLA D'ELBA • ORA ESATTA</div>
 </div>
 <div class="countdown-bar" id="countdownBar">
@@ -206,7 +207,7 @@ label{font-size:12px;color:#aaa}
 </main>
 <aside class="side">
 <div class="side-card"><h3>💌 DEDICHE & RICHIESTE</h3><input id="dedNome" placeholder="Il tuo nome"><input id="dedTesto" placeholder="Dedica / canzone..."><button class="btn-admin" style="background:#25D366;color:#000" onclick="inviaDedica()">💚 INVIA SU WHATSAPP</button><div class="dediche-wrap" id="dedicheList"></div></div>
-<div class="side-card"><h3>📊 SONDAGGIO LIVE</h3><p style="font-size:13px;margin-bottom:6px">Quale musica vuoi sentire stasera?</p><div id="pollBtns"></div><div id="pollRes"></div></div>
+<div class="side-card"><h3>📊 SONDAGGIO LIVE</h3><p style="font-size:13px;margin-bottom:6px">Quale musica vuoi sentire stasera?</p><div id="pollBtns"></div><div id="pollRes"></div><div id="pollFirebaseStatus" style="font-size:10px;color:#888;text-align:center;margin-top:4px"></div></div>
 <div class="side-card"><h3>🎉 EVENTI ELBA</h3><div class="event-row"><b>🎶 Sera in Piazza - Porto Azzurro</b><br><span style="color:#aaa">Venerdì • 21:30 • Piazza Matteotti</span></div><div class="event-row"><b>🏖️ Beach Party - Barbarossa</b><br><span style="color:#aaa">Sabato • 18:00 • Spiaggia</span></div></div>
 </aside>
 </div>
@@ -230,7 +231,7 @@ label{font-size:12px;color:#aaa}
 <input id="fTitolo" placeholder="Es: VASCO">
 <label>Cartella - sempre mp3</label>
 <input id="fCartella" value="mp3" readonly style="background:#2a2a00;color:#ffcc00;font-weight:900;text-align:center">
-<div style="font-size:11px;color:#aaa;margin-top:4px">Prende <b style="color:#fff">TUTTO</b> quello che c'è dentro <b style="color:#ffcc00">audio/mp3/</b><br>Qualsiasi file musicale: mp3, m4a, wav, ogg, flac, aac, opus, wma, aiff, ecc.<br>Non devi scegliere niente, li carica tutti da solo.</div>
+<div style="font-size:11px;color:#aaa;margin-top:4px">Prende <b style="color:#fff">TUTTO</b> quello che c'è dentro <b style="color:#ffcc00">audio/mp3/</b><br>Qualsiasi file musicale: mp3, m4a, wav, ogg, flac, aac, opus, wma, aiff, ecc.</div>
 <button class="btn-admin" style="background:#ff0000;color:#fff" onclick="caricaDaServer()">📂 CARICA TUTTO DA CARTELLA MP3</button>
 <div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5;max-height:200px;overflow-y:auto"></div>
 </div>
@@ -275,7 +276,6 @@ const firebaseConfig = { apiKey: "INCOLLA_QUI_APIKEY", authDomain: "INCOLLA_QUI.
 let db = null; let firebaseOn = false;
 try{ if(firebaseConfig.apiKey !== "INCOLLA_QUI_APIKEY"){ firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseOn = true; } }catch(e){ firebaseOn = false; }
 const VOLUME_INIZIALE = 21;
-// ESTENSIONI MUSICALI ACCETTATE - TUTTE
 const AUDIO_EXT = /\.(mp3|m4a|mp4|wav|wave|ogg|oga|opus|flac|aac|wma|aif|aiff|mid|midi|webm)$/i;
 function nomeSenzaExt(name){ return name.replace(/\.[^.]+$/,''); }
 let programmi = JSON.parse(localStorage.getItem('samax_prog_v3')||'[]');
@@ -292,7 +292,7 @@ function aggiornaOnline(){ isOnline = isPlaying && currentIdx!==-1; localStorage
 audio.volume = VOLUME_INIZIALE / 100; let isMuted = false; let lastVol = VOLUME_INIZIALE;
 function setVolumePubblico(v){ v = parseInt(v); audio.volume = v / 100; document.getElementById('volLabel').innerText = v + "%"; document.getElementById('muteBtn').innerText = v == 0 ? "🔇" : v < 50 ? "🔉" : "🔊"; if(v > 0){ lastVol = v; isMuted = false; } }
 function toggleMute(){ if(isMuted){ setVolumePubblico(lastVol); document.getElementById('volPubblico').value = lastVol; isMuted = false; } else { lastVol = document.getElementById('volPubblico').value; setVolumePubblico(0); document.getElementById('volPubblico').value = 0; isMuted = true; } }
-let programmaOnlineFB = null; let votiProgrammaFB = 0; let votiSondaggioFB = [0,0,0,0]; let votiSondaggioListenerOn = false;
+let programmaOnlineFB = null; let votiProgrammaFB = 0; let votiSondaggioFB = [0,0,0,0]; let votiSondaggioListenerOn = false; let votiProgListenerId = null;
 function programmaIdCorrente(){ if(programmaOnlineFB && programmaOnlineFB.id) return programmaOnlineFB.id; if(currentIdx>=0 && programmi[currentIdx]) return 'prog_' + slugify(programmi[currentIdx].titolo); return null; }
 function calcolaDurataMinuti(prog){ if(!prog || !prog.episodi) return 0; let totale = 0; prog.episodi.forEach(e=>{ if(e.dur && e.dur>0) totale += e.dur/60; else totale += 3.5; }); return Math.round(totale); }
 function formatDurata(minuti){ if(!minuti) return "--"; let h = Math.floor(minuti/60); let m = minuti%60; if(h===0) return m + " min"; if(m===0) return h + "h"; return h + "h " + m + "m"; }
@@ -301,29 +301,59 @@ function calcolaOraFine(oraInizio, minuti){ let parts = (oraInizio||"21:00").spl
 function programmaCorrentePerCountdown(){ if(programmato){ let idx = programmi.findIndex(p=>p.titolo===programmato.titolo); if(idx>=0) return programmi[idx]; if(programmato.indice!=null && programmi[programmato.indice]) return programmi[programmato.indice]; } if(currentIdx>=0 && programmi[currentIdx]) return programmi[currentIdx]; let idx2 = programmi.findIndex(p=>p.titolo===prossimo.titolo); if(idx2>=0) return programmi[idx2]; if(programmi[programmaSelezionato]) return programmi[programmaSelezionato]; return null; }
 function renderVoteProg(){
   let box = document.getElementById('voteProgBox'); let status = document.getElementById('firebaseStatus');
-  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato - voti e countdown uguali su PC e iPhone" : "🟡 Firebase non collegato - incolla la config per sincronizzare PC e iPhone";
+  if(status) status.innerText = firebaseOn ? "🟢 Firebase collegato - voti in tempo reale per tutti, Admin compreso" : "🟡 Firebase non collegato - incolla la config per sincronizzare voti PC e iPhone";
+  let pollStatus = document.getElementById('pollFirebaseStatus'); if(pollStatus) pollStatus.innerText = firebaseOn ? "🟢 Sondaggio live per tutti" : "🟡 Sondaggio solo su questo dispositivo";
   if(!isOnline || currentIdx===-1){
-    if(programmaOnlineFB && programmaOnlineFB.titolo){ let pid = programmaOnlineFB.id; let votato = localStorage.getItem('samax_votato_'+pid)==='1'; box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA DA FIREBASE</div><div style="font-weight:900;font-size:16px;margin-top:4px">${programmaOnlineFB.titolo}</div><div style="font-size:12px;color:#aaa">${programmaOnlineFB.desc||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti - PC e iPhone uguali</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`; return; }
+    if(programmaOnlineFB && programmaOnlineFB.titolo){ let pid = programmaOnlineFB.id; let votato = localStorage.getItem('samax_votato_'+pid)==='1'; box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA</div><div style="font-weight:900;font-size:16px;margin-top:4px">${programmaOnlineFB.titolo}</div><div style="font-size:12px;color:#aaa">${programmaOnlineFB.desc||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">${firebaseOn ? 'Voti veri in tempo reale - tutti vedono lo stesso numero' : 'Voti solo su questo dispositivo'}</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`; return; }
     box.innerHTML = `<div style="text-align:center;padding:14px;background:#111;border:1px dashed #333;border-radius:12px"><div style="font-size:22px">📻</div><div style="font-weight:800;margin-top:4px">Nessun programma in onda</div><div style="font-size:12px;color:#aaa;margin-top:3px">Quando Samax manderà in onda un programma, qui potrai votarlo.</div></div>`; return;
   }
   let p = programmi[currentIdx]; let pid = programmaIdCorrente(); let votato = localStorage.getItem('samax_votato_'+pid)==='1';
-  box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA - VOTA!</div><div style="font-weight:900;font-size:16px;margin-top:4px">${p.titolo}</div><div style="font-size:12px;color:#aaa">${p.desc||''} • ${p.ora||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">Voti veri di tutti - PC e iPhone uguali</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`;
+  box.innerHTML = `<div class="vote-prog-box"><div style="font-size:11px;color:#00ff00;font-weight:800">🔴 IN ONDA ORA - VOTA!</div><div style="font-weight:900;font-size:16px;margin-top:4px">${p.titolo}</div><div style="font-size:12px;color:#aaa">${p.desc||''} • ${p.ora||''}</div><div style="font-size:26px;font-weight:900;color:#ff0000;margin-top:6px">❤️ ${votiProgrammaFB} voti</div><div style="font-size:11px;color:#aaa">${firebaseOn ? 'Voti veri in tempo reale - tutti vedono lo stesso numero, Admin compreso' : 'Voti solo su questo dispositivo'}</div><button class="vote-prog-btn" ${votato?'disabled':''} onclick="votaProgrammaOnline()">${votato?'✅ HAI VOTATO QUESTO PROGRAMMA':'❤️ VOTA QUESTO PROGRAMMA'}</button></div>`;
 }
-function votaProgrammaOnline(){ let pid = programmaIdCorrente(); if(!pid) return alert("Nessun programma in onda da votare"); if(localStorage.getItem('samax_votato_'+pid)==='1') return alert("Hai già votato questo programma!"); localStorage.setItem('samax_votato_'+pid,'1'); if(firebaseOn && db){ db.ref('samax/voti/' + pid).transaction(v => (v||0)+1); } else { votiProgrammaFB++; renderVoteProg(); } alert("✅ Voto vero registrato! Si vede anche su iPhone e PC"); }
+function votaProgrammaOnline(){
+  let pid = programmaIdCorrente(); if(!pid) return alert("Nessun programma in onda da votare");
+  if(localStorage.getItem('samax_votato_'+pid)==='1') return alert("Hai già votato questo programma!");
+  localStorage.setItem('samax_votato_'+pid,'1');
+  if(firebaseOn && db){ db.ref('samax/voti/' + pid).transaction(v => (v||0)+1); }
+  else { votiProgrammaFB++; renderVoteProg(); }
+}
+function vota(i){
+  if(firebaseOn && db){ db.ref('samax/sondaggio/' + i).transaction(v => (v||0)+1); }
+  else { voti[i]++; save(); render(); }
+  alert("✅ Voto registrato! Tutti lo vedono in tempo reale");
+}
 function syncFirebase(){
-  if(!firebaseOn || !db) { renderVoteProg(); return; }
+  if(!firebaseOn || !db) { renderVoteProg(); render(); return; }
   db.ref('samax/prossimo').on('value', snap=>{ let val = snap.val(); if(val){ prossimo = val; localStorage.setItem('samax_next', JSON.stringify(prossimo)); render(); updateCountdown(); } });
   db.ref('samax/programmato').on('value', snap=>{ let val = snap.val(); if(val){ programmato = val; localStorage.setItem('samax_programmato', JSON.stringify(programmato)); render(); updateCountdown(); } });
-  db.ref('samax/programmaOnline').on('value', snap=>{ programmaOnlineFB = snap.val(); if(programmaOnlineFB && programmaOnlineFB.id){ db.ref('samax/voti/' + programmaOnlineFB.id).on('value', s=>{ votiProgrammaFB = s.val() || 0; renderVoteProg(); }); } else { renderVoteProg(); } });
-  if(!votiSondaggioListenerOn){ votiSondaggioListenerOn = true; db.ref('samax/sondaggio').on('value', snap=>{ let val = snap.val(); if(val && Array.isArray(val) && val.length===4){ votiSondaggioFB = val; voti = val; localStorage.setItem('samax_voti', JSON.stringify(voti)); render(); } }); }
+  db.ref('samax/programmaOnline').on('value', snap=>{
+    programmaOnlineFB = snap.val();
+    if(programmaOnlineFB && programmaOnlineFB.id){
+      if(votiProgListenerId !== programmaOnlineFB.id){
+        votiProgListenerId = programmaOnlineFB.id;
+        db.ref('samax/voti/' + programmaOnlineFB.id).on('value', s=>{ votiProgrammaFB = s.val() || 0; renderVoteProg(); });
+      }
+    } else { votiProgrammaFB = 0; renderVoteProg(); }
+  });
+  if(!votiSondaggioListenerOn){
+    votiSondaggioListenerOn = true;
+    db.ref('samax/sondaggio').on('value', snap=>{
+      let val = snap.val();
+      if(val){
+        let arr = [0,0,0,0];
+        if(Array.isArray(val)){ arr = val; } else { for(let k in val){ arr[parseInt(k)] = val[k] || 0; } }
+        votiSondaggioFB = arr; voti = arr; localStorage.setItem('samax_voti', JSON.stringify(voti)); render();
+      }
+    });
+  }
 }
 function pubblicaProgrammaSuFirebase(){ if(!firebaseOn || !db || currentIdx<0) return; let p = programmi[currentIdx]; let pid = 'prog_' + slugify(p.titolo); db.ref('samax/programmaOnline').set({ id: pid, titolo: p.titolo, desc: p.desc||'', ora: p.ora||'', online: true, aggiornato: Date.now() }); }
 function rimuoviProgrammaDaFirebase(){ if(!firebaseOn || !db) return; db.ref('samax/programmaOnline').set(null); }
 function updateClockAndFerry(){
   let now = new Date(); let giorni = ["DOMENICA","LUNEDÌ","MARTEDÌ","MERCOLEDÌ","GIOVEDÌ","VENERDÌ","SABATO"]; let mesi = ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
   document.getElementById('clockDate').innerText = "📅 " + giorni[now.getDay()] + " " + now.getDate() + " " + mesi[now.getMonth()] + " " + now.getFullYear();
-  let hh = String(now.getHours()).padStart(2,'0'); let mm = String(now.getMinutes()).padStart(2,'0'); let ss = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clockTime').innerHTML = hh + "<span>:</span>" + mm + "<span>:</span>" + ss;
+  let hh = String(now.getHours()).padStart(2,'0'); let mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clockTime').innerHTML = hh + "<span>:</span>" + mm;
   function nextFerry(orari){ let nowMin = now.getHours()*60 + now.getMinutes(); for(let o of orari){ let parts=o.split(':'); let m=parseInt(parts[0])*60+parseInt(parts[1]); if(m>nowMin) return {time:o,diff:m-nowMin}; } let parts=orari[0].split(':'); let m=parseInt(parts[0])*60+parseInt(parts[1])+1440; return {time:orari[0]+" (domani)",diff:m-nowMin}; }
   let f1 = nextFerry(["06:30","07:30","08:30","09:30","10:30","11:30","12:30","13:30","14:30","15:30","16:30","17:30","18:30","19:30","20:30","21:30"]);
   let f2 = nextFerry(["07:00","08:15","10:00","12:00","14:00","16:00","18:00","19:30"]);
@@ -364,6 +394,14 @@ function controllaOrarioProgrammazione(){
   }
 }
 function updateCountdown(){
+  if(!programmato && !isOnline){
+    let b = document.getElementById('countdownBar');
+    if(b) b.style.display = 'none';
+    return;
+  } else {
+    let b2 = document.getElementById('countdownBar');
+    if(b2) b2.style.display = 'block';
+  }
   let bar=document.getElementById('countdownBar'); let label=document.getElementById('countdownLabel'); let timeEl=document.getElementById('countdownTime'); let sub=document.getElementById('countdownSub'); let durEl=document.getElementById('countdownDurata'); if(!bar) return; updateListeners(); controllaOrarioProgrammazione();
   let prog = programmaCorrentePerCountdown();
   if(isOnline && isPlaying && currentIdx!==-1){
@@ -471,13 +509,11 @@ function render(){
   document.getElementById('dedicheList').innerHTML=dediche.slice(0,6).map(d=>`<div class="dedica"><b>${d.nome}</b><span>${d.testo}</span></div>`).join('') || `<div style="font-size:12px;color:#666;text-align:center;padding:8px">Nessuna dedica ancora.<br>Sii il primo!</div>`;
   let opts=["🎸 Rock Italiano","🎤 Pop Elba","🎷 Jazz & Chill","🔥 Solo Samax"]; let tot=voti.reduce((a,b)=>a+b,0);
   document.getElementById('pollBtns').innerHTML=opts.map((o,i)=>`<button class="vote-btn" onclick="vota(${i})">${o}</button>`).join('');
-  document.getElementById('pollRes').innerHTML=opts.map((o,i)=>{let pc=tot?Math.round(voti[i]/tot*100):0; return `<div style="font-size:11px;margin:5px 0">${o} • ${pc}%<div class="vote-bar"><div style="width:${pc}%"></div></div></div>`}).join('');
+  document.getElementById('pollRes').innerHTML=opts.map((o,i)=>{let pc=tot?Math.round(voti[i]/tot*100):0; return `<div style="font-size:11px;margin:5px 0">${o} • ${pc}% • ${voti[i]} voti<div class="vote-bar"><div style="width:${pc}%"></div></div></div>`}).join('');
   if(document.getElementById('fPal')) document.getElementById('fPal').value=palinsestoTxt; updateLiveBadge();
 }
 function inviaDedica(){ let n=document.getElementById('dedNome').value.trim()||"Anonimo"; let t=document.getElementById('dedTesto').value.trim(); if(!t) return alert("Scrivi la dedica"); dediche.unshift({nome:n,testo:t}); save(); render(); document.getElementById('dedTesto').value=''; let wa = _getWhatsApp(); let msg = `💌 NUOVA DEDICA - RADIO SAMAX 🔥\n\n👤 Da: ${n}\n🎵 Dedica / Richiesta: ${t}\n\n--- Inviata dal sito Radio Samax ---`; window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank'); }
-function vota(i){ voti[i]++; save(); if(firebaseOn && db){ db.ref('samax/sondaggio').set(voti); } render(); alert("✅ Voto registrato! Ora si vede anche su iPhone e PC"); }
 function salvaPal(){palinsestoTxt=document.getElementById('fPal').value; localStorage.setItem('samax_pal',palinsestoTxt); render(); alert("Programmi di oggi salvati");}
-// CARICA TUTTO DA CARTELLA MP3 - QUALSIASI ESTENSIONE MUSICALE
 async function caricaDaServer(){
   let titolo = document.getElementById('fTitolo').value.trim();
   let cartella = (document.getElementById('fCartella').value.trim() || 'mp3');
@@ -501,7 +537,6 @@ async function caricaDaServer(){
     links.sort((a,b)=>a.localeCompare(b));
     if(links.length===0){ alert("Nessun file musicale trovato in audio/"+cartella+"/\nMetti i file dentro quella cartella e riprova."); return; }
     let episodi = links.map(name => ({nome: nomeSenzaExt(name), file: name, path: encodeURI(`audio/${cartella}/${name}`), dur: 0}));
-    // Se esiste già un programma con lo stesso nome, lo aggiorna invece di duplicarlo
     let idxEsiste = programmi.findIndex(p=>p.titolo===titolo);
     if(idxEsiste>=0){ programmi[idxEsiste].episodi = episodi; programmi[idxEsiste].cartella = cartella; programmaSelezionato = idxEsiste; }
     else { programmi.push({titolo: titolo, desc: "Programma " + titolo, ora: "", cartella: cartella, episodi: episodi}); programmaSelezionato = programmi.length-1; }
@@ -514,7 +549,6 @@ async function caricaDaServer(){
 }
 function mandaInOnda(i,ei){currentIdx=i; currentEp=ei; let p=programmi[i]; let e=p.episodi[ei]; document.getElementById('titoloOnda').innerText=p.titolo+" - "+e.nome; document.getElementById('descOnda').innerText=(p.desc||'')+" • Brano "+(ei+1)+" di "+p.episodi.length+" • "+(p.ora||''); audio.src=e.path; audio.volume = document.getElementById('volPubblico').value / 100; audio.play().catch(()=>{}); isPlaying=true; liveStartTime=Date.now(); save(); pubblicaProgrammaSuFirebase(); document.getElementById('playBtn').innerText="⏸ PAUSA"; document.getElementById('vinyl').classList.add('spin'); render();}
 audio.addEventListener('ended', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
-// Se un file non si apre (corrotto / codec), passa al prossimo invece di fermarsi
 audio.addEventListener('error', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
 function eliminaProg(i){if(confirm("Eliminare?")){programmi.splice(i,1); if(currentIdx===i){audio.pause(); currentIdx=-1; isPlaying=false; if(micOn) stopMic(); save(); rimuoviProgrammaDaFirebase();} if(programmaSelezionato>=programmi.length) programmaSelezionato=0; save(); render();}}
 function toggleRadio(){
@@ -524,8 +558,8 @@ function toggleRadio(){
   updateLiveBadge(); updateListeners();
 }
 function aggiungiNews(){let t=document.getElementById('fNews').value.trim(); if(!t) return; notizie.unshift({tag:"FLASH",testo:t}); save(); render(); document.getElementById('fNews').value=''; alert("Pubblicata!");}
-function openAdmin(){document.getElementById('adminModal').style.display='flex';}
-function closeAdmin(){document.getElementById('adminModal').style.display='none';}
+function openAdmin(){document.getElementById('adminModal').style.display='block'; document.body.style.overflow='hidden'; window.scrollTo(0,0);}
+function closeAdmin(){document.getElementById('adminModal').style.display='none'; document.body.style.overflow='';}
 function login(){ if(_hashPass(document.getElementById('pass').value)===_PASS_HASH){ isAdmin=true; document.getElementById('loginBox').style.display='none'; document.getElementById('adminBox').style.display='block'; document.getElementById('micBox').style.display='block'; document.getElementById('spikerBtn').style.display='block'; document.getElementById('spikerStatus').style.display='block'; closeAdmin(); alert("✅ Sei Admin! Ora vedi il bottone SPIKER giallo sotto PLAY"); } else alert("Password sbagliata"); }
 function logout(){ if(micOn) stopMic(); isAdmin=false; document.getElementById('micBox').style.display='none'; document.getElementById('spikerBtn').style.display='none'; document.getElementById('spikerStatus').style.display='none'; document.getElementById('adminBox').style.display='none'; document.getElementById('loginBox').style.display='block'; }
 audio.addEventListener('timeupdate',()=>{ if(audio.duration){document.getElementById('bar').style.width=(audio.currentTime/audio.duration*100)+"%"; document.getElementById('cur').innerText=fmt(audio.currentTime); document.getElementById('dur').innerText=fmt(audio.duration);} });
