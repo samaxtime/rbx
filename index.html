@@ -3,159 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Radio Samax - LIVE</title>
+<title>SAMAXTIME - Radio</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#0a0a0a;color:#fff;font-family:system-ui,-apple-system,sans-serif;padding:16px}
-  .top{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid #222;border-radius:14px;padding:12px 14px}
-  .badge{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;letter-spacing:.5px}
-  .dot{width:10px;height:10px;border-radius:50%;background:#ff2d2d;box-shadow:0 0 12px #ff2d2d;animation:pulse 1.2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .card{background:#141414;border:1px solid #222;border-radius:20px;padding:20px;margin-top:14px;text-align:center}
-  .vinyl{width:150px;height:150px;margin:14px auto;border-radius:50%;background:radial-gradient(circle,#222 0%,#000 60%,#111 100%);border:4px solid #222;display:flex;align-items:center;justify-content:center;position:relative}
-  .vinyl::after{content:"";position:absolute;inset:18px;border-radius:50%;border:1px solid #333}
-  .vinyl::before{content:"";position:absolute;inset:38px;border-radius:50%;border:1px dashed #333}
-  .label{width:52px;height:52px;background:#e11d48;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;z-index:2;text-align:center;line-height:1.1}
-  .spin{animation:gira 3s linear infinite}
-  @keyframes gira{to{transform:rotate(360deg)}}
-  #titoloOnda{font-size:19px;font-weight:900;margin-top:6px}
-  #descOnda{color:#aaa;font-size:13px;margin-top:4px}
-  #stato{font-size:12px;color:#888;margin-top:8px}
-  #playBtn{background:#e11d48;color:#fff;border:0;padding:14px 26px;border-radius:999px;font-size:17px;font-weight:900;margin-top:16px;cursor:pointer;width:100%}
-  #playBtn:active{transform:scale(.98)}
-  .vol{margin-top:16px;text-align:left}
-  .vol label{font-size:12px;color:#aaa;display:flex;justify-content:space-between}
-  .vol input{width:100%;margin-top:6px;accent-color:#e11d48}
-  .row{display:flex;gap:10px;margin-top:12px}
-  .mini{flex:1;background:#1c1c1c;border:1px solid #262626;border-radius:12px;padding:10px;font-size:12px;color:#aaa}
-  .mini b{color:#fff;font-size:15px;display:block}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+  .top{width:100%;max-width:480px;display:flex;justify-content:space-between;align-items:center;padding:8px 4px;font-size:13px;font-weight:700}
+  .dot{width:10px;height:10px;border-radius:50%;background:#ff2d2d;display:inline-block;margin-right:6px;box-shadow:0 0 10px #ff2d2d}
+  .dot.off{background:#555;box-shadow:none}
+  .listeners{color:#888;font-weight:600}
+  .card{width:100%;max-width:480px;background:#0f0f0f;border-radius:24px;padding:24px 20px;margin-top:12px;text-align:center}
+  .onda{color:#ff2d2d;font-weight:900;letter-spacing:3px;font-size:14px;margin-bottom:14px}
+  .vinyl-wrap{position:relative;width:230px;height:230px;margin:0 auto 20px}
+  .vinyl{width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(circle at center,#111 0 2px,#222 2px 4px);border:6px solid #1a1a1a;display:flex;align-items:center;justify-content:center;position:relative}
+  .vinyl.playing{animation:spin 2.5s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .center{width:72px;height:72px;border-radius:50%;background:#e91e2d;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1.1}
+  .hole{width:10px;height:10px;background:#000;border-radius:50%;position:absolute}
+  .btn-play{width:100%;background:#e91e2d;border:none;color:#fff;font-size:20px;font-weight:900;padding:16px;border-radius:999px;cursor:pointer;margin:6px 0 14px}
+  .btn-play:active{transform:scale(.98);opacity:.9}
+  .vol-row{display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:6px}
+  input[type=range]{width:100%;accent-color:#e91e2d}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .box{background:#1a1a1a;border-radius:14px;padding:12px}
+  .box small{color:#888;font-size:12px}
+  .box b{display:block;margin-top:4px;font-size:15px}
+  .msg{font-size:13px;color:#aaa;min-height:18px;margin-top:10px}
 </style>
 </head>
 <body>
 
 <div class="top">
-  <div class="badge"><span class="dot" id="dot"></span><span id="badgeText">● ON LINE</span></div>
-  <div style="font-size:12px;color:#aaa"><span id="listeners">0</span> ascoltatori</div>
+  <span><span id="liveDot" class="dot off"></span> <span id="liveText">ON LINE</span></span>
+  <span class="listeners"><span id="listeners">0</span> ascoltatori</span>
 </div>
 
 <div class="card">
-  <div style="font-size:12px;letter-spacing:2px;color:#e11d48;font-weight:800">IN ONDA ORA</div>
-  <div class="vinyl" id="vinyl"><div class="label">SAMAX</div></div>
-  <div id="titoloOnda">Radio Samax - LIVE da Caster</div>
-  <div id="descOnda">In diretta da Mixxx</div>
-  <div id="stato">Premi PLAY per ascoltare</div>
+  <div class="onda">IN ONDA ORA</div>
 
-  <button id="playBtn" onclick="toggleRadio()">▶ PLAY</button>
-
-  <div class="vol">
-    <label><span>Volume</span><span id="volVal">92%</span></label>
-    <input type="range" id="volPubblico" min="0" max="100" value="92" oninput="cambiaVolume(this.value)">
+  <div class="vinyl-wrap">
+    <div id="vinyl" class="vinyl">
+      <div class="center">SAMAX<br>TIME</div>
+      <div class="hole"></div>
+    </div>
   </div>
 
-  <div class="row">
-    <div class="mini">Stato<b id="statoMini">ON LINE</b></div>
-    <div class="mini">Sorgente<b>Mixxx / Caster</b></div>
+  <button id="playBtn" class="btn-play">▶ &nbsp;PLAY</button>
+
+  <div class="vol-row"><span>Volume</span><span id="volLabel">92%</span></div>
+  <input id="vol" type="range" min="0" max="100" value="92">
+
+  <div class="info">
+    <div class="box"><small>Stato</small><b id="stato">ON LINE</b></div>
+    <div class="box"><small>Sorgente</small><b>Mixxx / Caster</b></div>
   </div>
+
+  <div id="msg" class="msg"></div>
 </div>
 
-<script>
-const ICECAST_URL = "https://morcast.caster.fm:11284/aykN5";
-const STATUS_URL = "https://morcast.caster.fm:11284/status-json.xsl";
+<!-- Audio creato in HTML, mai con load() -->
+<audio id="radio" preload="none" playsinline></audio>
 
-// AUDIO - FIX: niente <source> dentro, src diretto. Così Safari non si incastra.
-const audio = document.createElement('audio');
-audio.id = "radio";
-audio.preload = "none";
-audio.setAttribute("playsinline", "");
-audio.src = ICECAST_URL;
-document.body.appendChild(audio);
+<script>
+const STREAM = "https://morcast.caster.fm:11284/aykN5";
+const audio = document.getElementById("radio");
+const btn = document.getElementById("playBtn");
+const vinyl = document.getElementById("vinyl");
+const vol = document.getElementById("vol");
+const volLabel = document.getElementById("volLabel");
+const stato = document.getElementById("stato");
+const liveDot = document.getElementById("liveDot");
+const msg = document.getElementById("msg");
 
 let isPlaying = false;
-let liveStartTime = 0;
 
-function cambiaVolume(v){
-  document.getElementById('volVal').innerText = v + "%";
-  audio.volume = v / 100;
-}
+// Volume iniziale
 audio.volume = 0.92;
+vol.addEventListener("input", () => {
+  audio.volume = vol.value / 100;
+  volLabel.textContent = vol.value + "%";
+});
 
-function toggleRadio(){
-  let btn = document.getElementById('playBtn');
-  let vinyl = document.getElementById('vinyl');
-  let stato = document.getElementById('stato');
+function setPlaying(on){
+  isPlaying = on;
+  btn.innerHTML = on ? "⏸ &nbsp;PAUSA" : "▶ &nbsp;PLAY";
+  vinyl.classList.toggle("playing", on);
+  liveDot.classList.toggle("off", !on);
+  stato.textContent = on ? "IN ONDA" : "ON LINE";
+}
 
-  if(isPlaying){
+btn.addEventListener("click", async () => {
+  if (isPlaying) {
     audio.pause();
-    isPlaying = false;
-    btn.innerText = "▶ PLAY";
-    vinyl.classList.remove('spin');
-    stato.innerText = "In pausa - premi PLAY";
-    updateLiveBadge();
+    setPlaying(false);
     return;
   }
 
-  // FIX: togliamo il ?t= che Caster rifiutava
-  btn.innerText = "⏳ COLLEGAMENTO...";
-  stato.innerText = "Collegamento a Caster...";
-  audio.src = ICECAST_URL;
-  audio.load();
-  audio.volume = document.getElementById('volPubblico').value / 100;
+  msg.textContent = "Connessione...";
 
-  audio.play().then(()=>{
-    isPlaying = true;
-    liveStartTime = Date.now();
-    btn.innerText = "⏸ PAUSA";
-    vinyl.classList.add('spin');
-    stato.innerText = "In diretta - stai ascoltando";
-    document.getElementById('titoloOnda').innerText = "Radio Samax - LIVE da Caster";
-    document.getElementById('descOnda').innerText = "In diretta da Mixxx";
-    updateLiveBadge();
-    updateListeners();
-  }).catch((e)=>{
-    console.log("Play bloccato:", e);
-    isPlaying = false;
-    btn.innerText = "▶ PLAY";
-    vinyl.classList.remove('spin');
-    stato.innerText = "Premi di nuovo PLAY (Safari ha bloccato l'audio)";
-    alert("⚠️ Safari ha bloccato l'audio. Ricarica la pagina in Safari e ripremi PLAY");
-  });
-}
-
-function updateLiveBadge(){
-  let b = document.getElementById('badgeText');
-  let d = document.getElementById('dot');
-  let s = document.getElementById('statoMini');
-  if(isPlaying){
-    b.innerText = "● ON AIR - IN DIRETTA";
-    s.innerText = "ON AIR";
-    d.style.background = "#22c55e";
-    d.style.boxShadow = "0 0 12px #22c55e";
-  } else {
-    b.innerText = "● ON LINE";
-    s.innerText = "ON LINE";
-    d.style.background = "#ff2d2d";
-    d.style.boxShadow = "0 0 12px #ff2d2d";
+  // FIX SAFARI: niente load(), niente fetch a Caster.
+  // Si imposta la sorgente solo la prima volta e si fa play() subito dentro il tocco.
+  if (!audio.src) {
+    audio.src = STREAM;
   }
-}
 
-// Aggiorna titolo e ascoltatori da Caster
-async function updateListeners(){
-  try{
-    let r = await fetch(STATUS_URL);
-    let j = await r.json();
-    let src = j.icestats.source;
-    if(Array.isArray(src)) src = src[0];
-    if(src){
-      if(src.title) document.getElementById('titoloOnda').innerText = src.title;
-      if(src.listeners !== undefined) document.getElementById('listeners').innerText = src.listeners;
-      if(src.server_name) document.getElementById('descOnda').innerText = "In diretta da Mixxx - " + src.server_name;
-    }
-  }catch(e){ console.log("status non letto", e); }
-}
+  try {
+    await audio.play();
+    setPlaying(true);
+    msg.textContent = "Stai ascoltando SAMAXTIME";
+  } catch (e) {
+    // Safari a volte vuole un secondo tocco, non mostriamo nessun allarme
+    msg.textContent = "Premi di nuovo PLAY";
+    setPlaying(false);
+  }
+});
 
-setInterval(updateListeners, 10000);
-updateListeners();
-updateLiveBadge();
+audio.addEventListener("playing", () => {
+  setPlaying(true);
+  msg.textContent = "Stai ascoltando SAMAXTIME";
+});
+audio.addEventListener("pause", () => setPlaying(false));
+audio.addEventListener("error", () => {
+  msg.textContent = "Stream non disponibile, Mixxx è in onda?";
+  setPlaying(false);
+});
 </script>
 </body>
 </html>
