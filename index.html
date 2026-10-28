@@ -175,8 +175,8 @@ label{font-size:12px;color:#aaa}
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-top:5px"><span id="cur">0:00</span><span>RADIO SAMAX</span><span id="dur">0:00</span></div>
-<!-- COLLEGATO A CASTER.FM - RADIO SAMAX LIVE -->
-<audio id="radio" preload="none" crossorigin="anonymous">
+<!-- COLLEGATO A CASTER.FM - RADIO SAMAX LIVE - FIX IPHONE: SENZA CROSSORIGIN -->
+<audio id="radio" preload="none">
   <source src="https://morcast.caster.fm:11284/aykN5" type="audio/mpeg">
 </audio>
 </div>
@@ -547,8 +547,8 @@ function caricaDaFileScelti(ev){
   salvaProgrammaDaLista(titolo, cartella, episodi);
   ev.target.value='';
 }
-// --- NUOVO: PLAY DA CASTER ---
-function mandaInOnda(i,ei){ /* tenuto per compatibilità, ora usa Caster */ toggleRadio(); }
+// --- PLAY DA CASTER - FIX IPHONE ---
+function mandaInOnda(i,ei){ toggleRadio(); }
 function toggleRadio(){
   if(isPlaying){
     audio.pause(); isPlaying=false;
@@ -564,7 +564,7 @@ function toggleRadio(){
       document.getElementById('titoloOnda').innerText = "Radio Samax - LIVE da Caster";
       document.getElementById('descOnda').innerText = "In diretta da Mixxx";
     }).catch(()=>{
-      alert("⚠️ Mixxx non è in onda! Avvia Mixxx e premi 'Abilita trasmissione in diretta'");
+      alert("⚠️ Non riesco a collegarmi allo stream, riprova tra 5 secondi e premi di nuovo PLAY");
     });
   }
   updateLiveBadge(); updateListeners();
@@ -606,38 +606,34 @@ async function meteoElba(){
     document.getElementById('bike').innerText = cur.precipitation>0 ? "🌧️ Bagnato" : "✅ Perfetto";
     document.getElementById('bikeSub').innerText = "Strada asciutta";
     document.getElementById('tUpdate').innerText = "Aggiornato ora";
-    // Ore
     let hHtml = "";
     for(let i=0;i<12;i++){ let idx = new Date().getHours()+i; if(idx>=24) break; let t = j.hourly.temperature_2m[idx]; let c = codeToText(j.hourly.weather_code[idx]); hHtml += `<div class="hour-item"><div>${String(idx).padStart(2,'0')}:00</div><div style="font-size:16px">${c.icon}</div><div><b>${Math.round(t)}°</b></div></div>`; }
     document.getElementById('hourList').innerHTML = hHtml;
-    // Giorni
     let dHtml = ""; let giorni=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
     for(let i=0;i<7;i++){ let dt = new Date(j.daily.time[i]); let c = codeToText(j.daily.weather_code[i]); dHtml += `<div class="day-row"><span><b>${giorni[dt.getDay()]}</b> ${dt.getDate()}</span><span>${c.icon} ${c.t}</span><span><b>${Math.round(j.daily.temperature_2m_max[i])}°</b> / ${Math.round(j.daily.temperature_2m_min[i])}°</span></div>`; }
     document.getElementById('dayList').innerHTML = dHtml;
   }catch(e){ document.getElementById('tCond').innerText = "Meteo non disponibile"; }
 }
 meteoElba(); setInterval(meteoElba, 600000);
-// --- CASTER LIVE CHECK ---
+// --- CASTER LIVE CHECK - FIX: NON SPEGNE PIU' IL BOLLINO SE CORS BLOCCA ---
 async function checkIcecastLive(){
   try{
     const res = await fetch(ICECAST_STATUS);
     const data = await res.json();
-    const source = data.icestats.source;
+    let source = data.icestats.source;
+    if(Array.isArray(source)) source = source[0];
     const badge = document.getElementById('liveBadge');
     if(source){
       badge.className = "live-badge on"; badge.innerText = "● ON LINE";
-      document.getElementById('oraOnda').innerText = "● IN ONDA ORA - " + (source.title || "Radio Samax");
+      document.getElementById('oraOnda').innerText = "● IN ONDA ORA - " + (source.title || source.stream_title || "Radio Samax");
       document.getElementById('oraOnda').style.color = "#00ff00";
       document.getElementById('titoloOnda').innerText = source.server_name || "Radio Samax";
       document.getElementById('descOnda').innerText = "In diretta da Mixxx via Caster • " + (source.listeners||0) + " ascoltatori";
-    } else {
-      if(!isPlaying){ badge.className = "live-badge off"; badge.innerText = "● OFF-LINE"; }
     }
   }catch(e){}
 }
 setInterval(checkIcecastLive, 5000);
 checkIcecastLive();
-// Avvio
 updateClockAndFerry();
 render();
 syncFirebase();
