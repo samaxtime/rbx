@@ -175,7 +175,10 @@ label{font-size:12px;color:#aaa}
 </div>
 <div class="progress"><div id="bar"></div></div>
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-top:5px"><span id="cur">0:00</span><span>RADIO SAMAX</span><span id="dur">0:00</span></div>
-<audio id="radio" preload="none" crossorigin="anonymous"><source src="http://localhost:8000/stream" type="audio/mpeg"></audio>
+<!-- COLLEGATO A ICECAST -->
+<audio id="radio" preload="none" crossorigin="anonymous">
+  <source src="http://localhost:8000/stream" type="audio/mpeg">
+</audio>
 </div>
 <div class="ferry-bar">
   <div class="ferry-title">⛴️ TRAGHETTI <span>ELBA</span> • PROSSIME PARTENZE</div>
@@ -211,8 +214,6 @@ label{font-size:12px;color:#aaa}
 <div class="side-card"><h3>🎉 EVENTI ELBA</h3><div class="event-row"><b>🎶 Sera in Piazza - Porto Azzurro</b><br><span style="color:#aaa">Venerdì • 21:30 • Piazza Matteotti</span></div><div class="event-row"><b>🏖️ Beach Party - Barbarossa</b><br><span style="color:#aaa">Sabato • 18:00 • Spiaggia</span></div></div>
 </aside>
 </div>
-
-<!-- ADMIN -->
 <div id="adminModal"><div class="modal-box">
 <button class="close" onclick="closeAdmin()">✕</button>
 <div id="loginBox"><h2>🔐 Area Admin</h2><input type="password" id="pass" placeholder="Password"><button class="btn-admin" onclick="login()">ENTRA</button></div>
@@ -226,55 +227,38 @@ label{font-size:12px;color:#aaa}
 <div id="programmatoDurata" style="font-size:12px;color:#ffcc00;margin-top:2px"></div>
 <button class="btn-admin" style="background:#111;color:#ff5555;border:1px solid #333;margin-top:6px" onclick="annullaProgrammazione()">❌ ANNULLA PROGRAMMAZIONE</button>
 </div>
-
-<!-- PASSO 1 - CREA PROGRAMMA - ESEMPIO VASCO ROSSI -->
 <div class="step-box">
-<span class="step-num">PASSO 1 • CREA PROGRAMMA</span>
-<h3 style="margin:8px 0 4px">📂 Crea Programma da cartella MP3</h3>
-<label>1. Nome programma - Esempio Vasco Rossi</label>
-<input id="fTitolo" placeholder="Es: Vasco Rossi" value="Vasco Rossi">
-<label>2. Cartella MP3 in RadioSamax - Scegli a mano</label>
-<input id="fCartella" value="Vasco Rossi" placeholder="Nome cartella, es: Vasco Rossi" style="background:#2a2a00;color:#ffcc00;font-weight:900;text-align:center">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="caricaDaServer()">📂 CARICA DA CARTELLA MP3</button>
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="document.getElementById('filePicker').click()">📁 SCEGLI CARTELLA A MANO</button>
-</div>
-<input type="file" id="folderPicker" webkitdirectory directory multiple accept="audio/*,.mp3" style="display:none" onchange="caricaDaCartellaScelta(event)">
+<span class="step-num">PASSO 1 • CREA</span>
+<h3 style="margin:8px 0 4px">📂 Crea Programma da cartella mp3</h3>
+<label>Nome programma - A PIACERE, es: VASCO</label>
+<input id="fTitolo" placeholder="Es: VASCO">
+<label>Cartella - sempre mp3</label>
+<input id="fCartella" value="mp3" readonly style="background:#2a2a00;color:#ffcc00;font-weight:900;text-align:center">
+<div style="font-size:11px;color:#aaa;margin-top:4px">Ora con Icecast la musica la manda Mixxx.<br>Questa parte resta per il palinsesto / promemoria.</div>
+<button class="btn-admin" style="background:#ff0000;color:#fff" onclick="caricaDaServer()">📂 CARICA TUTTO DA CARTELLA MP3</button>
 <input type="file" id="filePicker" multiple accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac,.aac,.opus,.wma,.aiff" style="display:none" onchange="caricaDaFileScelti(event)">
-<div style="text-align:center;margin-top:6px"><button class="btn-admin" style="background:#111;color:#ffcc00;border:1px dashed #ffcc00;font-size:12px" onclick="document.getElementById('folderPicker').click()">📂 OPPURE: SCEGLI TUTTA LA CARTELLA MP3</button></div>
+<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="document.getElementById('filePicker').click()">📁 SE NON FUNZIONA: SCEGLI FILE A MANO</button>
 <div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5;max-height:200px;overflow-y:auto"></div>
 </div>
-
-<!-- PASSO 2 - ORA -->
 <div class="step-box">
 <span class="step-num">PASSO 2 • ORA DIRETTA</span>
-<h3 style="margin:8px 0 4px">🕐 A che ora va in onda in automatico?</h3>
-<p style="font-size:12px;color:#aaa">Tocca l'orologio, è facile. L'onda partirà DA SOLA a quell'ora.</p>
+<h3 style="margin:8px 0 4px">🕐 A che ora va in onda?</h3>
+<p style="font-size:12px;color:#aaa">Tocca l'orologio. L'onda partirà DA SOLA a quell'ora.</p>
 <input type="time" id="fNextOra" class="clock-input" value="21:00" onchange="salvaOraDiretta()">
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:6px">
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333;padding:8px" onclick="setOraVeloce('18:00')">18:00</button>
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333;padding:8px" onclick="setOraVeloce('20:00')">20:00</button>
-<button class="btn-admin" style="background:#ff0000;color:#fff;padding:8px" onclick="setOraVeloce('21:00')">21:00</button>
-<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333;padding:8px" onclick="setOraVeloce('22:00')">22:00</button>
-</div>
-<input id="fNextTitolo" placeholder="Titolo diretta - Es: Tributo Vasco Rossi" value="Tributo Vasco Rossi">
-<input id="fNextDesc" placeholder="Descrizione - Es: Con Samax da Porto Azzurro" value="Con Samax da Porto Azzurro">
+<input id="fNextTitolo" placeholder="Titolo diretta - Es: Tributo Vasco Rossi">
+<input id="fNextDesc" placeholder="Descrizione - Es: Con Samax da Porto Azzurro">
 <button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="salvaProssimo()">💾 SALVA ORA E TITOLO</button>
-<div style="text-align:center;font-size:12px;color:#888;margin-top:6px">Ora impostata: <b id="oraSceltaLabel" style="color:#ff0000;font-size:18px">21:00</b></div>
+<div style="text-align:center;font-size:12px;color:#888;margin-top:6px">Ora impostata: <b id="oraSceltaLabel" style="color:#ff0000;font-size:16px">21:00</b></div>
 </div>
-
 <div class="step-box">
 <span class="step-num">PASSO 3 • SCEGLI</span>
 <h3 style="margin:8px 0 4px">📻 Quale programma mandi in onda?</h3>
 <p style="font-size:12px;color:#aaa">Tocca un programma per sceglierlo. Vedi anche quanto durerà.</p>
 <div id="adminOnda"></div>
 </div>
-
-<!-- ULTIMO BOTTONE - MANDA IN ONDA -->
-<button class="btn-admin btn-vai-onda" onclick="vaiInOnda()">🔴 MANDA IN ONDA</button>
+<button class="btn-admin btn-vai-onda" onclick="vaiInOnda()">🔴 VAI IN ONDA</button>
 <div style="text-align:center;font-size:11px;color:#888;margin-top:6px">Premilo e NON parte subito. Si programma e parte da solo all'ora che hai messo. Nel sito vedrai il conto alla rovescia + durata.</div>
 <button class="btn-admin" style="background:#00aa00;color:#fff;margin-top:8px" onclick="vaiInOndaOra()">▶ PARTI SUBITO ADESSO</button>
-
 <details style="margin-top:12px"><summary style="cursor:pointer;color:#888;font-size:12px">⚙️ Altro - Jingle / Notizie / Palinsesto</summary>
 <div style="margin-top:8px">
 <label>Jingle</label><input id="fJingle" value="Radio Samax! La radio che spacca!">
@@ -287,11 +271,9 @@ label{font-size:12px;color:#aaa}
 <button class="btn-admin" style="background:#111;color:#888;border:1px solid #222;margin-top:12px" onclick="logout()">Esci</button>
 </div>
 </div></div>
-
 <script>
 const ICECAST_URL = "http://localhost:8000/stream";
 const ICECAST_STATUS = "http://localhost:8000/status-json.xsl";
-// PASSWORD OSCURATA - solo hash, mai in chiaro nel codice
 const _PASS_HASH = 3447138869;
 function _hashPass(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h*33)+s.charCodeAt(i)) >>> 0; } return h; }
 const _WA_CODE = [54,50,51,52,51,53,50,50,57,51,57,51];
@@ -465,10 +447,9 @@ function save(){localStorage.setItem('samax_prog_v3',JSON.stringify(programmi));
 function updateLiveBadge(){ aggiornaOnline(); let b=document.getElementById('liveBadge'); let a=document.getElementById('adminStato'); let live = isOnline; if(live){ b.className="live-badge on"; b.innerText="● ON LINE"; if(a){ a.innerText="ON LINE 🟢"; a.style.color="#00ff00"; } document.getElementById('oraOnda').innerText="● IN ONDA ORA - "+(prossimo.titolo||''); document.getElementById('oraOnda').style.color="#00ff00"; } else { b.className="live-badge off"; b.innerText="● OFF-LINE"; if(a){ a.innerText="OFF-LINE 🔴"; a.style.color="#ff0000"; } document.getElementById('oraOnda').innerText="⏸ IN PAUSA - "+prossimo.titolo; document.getElementById('oraOnda').style.color="#ff0000"; } updateCountdown(); renderVoteProg(); }
 function parlaConEco(testo, volume=1, rate=0.95){ return new Promise(resolve=>{ if(!('speechSynthesis' in window)){ resolve(); return; } window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(testo); u.lang='it-IT'; u.rate=rate; u.pitch=0.7; u.volume=volume; let voices = window.speechSynthesis.getVoices(); let it = voices.find(v=>v.lang.startsWith('it') && v.name.toLowerCase().includes('male')) || voices.find(v=>v.lang.startsWith('it')) || voices[0]; if(it) u.voice=it; u.onend=()=>resolve(); u.onerror=()=>resolve(); window.speechSynthesis.speak(u); setTimeout(()=>resolve(), 3500); }); }
 async function playJingle(){ if(jingleInCorso) return; jingleInCorso=true; let testo = document.getElementById('fJingle') ? document.getElementById('fJingle').value.trim() : ""; if(!testo) testo="Radio Samax! La radio che spacca!"; let volOriginale = audio.volume || 1; audio.volume = 0.15; await parlaConEco(testo, 1, 0.92); await new Promise(r=>setTimeout(r, 900)); audio.volume = volOriginale; jingleInCorso=false; }
-function setOraVeloce(ora){ document.getElementById('fNextOra').value=ora; salvaOraDiretta(); }
 function salvaOraDiretta(){ let ora = document.getElementById('fNextOra').value || "21:00"; document.getElementById('oraSceltaLabel').innerText = ora; prossimo.ora = ora; save(); if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); } updateCountdown(); render(); }
 function salvaProssimo(){
-  prossimo = { ora: document.getElementById('fNextOra').value||"21:00", titolo: document.getElementById('fNextTitolo').value.trim()||programmi[programmaSelezionato]?.titolo||"Vasco Rossi", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" };
+  prossimo = { ora: document.getElementById('fNextOra').value||"21:00", titolo: document.getElementById('fNextTitolo').value.trim()||programmi[programmaSelezionato]?.titolo||"Show Live Music", desc: document.getElementById('fNextDesc').value.trim()||"Con Samax" };
   save(); render(); updateCountdown();
   if(firebaseOn && db){ db.ref('samax/prossimo').set(prossimo); }
   document.getElementById('oraSceltaLabel').innerText = prossimo.ora;
@@ -549,7 +530,7 @@ async function caricaDaServer(){
     try{ let r2 = await fetch(`audio/${encodeURIComponent(cartella)}/list.json`); if(r2.ok){ let j = await r2.json(); if(Array.isArray(j)) links = j.filter(n=>AUDIO_EXT.test(n)); } }catch(e){}
   }
   links.sort((a,b)=>a.localeCompare(b));
-  if(links.length===0){ document.getElementById('adminMp3List').innerHTML = "❌ Non trovo i file in automatico.<br>Usa: <b>SCEGLI CARTELLA A MANO</b>"; alert("Usa SCEGLI CARTELLA A MANO"); return; }
+  if(links.length===0){ document.getElementById('adminMp3List').innerHTML = "❌ Non trovo i file in automatico.<br>Usa: <b>SCEGLI FILE A MANO</b>"; alert("Usa SCEGLI FILE A MANO"); return; }
   let basePath = location.pathname.split('/').filter(Boolean); let prefix = "";
   if(basePath.length>0 && !basePath[0].endsWith('.html')) prefix = "/" + basePath[0];
   let episodi = links.map(name => ({nome: nomeSenzaExt(name), file: name, path: encodeURI(prefix + `/audio/${cartella}/${name}`), dur: 0}));
@@ -558,7 +539,7 @@ async function caricaDaServer(){
 function caricaDaFileScelti(ev){
   let titolo = document.getElementById('fTitolo').value.trim();
   let cartella = (document.getElementById('fCartella').value.trim() || 'mp3');
-  if(!titolo){ alert("Prima scrivi il nome programma, es: VASCO ROSSI"); ev.target.value=''; return; }
+  if(!titolo){ alert("Prima scrivi il nome programma, es: VASCO"); ev.target.value=''; return; }
   let files = Array.from(ev.target.files||[]);
   if(files.length===0) return;
   let episodi = files.filter(f=>AUDIO_EXT.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({nome: nomeSenzaExt(f.name), file: f.name, path: URL.createObjectURL(f), dur: 0, locale: true}));
@@ -566,19 +547,8 @@ function caricaDaFileScelti(ev){
   salvaProgrammaDaLista(titolo, cartella, episodi);
   ev.target.value='';
 }
-function caricaDaCartellaScelta(ev){
-  let files = Array.from(ev.target.files||[]);
-  if(files.length===0) return;
-  let titolo = document.getElementById('fTitolo').value.trim() || files[0].webkitRelativePath.split('/')[0] || "Vasco Rossi";
-  document.getElementById('fTitolo').value = titolo;
-  let cartella = files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : titolo;
-  document.getElementById('fCartella').value = cartella;
-  let episodi = files.filter(f=>AUDIO_EXT.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({nome: nomeSenzaExt(f.name), file: f.name, path: URL.createObjectURL(f), dur: 0, locale: true, cartella: cartella}));
-  if(episodi.length===0){ alert("In questa cartella non ci sono MP3"); return; }
-  salvaProgrammaDaLista(titolo, cartella, episodi);
-  ev.target.value='';
-}
-function mandaInOnda(i,ei){ toggleRadio(); }
+// --- NUOVO: PLAY DA ICECAST ---
+function mandaInOnda(i,ei){ /* tenuto per compatibilità, ora usa Icecast */ toggleRadio(); }
 function toggleRadio(){
   if(isPlaying){
     audio.pause(); isPlaying=false;
@@ -636,15 +606,18 @@ async function meteoElba(){
     document.getElementById('bike').innerText = cur.precipitation>0 ? "🌧️ Bagnato" : "✅ Perfetto";
     document.getElementById('bikeSub').innerText = "Strada asciutta";
     document.getElementById('tUpdate').innerText = "Aggiornato ora";
+    // Ore
     let hHtml = "";
     for(let i=0;i<12;i++){ let idx = new Date().getHours()+i; if(idx>=24) break; let t = j.hourly.temperature_2m[idx]; let c = codeToText(j.hourly.weather_code[idx]); hHtml += `<div class="hour-item"><div>${String(idx).padStart(2,'0')}:00</div><div style="font-size:16px">${c.icon}</div><div><b>${Math.round(t)}°</b></div></div>`; }
     document.getElementById('hourList').innerHTML = hHtml;
+    // Giorni
     let dHtml = ""; let giorni=["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
     for(let i=0;i<7;i++){ let dt = new Date(j.daily.time[i]); let c = codeToText(j.daily.weather_code[i]); dHtml += `<div class="day-row"><span><b>${giorni[dt.getDay()]}</b> ${dt.getDate()}</span><span>${c.icon} ${c.t}</span><span><b>${Math.round(j.daily.temperature_2m_max[i])}°</b> / ${Math.round(j.daily.temperature_2m_min[i])}°</span></div>`; }
     document.getElementById('dayList').innerHTML = dHtml;
   }catch(e){ document.getElementById('tCond').innerText = "Meteo non disponibile"; }
 }
 meteoElba(); setInterval(meteoElba, 600000);
+// --- ICECAST LIVE CHECK ---
 async function checkIcecastLive(){
   try{
     const res = await fetch(ICECAST_STATUS);
@@ -664,11 +637,23 @@ async function checkIcecastLive(){
 }
 setInterval(checkIcecastLive, 5000);
 checkIcecastLive();
+// Avvio
 updateClockAndFerry();
 render();
 syncFirebase();
 updateCountdown();
 updateListeners();
+</script>
+<div id="box-prog" style="background:#ff2d55;color:#fff;padding:14px;border-radius:12px;text-align:center;margin:15px;font-weight:700;font-size:18px">Caricamento programmi...</div>
+<script>
+function proxProg(){
+ let arr=JSON.parse(localStorage.getItem('samax_programmi')||'[]');
+ let ora=new Date(); let oggi=(ora.getDay()+6)%7; let cands=[];
+ cands.sort((a,b)=>a.d-b.d); let next=cands[0]; let diff=next.d-new Date();
+ let hh=Math.floor(diff/3600000), mm=Math.floor(diff%3600000/60000), ss=Math.floor(diff%60000/1000);
+ document.getElementById('box-prog').innerHTML='Prossimo: '+next.p.nome+' alle '+next.p.ora+' - tra '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+}
+setInterval(proxProg,1000); proxProg();
 </script>
 </body>
 </html>
