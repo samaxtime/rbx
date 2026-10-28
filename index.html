@@ -231,8 +231,10 @@ label{font-size:12px;color:#aaa}
 <input id="fTitolo" placeholder="Es: VASCO">
 <label>Cartella - sempre mp3</label>
 <input id="fCartella" value="mp3" readonly style="background:#2a2a00;color:#ffcc00;font-weight:900;text-align:center">
-<div style="font-size:11px;color:#aaa;margin-top:4px">Prende <b style="color:#fff">TUTTO</b> quello che c'è dentro <b style="color:#ffcc00">audio/mp3/</b><br>Qualsiasi file musicale: mp3, m4a, wav, ogg, flac, aac, opus, wma, aiff, ecc.</div>
+<div style="font-size:11px;color:#aaa;margin-top:4px">Funziona anche su GitHub Pages.<br>Prova prima automatico, se non va usa "SCEGLI FILE A MANO".</div>
 <button class="btn-admin" style="background:#ff0000;color:#fff" onclick="caricaDaServer()">📂 CARICA TUTTO DA CARTELLA MP3</button>
+<input type="file" id="filePicker" multiple accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac,.aac,.opus,.wma,.aiff" style="display:none" onchange="caricaDaFileScelti(event)">
+<button class="btn-admin" style="background:#222;color:#fff;border:1px solid #333" onclick="document.getElementById('filePicker').click()">📁 SE NON FUNZIONA: SCEGLI FILE A MANO</button>
 <div id="adminMp3List" style="font-size:12px;color:#aaa;margin-top:6px;line-height:1.5;max-height:200px;overflow-y:auto"></div>
 </div>
 <div class="step-box">
@@ -514,38 +516,92 @@ function render(){
 }
 function inviaDedica(){ let n=document.getElementById('dedNome').value.trim()||"Anonimo"; let t=document.getElementById('dedTesto').value.trim(); if(!t) return alert("Scrivi la dedica"); dediche.unshift({nome:n,testo:t}); save(); render(); document.getElementById('dedTesto').value=''; let wa = _getWhatsApp(); let msg = `💌 NUOVA DEDICA - RADIO SAMAX 🔥\n\n👤 Da: ${n}\n🎵 Dedica / Richiesta: ${t}\n\n--- Inviata dal sito Radio Samax ---`; window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank'); }
 function salvaPal(){palinsestoTxt=document.getElementById('fPal').value; localStorage.setItem('samax_pal',palinsestoTxt); render(); alert("Programmi di oggi salvati");}
+function salvaProgrammaDaLista(titolo, cartella, episodi){
+  let idxEsiste = programmi.findIndex(p=>p.titolo===titolo);
+  if(idxEsiste>=0){ programmi[idxEsiste].episodi = episodi; programmi[idxEsiste].cartella = cartella; programmaSelezionato = idxEsiste; }
+  else { programmi.push({titolo: titolo, desc: "Programma " + titolo, ora: "", cartella: cartella, episodi: episodi}); programmaSelezionato = programmi.length-1; }
+  document.getElementById('fNextTitolo').value = titolo;
+  save(); render();
+  let minStima = Math.round(episodi.length*3.5);
+  document.getElementById('adminMp3List').innerHTML = "✅ Caricato <b style='color:#ff0000'>" + titolo + "</b> con <b style='color:#ffcc00'>" + episodi.length + " file musicali</b><br>⏱️ Durata stimata: <b style='color:#ffcc00'>" + formatDurata(minStima) + "</b><br>" + episodi.map(e=>"🎵 "+e.file).join("<br>");
+  alert("✅ FATTO! " + titolo + " con " + episodi.length + " file musicali\nDurata: " + formatDurata(minStima));
+}
 async function caricaDaServer(){
   let titolo = document.getElementById('fTitolo').value.trim();
   let cartella = (document.getElementById('fCartella').value.trim() || 'mp3');
   if(!titolo){ alert("Prima scrivi il nome programma, es: VASCO"); return; }
+  document.getElementById('adminMp3List').innerHTML = "⏳ Sto cercando i file su GitHub...";
+  let links = [];
+  // 1) Prova GitHub API - funziona su GitHub Pages
   try{
-    let res = await fetch(`audio/${encodeURIComponent(cartella)}/`);
-    let html = await res.text();
-    let doc = new DOMParser().parseFromString(html, 'text/html');
-    let raw = Array.from(doc.querySelectorAll('a')).map(a=>a.getAttribute('href')).filter(h=>h);
-    let links = [];
-    raw.forEach(h=>{
-      try{
-        let decoded = decodeURIComponent(h);
-        if(decoded.includes('../')) return;
-        let name = decoded.split('/').pop();
-        if(!name) return;
-        if(!AUDIO_EXT.test(name)) return;
-        if(!links.includes(name)) links.push(name);
-      }catch(e){}
-    });
-    links.sort((a,b)=>a.localeCompare(b));
-    if(links.length===0){ alert("Nessun file musicale trovato in audio/"+cartella+"/\nMetti i file dentro quella cartella e riprova."); return; }
-    let episodi = links.map(name => ({nome: nomeSenzaExt(name), file: name, path: encodeURI(`audio/${cartella}/${name}`), dur: 0}));
-    let idxEsiste = programmi.findIndex(p=>p.titolo===titolo);
-    if(idxEsiste>=0){ programmi[idxEsiste].episodi = episodi; programmi[idxEsiste].cartella = cartella; programmaSelezionato = idxEsiste; }
-    else { programmi.push({titolo: titolo, desc: "Programma " + titolo, ora: "", cartella: cartella, episodi: episodi}); programmaSelezionato = programmi.length-1; }
-    document.getElementById('fNextTitolo').value = titolo;
-    save(); render();
-    let minStima = Math.round(episodi.length*3.5);
-    document.getElementById('adminMp3List').innerHTML = "✅ Caricato <b style='color:#ff0000'>" + titolo + "</b> con <b style='color:#ffcc00'>" + episodi.length + " file musicali</b> da <b style='color:#00ccff'>audio/" + cartella + "/</b><br>⏱️ Durata stimata: <b style='color:#ffcc00'>" + formatDurata(minStima) + "</b><br>" + episodi.map(e=>"🎵 "+e.file).join("<br>");
-    alert("✅ FATTO! " + titolo + " con " + episodi.length + " file musicali da audio/" + cartella + "\nDurata: " + formatDurata(minStima));
-  }catch(e){ alert("Non riesco a leggere la cartella. Apri il sito da http://localhost:8000 e riprova."); }
+    let host = location.hostname; // es: samaxtime.github.io
+    let owner = host.split('.')[0];
+    let pathParts = location.pathname.split('/').filter(Boolean);
+    // Se sito è in /rbx/index.html -> repo = rbx, se è in root -> repo = owner.github.io
+    let repo = pathParts.length>0 ? pathParts[0] : owner + ".github.io";
+    // Se repo è un file .html, allora è root
+    if(repo.endsWith('.html')) repo = owner + ".github.io";
+    let apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/audio/${encodeURIComponent(cartella)}`;
+    let r = await fetch(apiUrl);
+    if(r.ok){
+      let data = await r.json();
+      if(Array.isArray(data)){
+        data.forEach(f=>{ if(f.type==='file' && AUDIO_EXT.test(f.name)) links.push(f.name); });
+      }
+    }
+  }catch(e){}
+  // 2) Prova list.json se esiste: audio/mp3/list.json = ["file1.mp3","file2.mp3"]
+  if(links.length===0){
+    try{
+      let r2 = await fetch(`audio/${encodeURIComponent(cartella)}/list.json`);
+      if(r2.ok){ let j = await r2.json(); if(Array.isArray(j)) links = j.filter(n=>AUDIO_EXT.test(n)); }
+    }catch(e){}
+  }
+  // 3) Prova elenco classico localhost
+  if(links.length===0){
+    try{
+      let res = await fetch(`audio/${encodeURIComponent(cartella)}/`);
+      let html = await res.text();
+      let doc = new DOMParser().parseFromString(html, 'text/html');
+      let raw = Array.from(doc.querySelectorAll('a')).map(a=>a.getAttribute('href')).filter(h=>h);
+      raw.forEach(h=>{
+        try{
+          let decoded = decodeURIComponent(h);
+          if(decoded.includes('../')) return;
+          let name = decoded.split('/').pop();
+          if(!name) return;
+          if(!AUDIO_EXT.test(name)) return;
+          if(!links.includes(name)) links.push(name);
+        }catch(e){}
+      });
+    }catch(e){}
+  }
+  links.sort((a,b)=>a.localeCompare(b));
+  if(links.length===0){
+    document.getElementById('adminMp3List').innerHTML = "❌ Non trovo i file in automatico.<br>Usa il bottone sotto: <b>SCEGLI FILE A MANO</b><br>Seleziona tutti i file in audio/mp3/";
+    alert("Su GitHub non riesco a leggere la cartella in automatico.\n\nUsa: SCEGLI FILE A MANO\nSeleziona tutti i file dentro audio/mp3/");
+    return;
+  }
+  // Costruisci path tenendo conto che il sito può essere in /rbx/
+  let basePath = location.pathname.split('/').filter(Boolean);
+  let prefix = "";
+  if(basePath.length>0 && !basePath[0].endsWith('.html')) prefix = "/" + basePath[0];
+  // Se siamo in /rbx/index.html, i file sono in /rbx/audio/mp3/
+  // Se siamo in /index.html, i file sono in /audio/mp3/
+  let episodi = links.map(name => ({nome: nomeSenzaExt(name), file: name, path: encodeURI(prefix + `/audio/${cartella}/${name}`), dur: 0}));
+  // Se il path non funziona, prova senza prefix
+  salvaProgrammaDaLista(titolo, cartella, episodi);
+}
+function caricaDaFileScelti(ev){
+  let titolo = document.getElementById('fTitolo').value.trim();
+  let cartella = (document.getElementById('fCartella').value.trim() || 'mp3');
+  if(!titolo){ alert("Prima scrivi il nome programma, es: VASCO"); ev.target.value=''; return; }
+  let files = Array.from(ev.target.files||[]);
+  if(files.length===0) return;
+  let episodi = files.filter(f=>AUDIO_EXT.test(f.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(f=>({nome: nomeSenzaExt(f.name), file: f.name, path: URL.createObjectURL(f), dur: 0, locale: true}));
+  if(episodi.length===0){ alert("Nessun file audio selezionato"); return; }
+  salvaProgrammaDaLista(titolo, cartella, episodi);
+  ev.target.value='';
 }
 function mandaInOnda(i,ei){currentIdx=i; currentEp=ei; let p=programmi[i]; let e=p.episodi[ei]; document.getElementById('titoloOnda').innerText=p.titolo+" - "+e.nome; document.getElementById('descOnda').innerText=(p.desc||'')+" • Brano "+(ei+1)+" di "+p.episodi.length+" • "+(p.ora||''); audio.src=e.path; audio.volume = document.getElementById('volPubblico').value / 100; audio.play().catch(()=>{}); isPlaying=true; liveStartTime=Date.now(); save(); pubblicaProgrammaSuFirebase(); document.getElementById('playBtn').innerText="⏸ PAUSA"; document.getElementById('vinyl').classList.add('spin'); render();}
 audio.addEventListener('ended', ()=>{ if(currentIdx===-1) return; let p=programmi[currentIdx]; let next=currentEp+1; if(next < p.episodi.length){ mandaInOnda(currentIdx, next); } else { mandaInOnda(currentIdx, 0); }});
