@@ -2,70 +2,80 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SAMAXTIME - Radio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SAMAXTIME - RBX Radio</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
-  .top{width:100%;max-width:480px;display:flex;justify-content:space-between;align-items:center;padding:8px 4px;font-size:13px;font-weight:700}
-  .dot{width:10px;height:10px;border-radius:50%;background:#ff2d2d;display:inline-block;margin-right:6px;box-shadow:0 0 10px #ff2d2d}
-  .dot.off{background:#555;box-shadow:none}
-  .listeners{color:#888;font-weight:600}
-  .card{width:100%;max-width:480px;background:#0f0f0f;border-radius:24px;padding:24px 20px;margin-top:12px;text-align:center}
-  .onda{color:#ff2d2d;font-weight:900;letter-spacing:3px;font-size:14px;margin-bottom:14px}
-  .vinyl-wrap{position:relative;width:230px;height:230px;margin:0 auto 20px}
-  .vinyl{width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(circle at center,#111 0 2px,#222 2px 4px);border:6px solid #1a1a1a;display:flex;align-items:center;justify-content:center;position:relative}
-  .vinyl.playing{animation:spin 2.5s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .center{width:72px;height:72px;border-radius:50%;background:#e91e2d;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1.1}
-  .hole{width:10px;height:10px;background:#000;border-radius:50%;position:absolute}
-  .btn-play{width:100%;background:#e91e2d;border:none;color:#fff;font-size:20px;font-weight:900;padding:16px;border-radius:999px;cursor:pointer;margin:6px 0 14px}
-  .btn-play:active{transform:scale(.98);opacity:.9}
-  .vol-row{display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:6px}
-  input[type=range]{width:100%;accent-color:#e91e2d}
-  .info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-  .box{background:#1a1a1a;border-radius:14px;padding:12px}
-  .box small{color:#888;font-size:12px}
-  .box b{display:block;margin-top:4px;font-size:15px}
-  .msg{font-size:13px;color:#aaa;min-height:18px;margin-top:10px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.header{width:100%;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:900;font-size:22px;letter-spacing:1px}
+.logo span{color:#ff2d55}
+.live{display:flex;align-items:center;gap:7px;background:#1a1a1a;border:1px solid #333;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:#ff2d55;box-shadow:0 0 10px #ff2d55;animation:pulse 1.2s infinite}
+.dot.off{background:#555;box-shadow:none;animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.main{flex:1;width:100%;max-width:480px;padding:10px 20px 20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.badge{background:#ff2d55;color:#fff;font-size:11px;font-weight:900;letter-spacing:2px;padding:6px 12px;border-radius:999px;margin:8px 0 14px}
+h1{font-size:38px;line-height:.95;font-weight:900;letter-spacing:-1px}
+h1 span{color:#ff2d55}
+.sub{color:#aaa;font-size:14px;margin:8px 0 18px}
+.vinyl{width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,#222 0%,#000 65%),repeating-radial-gradient(circle at center,#111 0 2px,#000 2px 4px);border:4px solid #222;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 20px 50px rgba(255,45,85,.25);margin:6px 0 18px}
+.vinyl:after{content:"";position:absolute;width:170px;height:170px;border-radius:50%;border:1px solid #222}
+.center{width:72px;height:72px;border-radius:50%;background:#ff2d55;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;z-index:2;text-align:center;line-height:1.1}
+.vinyl.playing{animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#playBtn{background:#ff2d55;color:#fff;border:none;width:100%;padding:18px;border-radius:999px;font-size:20px;font-weight:900;letter-spacing:1px;cursor:pointer;box-shadow:0 10px 30px rgba(255,45,85,.4)}
+#playBtn:active{transform:scale(.98)}
+#msg{min-height:22px;margin:10px 0 4px;font-size:14px;color:#ffb3c1}
+.volBox{width:100%;background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-top:10px}
+.volRow{display:flex;justify-content:space-between;font-size:13px;color:#aaa;margin-bottom:8px}
+input[type=range]{width:100%;accent-color:#ff2d55}
+.info{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.card{background:#111;border:1px solid #222;border-radius:14px;padding:12px}
+.card b{display:block;font-size:13px}
+.card span{font-size:12px;color:#aaa}
+.casterBtn{display:block;width:100%;text-align:center;margin-top:12px;background:#1a1a1a;border:1px solid #333;color:#fff;text-decoration:none;padding:13px;border-radius:999px;font-size:14px;font-weight:700}
+.footer{padding:12px;font-size:11px;color:#666;text-align:center}
 </style>
 </head>
 <body>
 
-<div class="top">
-  <span><span id="liveDot" class="dot off"></span> <span id="liveText">ON LINE</span></span>
-  <span class="listeners"><span id="listeners">0</span> ascoltatori</span>
+<div class="header">
+  <div class="logo">SAMAX<span>TIME</span></div>
+  <div class="live"><div class="dot" id="liveDot"></div><span id="stato">ON LINE</span></div>
 </div>
 
-<div class="card">
-  <div class="onda">IN ONDA ORA</div>
+<div class="main">
+  <div class="badge">RBX RADIO • LIVE</div>
+  <h1>SAMAX<span>TIME</span><br>RBX RADIO</h1>
+  <p class="sub">La radio che suona davvero. Premi PLAY e goditi la musica.</p>
 
-  <div class="vinyl-wrap">
-    <div id="vinyl" class="vinyl">
-      <div class="center">SAMAX<br>TIME</div>
-      <div class="hole"></div>
-    </div>
+  <div class="vinyl" id="vinyl"><div class="center">SAMAX<br>TIME</div></div>
+
+  <button id="playBtn">▶ &nbsp;PLAY</button>
+  <div id="msg"></div>
+
+  <div class="volBox">
+    <div class="volRow"><span>🔊 Volume</span><span id="volLabel">80%</span></div>
+    <input type="range" id="vol" min="0" max="100" value="80">
   </div>
-
-  <button id="playBtn" class="btn-play">▶ &nbsp;PLAY</button>
-
-  <div class="vol-row"><span>Volume</span><span id="volLabel">92%</span></div>
-  <input id="vol" type="range" min="0" max="100" value="92">
 
   <div class="info">
-    <div class="box"><small>Stato</small><b id="stato">ON LINE</b></div>
-    <div class="box"><small>Sorgente</small><b>Mixxx / Caster</b></div>
+    <div class="card"><b>📻 In Onda</b><span>Musica no-stop</span></div>
+    <div class="card"><b>🎙️ DJ Samax</b><span>Direttamente da Lissone</span></div>
   </div>
 
-  <div id="msg" class="msg"></div>
+  <a class="casterBtn" href="https://samaxtime.caster.fm" target="_blank">Se non parte, ascolta su Caster ↗</a>
 </div>
 
-<!-- Audio creato in HTML, mai con load() -->
-<audio id="radio" preload="none" playsinline></audio>
+<div class="footer">© 2026 SAMAXTIME • RBX Radio • Lissone, Italia</div>
 
 <script>
+// *** LINK PUBBLICO ***
+// Questo è il link pubblico di Caster, NON quello di Mixxx.
+// Se in Caster > Condividi hai un link diverso, incollalo qui.
 const STREAM = "https://morcast.caster.fm:11284/aykN5";
-const audio = document.getElementById("radio");
+
 const btn = document.getElementById("playBtn");
 const vinyl = document.getElementById("vinyl");
 const vol = document.getElementById("vol");
@@ -74,57 +84,48 @@ const stato = document.getElementById("stato");
 const liveDot = document.getElementById("liveDot");
 const msg = document.getElementById("msg");
 
-let isPlaying = false;
+let audio = null;
 
-// Volume iniziale
-audio.volume = 0.92;
 vol.addEventListener("input", () => {
-  audio.volume = vol.value / 100;
   volLabel.textContent = vol.value + "%";
+  if (audio) audio.volume = vol.value / 100;
 });
 
-function setPlaying(on){
-  isPlaying = on;
-  btn.innerHTML = on ? "⏸ &nbsp;PAUSA" : "▶ &nbsp;PLAY";
-  vinyl.classList.toggle("playing", on);
-  liveDot.classList.toggle("off", !on);
-  stato.textContent = on ? "IN ONDA" : "ON LINE";
-}
-
-btn.addEventListener("click", async () => {
-  if (isPlaying) {
+btn.addEventListener("click", () => {
+  if (audio) {
     audio.pause();
-    setPlaying(false);
+    audio.src = "";
+    audio = null;
+    btn.innerHTML = "▶ &nbsp;PLAY";
+    vinyl.classList.remove("playing");
+    liveDot.classList.add("off");
+    stato.textContent = "ON LINE";
+    msg.textContent = "";
     return;
   }
 
   msg.textContent = "Connessione...";
 
-  // FIX SAFARI: niente load(), niente fetch a Caster.
-  // Si imposta la sorgente solo la prima volta e si fa play() subito dentro il tocco.
-  if (!audio.src) {
-    audio.src = STREAM;
-  }
+  // FIX SAFARI: Audio creato DENTRO il click
+  audio = new Audio();
+  audio.playsInline = true;
+  audio.preload = "none";
+  audio.volume = vol.value / 100;
+  audio.src = STREAM + "?t=" + Date.now();
 
-  try {
-    await audio.play();
-    setPlaying(true);
-    msg.textContent = "Stai ascoltando SAMAXTIME";
-  } catch (e) {
-    // Safari a volte vuole un secondo tocco, non mostriamo nessun allarme
-    msg.textContent = "Premi di nuovo PLAY";
-    setPlaying(false);
+  const p = audio.play();
+  if (p) {
+    p.then(() => {
+      btn.innerHTML = "⏸ &nbsp;PAUSA";
+      vinyl.classList.add("playing");
+      liveDot.classList.remove("off");
+      stato.textContent = "IN ONDA";
+      msg.textContent = "Stai ascoltando SAMAXTIME";
+    }).catch(() => {
+      msg.textContent = "Se non parte, premi 'Ascolta su Caster' qui sotto";
+      audio = null;
+    });
   }
-});
-
-audio.addEventListener("playing", () => {
-  setPlaying(true);
-  msg.textContent = "Stai ascoltando SAMAXTIME";
-});
-audio.addEventListener("pause", () => setPlaying(false));
-audio.addEventListener("error", () => {
-  msg.textContent = "Stream non disponibile, Mixxx è in onda?";
-  setPlaying(false);
 });
 </script>
 </body>
