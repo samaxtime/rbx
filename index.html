@@ -3,28 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Nostra Radio</title>
+<title>RadioSamax - Sama X Time</title>
 <style>
-  body { background: #111; color: white; font-family: sans-serif; text-align: center; padding: 40px 20px; }
-  .box { background: #222; max-width: 400px; margin: auto; padding: 30px; border-radius: 20px; }
-  h1 { margin: 0; font-size: 28px; }
-  .onair { color: #ff3b30; font-weight: bold; margin: 10px 0; }
-  .dot { display: inline-block; width: 12px; height: 12px; background: red; border-radius: 50%; margin-right: 6px; }
-  button { background: #ff3b30; color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 50px; cursor: pointer; margin-top: 15px; }
-  audio { width: 100%; margin-top: 20px; }
-  p { color: #aaa; font-size: 14px; }
+  body{margin:0;background:#0f0f0f;color:white;font-family:Arial;text-align:center}
+  .box{padding:40px 20px}
+  h1{font-size:50px;margin:10px 0;color:#ff2d55}
+  h2{font-weight:300;color:#ccc}
+  .player{background:#1e1e1e;border-radius:20px;padding:30px;max-width:500px;margin:30px auto}
+  audio{width:100%;margin-top:15px}
+  .live{background:red;color:white;padding:5px 15px;border-radius:20px;font-weight:bold}
+  .btn{background:#ff2d55;color:white;border:0;padding:15px 30px;border-radius:50px;font-size:18px;cursor:pointer;margin-top:15px}
 </style>
 </head>
 <body>
-  <div class="box">
-    <h1>🎶 La Nostra Radio</h1>
-    <div class="onair"><span class="dot"></span> ON AIR - Vellezzo Bellini</div>
-    <p>In diretta da Mixxx</p>
-    <button onclick="document.getElementById('player').play()">▶ ASCOLTA</button>
-    <audio id="player" controls preload="none">
-      <source src="http://192.168.1.232:8000/radio" type="audio/mpeg">
+<div class="box">
+  <span class="live">● LIVE</span>
+  <h1>RADIO SAMAX</h1>
+  <h2>Sama X Time - La tua radio</h2>
+
+  <div class="player">
+    <p>🎧 Stai ascoltando RadioSamax</p>
+    <audio id="radio" controls preload="none">
+      <source src="https://s1.free-shoutcast.com:18404/stream" type="audio/mpeg">
     </audio>
-    <p>Stream: http://192.168.1.232:8000/radio</p>
+    <br>
+    <button class="btn" onclick="document.getElementById('radio').play()">▶️ ASCOLTA ORA</button>
+    <p style="color:#888;font-size:14px">Se non parte, premi Play nel player sopra</p>
   </div>
+
+  <p>📻 In onda da Mixxx - SamaxTime</p>
+  <p style="color:#666">© 2026 RadioSamax</p>
+</div>
 </body>
 </html>
