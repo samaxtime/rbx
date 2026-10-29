@@ -1,3 +1,30 @@
-<div data-type="newStreamPlayer" data-publicToken="29545c38-6a9d-4769-ba93-474128dc1abc" data-theme="light" data-color="e81e4d" data-channelId="aykN5" data-rendered="false" class="cstrEmbed"><a href="https://www.caster.fm">Shoutcast Hosting</a></div>
-<script src="https://cdn.cloud.caster.fm/widgets/embed.js"></script>
-<p><a href="https://www.caster.fm" style="color:#fff">Powered by Caster.fm</a></p>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Nostra Radio</title>
+<style>
+  body { background: #111; color: white; font-family: sans-serif; text-align: center; padding: 40px 20px; }
+  .box { background: #222; max-width: 400px; margin: auto; padding: 30px; border-radius: 20px; }
+  h1 { margin: 0; font-size: 28px; }
+  .onair { color: #ff3b30; font-weight: bold; margin: 10px 0; }
+  .dot { display: inline-block; width: 12px; height: 12px; background: red; border-radius: 50%; margin-right: 6px; }
+  button { background: #ff3b30; color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 50px; cursor: pointer; margin-top: 15px; }
+  audio { width: 100%; margin-top: 20px; }
+  p { color: #aaa; font-size: 14px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>🎶 La Nostra Radio</h1>
+    <div class="onair"><span class="dot"></span> ON AIR - Vellezzo Bellini</div>
+    <p>In diretta da Mixxx</p>
+    <button onclick="document.getElementById('player').play()">▶ ASCOLTA</button>
+    <audio id="player" controls preload="none">
+      <source src="http://192.168.1.232:8000/radio" type="audio/mpeg">
+    </audio>
+    <p>Stream: http://192.168.1.232:8000/radio</p>
+  </div>
+</body>
+</html>
