@@ -1,6 +1,30 @@
-<h3>🔴 RADIO ASTREA - In Diretta</h3>
-<audio controls autoplay style="width:100%">
-  <source src="http://s1.free-shoutcast.com:18404/;" type="audio/mpeg">
-  Il tuo browser non supporta l'audio.
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{background:black;color:white;text-align:center;font-family:Arial;padding:20px}
+h1{color:#ff2d55;font-size:50px;margin:10px}
+.live{background:red;padding:8px 20px;border-radius:20px;display:inline-block}
+.box{background:#1a1a1a;padding:20px;border-radius:20px;margin-top:20px}
+button{background:#ff2d55;color:white;border:0;padding:15px 30px;border-radius:30px;font-size:18px;font-weight:bold}
+a{color:white}
+</style>
+</head>
+<body>
+<div class="live">● LIVE</div>
+<h1>RADIO<br>SAMAX</h1>
+<p>Sama X Time - La tua radio</p>
+<div class="box">
+<p>🎧 Stai ascoltando RadioSamax</p>
+<audio id="radio" controls style="width:100%">
+  <source src="https://s1.free-shoutcast.com:18404/;" type="audio/mpeg">
 </audio>
-<p>Se non parte, clicca Play ▶️</p>
+<br><br>
+<button onclick="document.getElementById('radio').play()">▶️ ASCOLTA ORA</button>
+<p>Se non parte, <a href="http://s1.free-shoutcast.com:18404/" target="_blank"><b>clicca qui per aprire la radio</b></a></p>
+</div>
+<p>📻 In onda da Mixxx - SamaxTime</p>
+<p>© 2026 RadioSamax</p>
+</body>
+</html>
