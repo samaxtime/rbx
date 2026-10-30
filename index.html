@@ -112,6 +112,7 @@ footer{text-align:center;padding:18px;color:#7a8ac2;font-size:12px}
       </div>
       <div id="testoOnda">Caricamento programma...</div>
       <div id="oraAgg">Aggiornamento in tempo reale</div>
+      <div id="erroreAudio" style="display:none;color:#ff5252;font-size:12px;font-weight:800;margin-top:6px">⚠️ Nessun DJ in onda in questo momento. Riprova tra poco.</div>
       <div class="hero-img"><div class="hero-caption"><b>Porto Azzurro - Isola d'Elba</b><span>La tua radio, dal mare alla tua casa</span></div></div>
     </div>
 
@@ -146,7 +147,7 @@ footer{text-align:center;padding:18px;color:#7a8ac2;font-size:12px}
 
 <footer>© 2026 Radio Samax - Porto Azzurro - Isola d'Elba<br>NEMO SUB PORTO AZZURRO - Per info contattate DJ SAMAX</footer>
 
-<audio id="audioPlayer" preload="none"><source src="https://stream.radiosamax.it/stream" type="audio/mpeg"></audio>
+<audio id="audioPlayer" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 
 <div id="adminBox"><div>
   <h3 style="color:#ffcc00;margin-bottom:6px">✏️ Cosa c'è in onda?</h3>
@@ -223,11 +224,12 @@ function aggiornaOnAir(){
 }
 function togglePlay(){
   if(playing){audio.pause();playing=false;document.getElementById('playBtn').innerText='▶️';}
-  else{audio.play();playing=true;document.getElementById('playBtn').innerText='⏸️';}
+  else{audio.play().catch(()=>{document.getElementById('erroreAudio').style.display='block';});playing=true;document.getElementById('playBtn').innerText='⏸️';}
   aggiornaOnAir();
 }
-audio.addEventListener('play',()=>{playing=true;document.getElementById('playBtn').innerText='⏸️';aggiornaOnAir();});
+audio.addEventListener('play',()=>{playing=true;document.getElementById('playBtn').innerText='⏸️';document.getElementById('erroreAudio').style.display='none';aggiornaOnAir();});
 audio.addEventListener('pause',()=>{playing=false;document.getElementById('playBtn').innerText='▶️';aggiornaOnAir();});
+audio.addEventListener('error',()=>{document.getElementById('erroreAudio').style.display='block';});
 
 async function caricaDediche(){
   let {data} = await supabaseClient.from('dediche').select('*').order('created_at',{ascending:false}).limit(20);
