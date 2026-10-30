@@ -45,10 +45,23 @@ body{font-family:Arial,Helvetica,sans-serif;background:#020a2e;color:#fff;min-he
 .player-area h2 span{color:#ffcc00}
 .play-row{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0 10px;flex-wrap:wrap}
 .circle-btn{width:56px;height:56px;border-radius:50%;border:2px solid #ff5252;background:transparent;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.play-btn{width:62px;height:62px;border-radius:50%;border:0;background:#ff2b2b;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 15px rgba(255,43,43,.6)}
+
+/* VINILE GIGANTE */
+.vinyl-wrap{position:relative;width:210px;height:210px;margin:14px auto 6px;cursor:pointer}
+.vinyl{width:210px;height:210px;border-radius:50%;background:repeating-radial-gradient(circle at center,#111 0px,#111 2px,#222 3px,#111 4px);border:6px solid #000;box-shadow:0 0 0 4px #ffcc00,0 10px 30px rgba(0,0,0,.7);position:relative;animation:spin 4s linear infinite;animation-play-state:paused}
+.vinyl.playing{animation-play-state:running}
+.vinyl:after{content:"";position:absolute;inset:60px;border-radius:50%;background:#ff2b2b;border:3px solid #fff}
+.vinyl-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;width:90px}
+.vinyl-label b{font-size:13px;color:#fff;display:block;line-height:1.1}
+.vinyl-label span{font-size:9px;color:#ffcc00;font-weight:900;letter-spacing:1px}
+.vinyl-hole{width:16px;height:16px;background:#fff;border-radius:50%;margin:6px auto 0}
+.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;width:70px;height:70px;border-radius:50%;background:rgba(0,0,0,.65);border:3px solid #fff;color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.vinyl-text{font-weight:900;font-size:15px;margin-top:10px;color:#ffcc00;letter-spacing:1px}
+
 #testoOnda{font-size:17px;font-weight:800;margin:6px 0 2px}
 #oraAgg{font-size:12px;color:#9db4ff}
-input[type=range]{width:120px;accent-color:#fff}
+input[type=range]{width:140px;accent-color:#fff}
 .hero-img{margin:14px 0 0;border-radius:12px;overflow:hidden;border:2px solid #1a2f7a;position:relative;height:210px;background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80') center/cover}
 .hero-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(2,10,46,.7))}
 .hero-caption{position:absolute;left:12px;bottom:10px;z-index:2;text-align:left}
@@ -104,12 +117,21 @@ footer{text-align:center;padding:18px;color:#7a8ac2;font-size:12px}
 
   <main>
     <div class="player-area">
-      <h2>🎧 ASCOLTA ORA - <span>TOCCA PLAY</span></h2>
+      <h2>🎧 ASCOLTA ORA - <span>TOCCA IL VINILE</span></h2>
+
+      <!-- VINILE GIGANTE - PLAY -->
+      <div class="vinyl-wrap" onclick="togglePlay()">
+        <div class="vinyl" id="vinylDisc"></div>
+        <div class="vinyl-label"><b>RADIO<br>SAMAX</b><span>PORTO AZZURRO</span><div class="vinyl-hole"></div></div>
+        <div class="play-overlay" id="playOverlay">▶️</div>
+      </div>
+      <div class="vinyl-text" id="vinylText">▶️ PREMI IL VINILE PER ASCOLTARE</div>
+
       <div class="play-row">
         <button class="circle-btn" onclick="document.getElementById('adminBox').style.display='flex'">🎙️</button>
-        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
-        <div style="text-align:left"><div style="font-size:13px;font-weight:800">🎵 Radio Samax - In diretta</div><input type="range" min="0" max="100" value="80" oninput="document.getElementById('audioPlayer').volume=this.value/100"></div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:800">🔊 Volume</div><input type="range" min="0" max="100" value="80" oninput="document.getElementById('audioPlayer').volume=this.value/100"></div>
       </div>
+
       <div id="testoOnda">Caricamento programma...</div>
       <div id="oraAgg">Aggiornamento in tempo reale</div>
       <div id="erroreAudio" style="display:none;color:#ff5252;font-size:12px;font-weight:800;margin-top:6px">⚠️ Nessun DJ in onda in questo momento. Riprova tra poco.</div>
@@ -219,16 +241,19 @@ let playing=false;
 function aggiornaOnAir(){
   let box=document.getElementById('onairBox');
   let txt=document.getElementById('onairText');
-  if(playing){box.className='onair-box on';txt.innerText='ON AIR';}
-  else{box.className='onair-box off';txt.innerText='OFF AIR';}
+  let vinyl=document.getElementById('vinylDisc');
+  let overlay=document.getElementById('playOverlay');
+  let vtext=document.getElementById('vinylText');
+  if(playing){box.className='onair-box on';txt.innerText='ON AIR';vinyl.classList.add('playing');overlay.innerText='⏸️';vtext.innerText='⏸️ IN ONDA - PREMI PER METTERE IN PAUSA';}
+  else{box.className='onair-box off';txt.innerText='OFF AIR';vinyl.classList.remove('playing');overlay.innerText='▶️';vtext.innerText='▶️ PREMI IL VINILE PER ASCOLTARE';}
 }
 function togglePlay(){
-  if(playing){audio.pause();playing=false;document.getElementById('playBtn').innerText='▶️';}
-  else{audio.play().catch(()=>{document.getElementById('erroreAudio').style.display='block';});playing=true;document.getElementById('playBtn').innerText='⏸️';}
+  if(playing){audio.pause();playing=false;}
+  else{audio.play().catch(()=>{document.getElementById('erroreAudio').style.display='block';});playing=true;}
   aggiornaOnAir();
 }
-audio.addEventListener('play',()=>{playing=true;document.getElementById('playBtn').innerText='⏸️';document.getElementById('erroreAudio').style.display='none';aggiornaOnAir();});
-audio.addEventListener('pause',()=>{playing=false;document.getElementById('playBtn').innerText='▶️';aggiornaOnAir();});
+audio.addEventListener('play',()=>{playing=true;document.getElementById('erroreAudio').style.display='none';aggiornaOnAir();});
+audio.addEventListener('pause',()=>{playing=false;aggiornaOnAir();});
 audio.addEventListener('error',()=>{document.getElementById('erroreAudio').style.display='block';});
 
 async function caricaDediche(){
