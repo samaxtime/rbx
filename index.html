@@ -3,93 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - DJ SANAX da Porto Azzurro</title>
+<title>RADIO SAMAX - Porto Azzurro - Elba</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Black,Impact,sans-serif}
-body{background:#0a0a0a;color:#fff;overflow-x:hidden}
-header{text-align:center;padding:18px 10px;background:linear-gradient(90deg,#d60000,#0a0a0a 30%,#0a0a0a 70%,#00a651);border-bottom:4px solid #fff}
-header h1{font-size:52px;letter-spacing:3px;text-shadow:3px 3px 0 #d60000,-2px -2px 0 #00a651}
-header h1 span{color:#00ff6a}
-header p{font-size:16px;margin-top:4px;letter-spacing:2px}
-.onair-box{margin:14px auto 0;display:inline-flex;align-items:center;gap:12px;background:#111;border:2px solid #333;border-radius:50px;padding:8px 22px}
-.dot{width:22px;height:22px;border-radius:50%;background:#ff0000;box-shadow:0 0 20px #ff0000}
-.dot.live{background:#00ff00;box-shadow:0 0 20px #00ff00;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.3}}
-#status{font-size:22px;font-weight:900;letter-spacing:2px}
-.main{display:flex;gap:16px;max-width:1400px;margin:20px auto;padding:0 14px}
-.col{flex:1;background:#151515;border:2px solid #d60000;border-radius:16px;padding:14px}
-.col.right{border-color:#00a651}
-.col h2{background:#d60000;padding:8px;border-radius:8px;text-align:center;font-size:20px;margin-bottom:12px}
-.col.right h2{background:#00a651}
-.news{background:#222;border-left:4px solid #d60000;padding:10px;margin-bottom:12px;border-radius:8px}
-.col.right .news{border-left-color:#00a651}
-.news b{color:#ffcc00}
-.news p{font-size:14px;line-height:1.4;margin-top:4px;color:#ddd}
-.center{flex:1.3;text-align:center}
-.vinyl-wrap{position:relative;width:320px;height:320px;margin:10px auto}
-.vinyl{width:100%;height:100%;border-radius:50%;background:repeating-radial-gradient(circle at center,#111 0,#111 2px,#222 3px,#000 4px);border:6px solid #333;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(214,0,0,.6)}
-.vinyl.spinning{animation:spin 3s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.label{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#00a651 0%,#d60000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:3px solid #fff}
-.label b{font-size:18px;line-height:1}
-.label small{font-size:11px}
-.location{margin:10px 0;font-size:19px;font-weight:900;color:#00ff6a}
-.location b{color:#fff;background:#d60000;padding:2px 8px;border-radius:6px}
-.player{background:#1a1a1a;border:2px solid #fff;border-radius:16px;padding:14px;margin-top:10px}
-.player button{background:#d60000;color:#fff;border:none;padding:14px 26px;font-size:20px;font-weight:900;border-radius:50px;cursor:pointer;width:100%}
-.player button:hover{background:#00a651}
-audio{width:100%;margin-top:10px}
-footer{text-align:center;padding:16px;font-size:13px;color:#aaa;border-top:2px solid #333}
-@media(max-width:900px){.main{flex-direction:column}.vinyl-wrap{width:260px;height:260px}header h1{font-size:36px}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#020a2e;color:#fff;min-height:100vh}
+.topbar{background:#000a2a;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:2px solid #00e676}
+.logo-side{display:flex;align-items:center;gap:14px}
+.logo{font-size:34px;font-weight:900;letter-spacing:-1px;line-height:1}
+.logo .r{color:#ff3b3b}
+.logo .s{color:#ffcc00}
+.onair-box{display:flex;align-items:center;gap:8px;background:#111;padding:7px 12px;border-radius:999px;border:2px solid #333}
+.onair-dot{width:14px;height:14px;border-radius:50%;background:#ff2b2b}
+.onair-text{font-weight:900;font-size:13px;letter-spacing:1px}
+.onair-box.on{border-color:#00e676}
+.onair-box.on .onair-dot{background:#00e676;box-shadow:0 0 12px #00e676;animation:blink 1s infinite}
+.onair-box.on .onair-text{color:#00e676}
+.onair-box.off .onair-text{color:#ff2b2b}
+@keyframes blink{50%{opacity:.4}}
+.dj-info{font-size:11px;line-height:1.4;font-weight:700}
+.dj-info b{color:#fff;font-size:12px}
+.dj-info span{color:#aaa;font-size:10px}
+.dedica-box{background:#00c853;color:#fff;border-radius:8px;padding:10px 14px;text-align:left;min-width:220px}
+.dedica-box b{font-size:12px;display:block}
+.dedica-box small{font-size:11px;opacity:.9}
+.dedica-box button{margin-top:7px;background:#fff;color:#00a843;border:0;padding:7px 14px;border-radius:20px;font-weight:900;font-size:12px;cursor:pointer;width:100%}
+.layout{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:250px 1fr 250px;gap:16px;padding:16px}
+.sidebar{background:#0a1a5e;border:1px solid #1e3a8a;border-radius:14px;padding:14px;height:fit-content;position:sticky;top:14px}
+.sidebar h3{font-size:14px;color:#ffcc00;margin-bottom:10px;border-bottom:1px solid #1e3a8a;padding-bottom:8px}
+.side-card{background:#07133f;border:1px solid #1e3a8a;border-radius:10px;padding:11px;margin-bottom:10px;text-align:left}
+.side-card b{font-size:13px;color:#fff;display:block}
+.side-card span{font-size:12px;color:#9db4ff;line-height:1.4;display:block;margin-top:3px}
+.side-card .ora{color:#00e676;font-weight:900;font-size:12px;margin-top:5px}
+.side-card .tag{display:inline-block;background:#ff2b2b;color:#fff;font-size:10px;font-weight:900;padding:3px 8px;border-radius:20px;margin-top:6px}
+.side-card .tag.green{background:#00c853}
+.side-card .tag.yellow{background:#ffcc00;color:#000}
+.meteo{font-size:36px;text-align:center}
+.meteo b{font-size:22px;color:#ffcc00}
+.meteo span{font-size:12px;color:#9db4ff}
+.player-area{text-align:center;padding:18px 10px 10px;background:linear-gradient(180deg,#020a2e,#071a5e);border-radius:14px;border:1px solid #1e3a8a}
+.player-area h2{font-size:15px;letter-spacing:1px}
+.player-area h2 span{color:#ffcc00}
+.play-row{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0 10px;flex-wrap:wrap}
+.circle-btn{width:56px;height:56px;border-radius:50%;border:2px solid #ff5252;background:transparent;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.play-btn{width:62px;height:62px;border-radius:50%;border:0;background:#ff2b2b;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 15px rgba(255,43,43,.6)}
+#testoOnda{font-size:17px;font-weight:800;margin:6px 0 2px}
+#oraAgg{font-size:12px;color:#9db4ff}
+input[type=range]{width:120px;accent-color:#fff}
+.hero-img{margin:14px 0 0;border-radius:12px;overflow:hidden;border:2px solid #1a2f7a;position:relative;height:210px;background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80') center/cover}
+.hero-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(2,10,46,.7))}
+.hero-caption{position:absolute;left:12px;bottom:10px;z-index:2;text-align:left}
+.hero-caption b{font-size:15px}
+.hero-caption span{display:block;font-size:12px;color:#dbe6ff}
+.sezione{margin-top:18px}
+.sezione h3{font-size:16px;margin-bottom:10px;color:#ffcc00;text-align:left}
+.card{background:#0a1a5e;border:1px solid #1e3a8a;border-radius:12px;padding:13px;margin:8px 0;text-align:left;font-size:14px}
+.card b{color:#ffcc00}
+input,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid #334;background:#fff;color:#111;font-size:15px;margin-top:8px}
+.btn{padding:12px 18px;border:0;border-radius:999px;background:#ffcc00;color:#000;font-weight:900;cursor:pointer;margin-top:10px;width:100%}
+.btn-red{background:#ff2b2b;color:#fff}
+.btn-dark{background:#fff;color:#111}
+.btn-small{padding:8px 14px;font-size:12px;width:auto;margin:0 0 10px 0;background:#fff;color:#111}
+.dedica-item{background:#fff;color:#111;border-radius:10px;padding:11px;margin-top:8px;text-align:left}
+.dedica-item b{color:#d32f2f}
+#adminBox,#adminPalinsesto{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);align-items:center;justify-content:center;z-index:99;padding:14px}
+#adminBox>div,#adminPalinsesto>div{background:#0a1a5e;padding:20px;border-radius:16px;width:100%;max-width:460px;border:2px solid #00e676;text-align:center}
+footer{text-align:center;padding:18px;color:#7a8ac2;font-size:12px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static}.dedica-box{width:100%}}
 </style>
 </head>
 <body>
-<header>
-<h1>RADIO <span>SAMAX</span></h1>
-<p>🎧 DJ SANAX TRASMETTE DA PORTO AZZURRO - ISOLA D'ELBA 🏝️</p>
-<div class="onair-box"><div class="dot" id="dot"></div><div id="status">OFF AIR</div></div>
-</header>
 
-<div class="main">
-<div class="col">
-<h2>📰 NOTIZIE ELBA</h2>
-<div class="news"><b>PORTO AZZURRO - MARE CALMO</b><p>Oggi mare splendido a Porto Azzurro, spiagge di Barbarossa e Reale piene di turisti. Temperatura 26°.</p></div>
-<div class="news"><b>ELBA - EVENTI ESTATE</b><p>Serate musicali in piazza a Porto Azzurro, Capoliveri e Portoferraio. Musica live fino a tardi.</p></div>
-<div class="news"><b>TRAGHETTI</b><p>Collegamenti regolari Piombino - Portoferraio. Prenota in anticipo nel weekend.</p></div>
-<div class="news"><b>SAPORI ELBANI</b><p>Cacciucco, gurguglione e Aleatico: i sapori veri dell'Isola d'Elba da non perdere.</p></div>
+<!-- PUBBLICITA NEMO SUB PORTO AZZURRO - SENZA FOTO -->
+<div style="background:#0055aa;padding:18px 14px;text-align:center;border-bottom:4px solid #ffcc00">
+  <span style="background:#ff2b2b;color:#fff;font-weight:900;padding:4px 10px;border-radius:20px;font-size:11px;letter-spacing:1px">⭐ PUBBLICITÀ ⭐</span>
+  <h2 style="font-size:32px;font-weight:900;letter-spacing:1px;margin:10px 0 4px;color:#fff">🤿 NEMO SUB <span style="color:#ffcc00">PORTO AZZURRO</span></h2>
+  <p style="font-size:14px;font-weight:700;color:#fff">ALLA SCOPERTA DEI FONDALI MARINI DI PORTO AZZURRO</p>
+  <p style="font-size:14px;font-weight:700;color:#fff;margin-top:4px">PER INFO <b style="color:#ffcc00">CONTATTATE DJ SAMAX</b> 📻</p>
+  <button onclick="document.getElementById('dediche').scrollIntoView({behavior:'smooth'})" style="margin-top:12px;background:#ff2b2b;color:#fff;border:0;padding:10px 20px;border-radius:999px;font-weight:900;cursor:pointer;font-size:13px">📩 CHIEDI INFO ORA</button>
 </div>
 
-<div class="center">
-<div class="vinyl-wrap"><div class="vinyl" id="vinyl"><div class="label"><b>RADIO<br>SAMAX</b><small>PORTO AZZURRO<br>ELBA</small></div></div></div>
-<div class="location">📍 IN DIRETTA DA <b>PORTO AZZURRO</b></div>
-<div class="player">
-<button id="playBtn" onclick="togglePlay()">▶️ ASCOLTA LA DIRETTA</button>
-<audio id="audio" src="https://s1.free-shoutcast.com/stream/18404" preload="none"></audio>
-<p style="margin-top:8px;font-size:13px">Se non parte, premi play e alza il volume 🔊</p>
-</div>
-<p style="margin-top:14px;font-size:15px">🔴 Rosso = Passione &nbsp; | &nbsp; 🟢 Verde = Elba</p>
-</div>
-
-<div class="col right">
-<h2>🌊 ELBA LIVE</h2>
-<div class="news"><b>CAPOLIVERI - NOTTE MAGICA</b><p>Il borgo si illumina la sera, vista mozzafiato e aperitivo in piazza.</p></div>
-<div class="news"><b>MARCIANA MARINA</b><p>Passeggiata sul lungomare, gelato artigianale e barche nel porto.</p></div>
-<div class="news"><b>RIO MARINA - MINIERE</b><p>Visita alle miniere di ferro, storia e panorami rossi unici al mondo.</p></div>
-<div class="news"><b>DEDICHE & SALUTI</b><p>Scrivi a DJ SANAX e dedica la tua canzone preferita in diretta!</p></div>
-</div>
+<div class="topbar">
+  <div class="logo-side">
+    <div>
+      <div class="logo"><span class="r">radio</span><span class="s">samax</span></div>
+      <div class="onair-box off" id="onairBox"><div class="onair-dot"></div><div class="onair-text" id="onairText">OFF AIR</div></div>
+    </div>
+    <div class="dj-info"><b>DJ SAMAX 🇮🇹</b><br>TRASMETTE DA<br>PORTO AZZURRO<br>ISOLA D'ELBA<br><span>www.radiosamax.com</span></div>
+  </div>
+  <div class="dedica-box"><b>❤️ DEDICA IN DIRETTA</b><small>Vuoi una canzone o un saluto?<br>Scrivici ora!</small><button onclick="document.getElementById('dediche').scrollIntoView({behavior:'smooth'})">✉️ INVIA DEDICA</button></div>
 </div>
 
-<footer>RADIO SAMAX © 2026 - Da Porto Azzurro, Isola d'Elba - Tutti i diritti riservati</footer>
+<div class="layout">
+  <aside class="sidebar">
+    <h3>⛴️ TRAGHETTI ELBA</h3>
+    <div class="meteo">🌤️<br><b>24°</b><br><span>Porto Azzurro - Sole<br>Mare calmo</span></div>
+    <div class="side-card"><b>Piombino → Portoferraio</b><span>Moby • Toremar • Blu Navy</span><div class="ora">Partenze: 08:30 - 10:15 - 13:30 - 17:45</div><span class="tag green">IN ORARIO</span></div>
+    <div class="side-card"><b>Portoferraio → Piombino</b><span>Ritorno in terraferma</span><div class="ora">Partenze: 09:30 - 12:00 - 16:00 - 19:15</div><span class="tag green">IN ORARIO</span></div>
+    <div class="side-card"><b>Piombino → Rio Marina</b><span>Toremar - 45 min</span><div class="ora">Partenze: 09:00 - 14:30 - 18:00</div><span class="tag yellow">CONTROLLA</span></div>
+  </aside>
 
+  <main>
+    <div class="player-area">
+      <h2>🎧 ASCOLTA ORA - <span>TOCCA PLAY</span></h2>
+      <div class="play-row">
+        <button class="circle-btn" onclick="document.getElementById('adminBox').style.display='flex'">🎙️</button>
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:800">🎵 Radio Samax - In diretta</div><input type="range" min="0" max="100" value="80" oninput="document.getElementById('audioPlayer').volume=this.value/100"></div>
+      </div>
+      <div id="testoOnda">Caricamento programma...</div>
+      <div id="oraAgg">Aggiornamento in tempo reale</div>
+      <div class="hero-img"><div class="hero-caption"><b>Porto Azzurro - Isola d'Elba</b><span>La tua radio, dal mare alla tua casa</span></div></div>
+    </div>
+
+    <div class="sezione">
+      <h3>📅 In onda oggi</h3>
+      <button class="btn btn-small" onclick="apriPalinsesto()">✏️ Modifica Orari (DJ)</button>
+      <div id="listaPalinsesto"></div>
+      <div style="font-size:11px;color:#7a8ac2;margin-top:6px">Gli orari li decide il DJ. Non sono fissi.</div>
+    </div>
+
+    <div class="sezione" id="dediche">
+      <h3>💌 Dediche e Richieste</h3>
+      <div class="card">
+        <input id="nomeDedica" placeholder="Il tuo nome - Es: Marco da Porto Azzurro">
+        <textarea id="testoDedica" rows="2" placeholder="Es: Dedico Vita Spericolata a Giulia ❤️ - Oppure: Info Nemo Sub Porto Azzurro"></textarea>
+        <button class="btn" onclick="inviaDedica()">💌 Invia Dedica</button>
+        <div style="font-size:12px;color:#9db4ff;margin-top:6px">La dedica arriva subito al DJ e a tutti gli ascoltatori.</div>
+      </div>
+      <div id="listaDediche"></div>
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <h3>📰 NEWS ELBA</h3>
+    <div class="side-card"><b>🏖️ Porto Azzurro: spiagge piene nel weekend</b><span>Tanti turisti a Barbarossa e Reale. Previsto sole per tutta la settimana.</span><span class="tag">OGGI</span></div>
+    <div class="side-card"><b>🎶 Festa a Capoliveri sabato sera</b><span>Musica live in piazza e stand gastronomici dalle 19:00.</span><span class="tag yellow">EVENTI</span></div>
+    <div class="side-card"><b>🚧 Lavori sulla strada Portoferraio - Porto Azzurro</b><span>Rallentamenti possibili dalle 9 alle 12.</span><span class="tag">VIABILITÀ</span></div>
+    <div class="side-card"><b>🐬 Avvistata balena vicino a Capo d'Enfola</b><span>Escursioni in barca piene per il weekend.</span><span class="tag green">MARE</span></div>
+    <div class="side-card"><b>🤿 NEMO SUB PORTO AZZURRO - Ultimi posti</b><span>Immersioni guidate e snorkeling. Per info contattate DJ SAMAX in radio!</span><span class="tag yellow">PUBBLICITÀ</span></div>
+  </aside>
+</div>
+
+<footer>© 2026 Radio Samax - Porto Azzurro - Isola d'Elba<br>NEMO SUB PORTO AZZURRO - Per info contattate DJ SAMAX</footer>
+
+<audio id="audioPlayer" preload="none"><source src="https://stream.radiosamax.it/stream" type="audio/mpeg"></audio>
+
+<div id="adminBox"><div>
+  <h3 style="color:#ffcc00;margin-bottom:6px">✏️ Cosa c'è in onda?</h3>
+  <p style="color:#cbd5ff;font-size:13px">Scrivi e premi SALVA. Tutti vedono il testo subito.</p>
+  <input id="inputOnda" placeholder="Es: Ora Vasco Rossi - Vita Spericolata">
+  <button class="btn" onclick="salvaOnda()">💾 SALVA PER TUTTI</button>
+  <button class="btn btn-dark" onclick="document.getElementById('adminBox').style.display='none'">Chiudi</button>
+</div></div>
+
+<div id="adminPalinsesto"><div>
+  <h3 style="color:#ffcc00;margin-bottom:6px">✏️ In onda oggi - Decidi tu</h3>
+  <p style="color:#cbd5ff;font-size:13px">Scrivi una riga per programma. Es:<br>10:00 — Samax Mattina 🎵</p>
+  <textarea id="inputPalinsesto" rows="6" placeholder="07:00 — Buongiorno Elba ☀️"></textarea>
+  <button class="btn" onclick="salvaPalinsesto()">💾 SALVA ORARI PER TUTTI</button>
+  <button class="btn btn-dark" onclick="document.getElementById('adminPalinsesto').style.display='none'">Chiudi</button>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const audio=document.getElementById('audio');
-const vinyl=document.getElementById('vinyl');
-const dot=document.getElementById('dot');
-const status=document.getElementById('status');
-const btn=document.getElementById('playBtn');
+const SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function caricaProgramma(){
+  let {data} = await supabaseClient.from('programma').select('testo').eq('id',1).single();
+  if(data && data.testo){document.getElementById('testoOnda').innerText = data.testo;document.getElementById('oraAgg').innerText = "Aggiornato alle " + new Date().toLocaleTimeString('it-IT');}
+}
+caricaProgramma();
+supabaseClient.channel('programma-live').on('postgres_changes',{event:'*',schema:'public',table:'programma'},(p)=>{if(p.new && p.new.testo){document.getElementById('testoOnda').innerText = p.new.testo;document.getElementById('oraAgg').innerText = "Aggiornato alle " + new Date().toLocaleTimeString('it-IT');}}).subscribe();
+async function salvaOnda(){
+  let t=document.getElementById('inputOnda').value.trim();
+  if(!t){alert('Scrivi prima qualcosa');return;}
+  let {error}=await supabaseClient.from('programma').update({testo:t,updated_at:new Date().toISOString()}).eq('id',1);
+  if(error){alert('Errore: '+error.message);return;}
+  document.getElementById('testoOnda').innerText=t;document.getElementById('inputOnda').value='';document.getElementById('adminBox').style.display='none';alert('Fatto! Ora tutti vedono: '+t);
+}
+
+async function caricaPalinsesto(){
+  let {data} = await supabaseClient.from('palinsesto').select('testo').eq('id',1).single();
+  if(data && data.testo){mostraPalinsesto(data.testo);}
+}
+function mostraPalinsesto(testo){
+  let righe = testo.split('\n').filter(r=>r.trim()!=='');
+  document.getElementById('listaPalinsesto').innerHTML = righe.map(r=>{
+    let parts = r.split('—');
+    if(parts.length>1) return `<div class="card"><b>${parts[0].trim()}</b> — ${parts.slice(1).join('—').trim()}</div>`;
+    return `<div class="card">${r}</div>`;
+  }).join('');
+}
+caricaPalinsesto();
+supabaseClient.channel('palinsesto-live').on('postgres_changes',{event:'*',schema:'public',table:'palinsesto'},(p)=>{if(p.new && p.new.testo) mostraPalinsesto(p.new.testo);}).subscribe();
+async function apriPalinsesto(){
+  let {data} = await supabaseClient.from('palinsesto').select('testo').eq('id',1).single();
+  document.getElementById('inputPalinsesto').value = data ? data.testo : '';
+  document.getElementById('adminPalinsesto').style.display='flex';
+}
+async function salvaPalinsesto(){
+  let t=document.getElementById('inputPalinsesto').value.trim();
+  if(!t){alert('Scrivi almeno un programma');return;}
+  let {error}=await supabaseClient.from('palinsesto').update({testo:t}).eq('id',1);
+  if(error){alert('Errore: '+error.message);return;}
+  mostraPalinsesto(t);
+  document.getElementById('adminPalinsesto').style.display='none';
+  alert('Orari salvati! Ora tutti vedono i TUOI orari.');
+}
+
+let audio=document.getElementById('audioPlayer');
+let playing=false;
+function aggiornaOnAir(){
+  let box=document.getElementById('onairBox');
+  let txt=document.getElementById('onairText');
+  if(playing){box.className='onair-box on';txt.innerText='ON AIR';}
+  else{box.className='onair-box off';txt.innerText='OFF AIR';}
+}
 function togglePlay(){
-  if(audio.paused){audio.play();vinyl.classList.add('spinning');dot.classList.add('live');status.textContent='ON AIR';status.style.color='#00ff00';btn.textContent='⏸️ PAUSA';btn.style.background='#00a651';}
-  else{audio.pause();vinyl.classList.remove('spinning');dot.classList.remove('live');status.textContent='OFF AIR';status.style.color='#fff';btn.textContent='▶️ ASCOLTA LA DIRETTA';btn.style.background='#d60000';}
+  if(playing){audio.pause();playing=false;document.getElementById('playBtn').innerText='▶️';}
+  else{audio.play();playing=true;document.getElementById('playBtn').innerText='⏸️';}
+  aggiornaOnAir();
+}
+audio.addEventListener('play',()=>{playing=true;document.getElementById('playBtn').innerText='⏸️';aggiornaOnAir();});
+audio.addEventListener('pause',()=>{playing=false;document.getElementById('playBtn').innerText='▶️';aggiornaOnAir();});
+
+async function caricaDediche(){
+  let {data} = await supabaseClient.from('dediche').select('*').order('created_at',{ascending:false}).limit(20);
+  if(data) mostraDediche(data);
+}
+caricaDediche();
+supabaseClient.channel('dediche-live').on('postgres_changes',{event:'INSERT',schema:'public',table:'dediche'},()=>{caricaDediche();}).subscribe();
+function mostraDediche(list){
+  let box=document.getElementById('listaDediche');
+  if(!list || list.length===0){box.innerHTML='<div style="color:#9db4ff;font-size:13px;margin-top:8px">Ancora nessuna dedica. Scrivi la prima!</div>';return;}
+  box.innerHTML=list.map(d=>`<div class="dedica-item"><b>${d.nome}</b> <span style="color:#888;font-size:12px">${new Date(d.created_at).toLocaleString('it-IT')}</span><br>${d.testo}</div>`).join('');
+}
+async function inviaDedica(){
+  let n=document.getElementById('nomeDedica').value.trim();
+  let t=document.getElementById('testoDedica').value.trim();
+  if(!n||!t){alert('Metti nome e dedica');return;}
+  let {error}=await supabaseClient.from('dediche').insert([{nome:n,testo:t}]);
+  if(error){alert('Errore: '+error.message);return;}
+  document.getElementById('testoDedica').value='';
+  alert('Dedica inviata! ❤️ Ora il DJ la vede subito.');
 }
 </script>
 </body>
