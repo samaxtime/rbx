@@ -1,30 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RADIO ASTREA - In Diretta</title>
 <style>
-body{background:black;color:white;text-align:center;font-family:Arial;padding:20px}
-h1{color:#ff2d55;font-size:50px;margin:10px}
-.live{background:red;padding:8px 20px;border-radius:20px;display:inline-block}
-.box{background:#1a1a1a;padding:20px;border-radius:20px;margin-top:20px}
-button{background:#ff2d55;color:white;border:0;padding:15px 30px;border-radius:30px;font-size:18px;font-weight:bold}
-a{color:white}
+  body { background: #111; color: white; font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+  .box { background: #222; border-radius: 20px; padding: 30px; max-width: 500px; margin: auto; }
+  h1 { color: #ff2d55; font-size: 32px; margin: 10px 0; }
+  .live { background: red; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; display: inline-block; }
+  button { background: #ff2d55; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 50px; cursor: pointer; margin: 20px 0; }
+  audio { width: 100%; margin-top: 15px; }
+  .status { margin-top: 15px; color: #00ff88; }
 </style>
 </head>
 <body>
-<div class="live">● LIVE</div>
-<h1>RADIO<br>SAMAX</h1>
-<p>Sama X Time - La tua radio</p>
+
 <div class="box">
-<p>🎧 Stai ascoltando RadioSamax</p>
-<audio id="radio" controls style="width:100%">
-  <source src="https://s1.free-shoutcast.com:18404/;" type="audio/mpeg">
-</audio>
-<br><br>
-<button onclick="document.getElementById('radio').play()">▶️ ASCOLTA ORA</button>
-<p>Se non parte, <a href="http://s1.free-shoutcast.com:18404/" target="_blank"><b>clicca qui per aprire la radio</b></a></p>
+  <span class="live">● LIVE</span>
+  <h1>RADIO ASTREA</h1>
+  <p>La tua radio in diretta</p>
+
+  <button onclick="playRadio()">▶️ ASCOLTA ORA</button>
+
+  <audio id="radio" controls>
+    <source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg">
+  </audio>
+
+  <p class="status" id="status">Premi ASCOLTA per sentire la diretta</p>
+  <p style="font-size:13px; color:#aaa;">Se non parte subito, premi Play nel lettore qui sopra</p>
 </div>
-<p>📻 In onda da Mixxx - SamaxTime</p>
-<p>© 2026 RadioSamax</p>
+
+<script>
+function playRadio() {
+  var a = document.getElementById('radio');
+  a.play();
+  document.getElementById('status').innerText = "Stai ascoltando RADIO ASTREA 🔴";
+}
+</script>
+
 </body>
 </html>
