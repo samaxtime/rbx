@@ -14,7 +14,6 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 .dot { display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:8px; vertical-align:middle; }
 .green { background:#00ff5a; box-shadow:0 0 12px #00ff5a; }
 .red { background:#ff2222; box-shadow:0 0 12px #ff2222; }
-.yellow { background:#ffcc00; box-shadow:0 0 12px #ffcc00; }
 .vinyl-wrap { position:relative; width:230px; height:230px; margin:12px auto; }
 .vinyl { width:230px; height:230px; border-radius:50%; background: repeating-radial-gradient(circle at center, #000 0px, #000 2px, #1a1a1a 3px, #000 4px); box-shadow: 0 0 0 5px #fff, 0 10px 30px rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; }
 .vinyl.playing { animation: spin 3s linear infinite; }
@@ -60,6 +59,23 @@ var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
 var ora = document.getElementById('oraInOnda');
+var dot = document.getElementById('liveDot');
+var txt = document.getElementById('liveText');
+var titoloEl = document.getElementById('titoloCanzone');
+
+function setLive(online, titolo){
+  if(online){
+    dot.className = 'dot green';
+    txt.textContent = 'LIVE - IN ONDA';
+    txt.style.color = '#00ff5a';
+    if(titolo) titoloEl.textContent = '🎵 In onda: ' + titolo;
+  } else {
+    dot.className = 'dot red';
+    txt.textContent = 'OFFLINE - RADIO SPENTA';
+    txt.style.color = '#ff9999';
+    titoloEl.textContent = '';
+  }
+}
 
 btn.onclick = function() {
   if (audio.paused) {
@@ -72,8 +88,13 @@ btn.onclick = function() {
     vinyl.classList.remove('playing');
     btn.textContent = '▶️ PLAY';
     ora.textContent = 'Premi PLAY per ascoltare';
+    checkLive();
   }
 };
+
+// SE LA MUSICA SI SENTE DAVVERO, FORZA VERDE - questa è la correzione
+audio.addEventListener('playing', function(){ setLive(true); });
+audio.addEventListener('error', function(){ setLive(false); });
 
 fetch('https://api.counterapi.dev/v1/radiosamax-sito/visite/up')
 .then(r => r.json())
@@ -81,35 +102,28 @@ fetch('https://api.counterapi.dev/v1/radiosamax-sito/visite/up')
 .catch(() => { document.getElementById('visite').textContent = '—'; });
 
 function checkLive() {
-  // Usiamo stats?sid=1 che è più preciso di 7.html + anti-cache
-  var statsUrl = 'http://s1.free-shoutcast.com:18404/stats?sid=1&rand=' + Date.now();
-  var url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(statsUrl);
-  fetch(url)
-  .then(r => r.text())
-  .then(t => {
-    var dot = document.getElementById('liveDot');
-    var txt = document.getElementById('liveText');
-    var titoloEl = document.getElementById('titoloCanzone');
-    // Cerca <STREAMSTATUS>1</STREAMSTATUS> e <SONGTITLE>
-    var statusMatch = t.match(/<STREAMSTATUS>(\d)<\/STREAMSTATUS>/);
-    var titleMatch = t.match(/<SONGTITLE>(.*?)<\/SONGTITLE>/);
-    var online = statusMatch && statusMatch[1] === '1';
-    var titolo = titleMatch ? titleMatch[1] : '';
-    if (online) {
-      dot.className = 'dot green';
-      txt.textContent = 'LIVE - IN ONDA';
-      txt.style.color = '#00ff5a';
-      if (titolo) titoloEl.textContent = '🎵 In onda: ' + titolo;
-    } else {
-      dot.className = 'dot red';
-      txt.textContent = 'OFFLINE - RADIO SPENTA';
-      txt.style.color = '#ff9999';
-      titoloEl.textContent = '';
-    }
-  })
-  .catch(() => {
-    document.getElementById('liveText').textContent = 'OFFLINE - RADIO SPENTA';
+  // Prova con 7.html che è il sistema vecchio che funzionava, con 2 proxy diversi
+  var target = 'http://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
+  var urls = [
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target)
+  ];
+  // Prova il primo, se fallisce prova il secondo
+  fetch(urls[0]).then(r => r.text()).then(parse7).catch(function(){
+    fetch(urls[1]).then(r => r.text()).then(parse7).catch(function(){});
   });
+  function parse7(t){
+    // 7.html è così: ascoltatori, 1=online 0=offline, picco, max, unici, bitrate, titolo
+    var pulito = t.replace(/<[^>]*>/g, '').trim();
+    var parts = pulito.split(',');
+    // Se sta già suonando, non sovrascrivere con rosso
+    if(!audio.paused) return;
+    if(parts.length >= 2 && parts[1].trim() === '1'){
+      setLive(true, parts[6] ? parts[6].trim() : '');
+    } else if(parts.length >= 2 && parts[1].trim() === '0'){
+      setLive(false);
+    }
+  }
 }
 checkLive();
 setInterval(checkLive, 15000);
