@@ -3,221 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - Porto Azzurro - Elba</title>
+<title>RADIO SAMAX - In Onda Ora Live</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;background:#020a2e;color:#fff;min-height:100vh}
-.layout{max-width:1250px;margin:0 auto;display:grid;grid-template-columns:250px 1fr 250px;gap:16px;padding:16px}
-.sidebar{background:#0a1a5e;border:1px solid #1e3a8a;border-radius:14px;padding:14px;height:fit-content;position:sticky;top:14px}
-.sidebar h3{font-size:14px;color:#ffcc00;margin-bottom:10px;border-bottom:1px solid #1e3a8a;padding-bottom:8px}
-.side-card{background:#07133f;border:1px solid #1e3a8a;border-radius:10px;padding:11px;margin-bottom:10px;text-align:left}
-.side-card b{font-size:13px;color:#fff;display:block}
-.side-card span{font-size:12px;color:#9db4ff;line-height:1.4;display:block;margin-top:3px}
-.side-card .ora{color:#00e676;font-weight:900;font-size:12px;margin-top:5px}
-.side-card .tag{display:inline-block;background:#ff2b2b;color:#fff;font-size:10px;font-weight:900;padding:3px 8px;border-radius:20px;margin-top:6px}
-.side-card .tag.green{background:#00c853}
-.side-card .tag.yellow{background:#ffcc00;color:#000}
-.meteo{font-size:36px;text-align:center}
-.meteo b{font-size:22px;color:#ffcc00}
-.meteo span{font-size:12px;color:#9db4ff}
-.player-area{text-align:center;padding:18px 14px 14px;background:linear-gradient(180deg,#071a5e,#020a2e);border-bottom:3px solid #ffcc00}
-.player-area h2{font-size:16px;letter-spacing:1px;margin-bottom:10px}
-.player-area h2 span{color:#ffcc00}
-.player-flex{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
-.player-left{text-align:left;min-width:240px}
-.logo{font-size:64px;font-weight:900;letter-spacing:-2px;line-height:.95;cursor:pointer;user-select:none;margin-bottom:12px;text-shadow:0 4px 20px rgba(0,0,0,.6)}
-.logo .r{color:#ff3b3b}
-.logo .s{color:#ffcc00}
-.onair-box{display:inline-flex;align-items:center;gap:8px;background:#111;padding:8px 14px;border-radius:999px;border:2px solid #333;margin-bottom:12px}
-.onair-dot{width:14px;height:14px;border-radius:50%;background:#ff2b2b}
-.onair-text{font-weight:900;font-size:14px;letter-spacing:1px}
-.onair-box.on{border-color:#00e676}
-.onair-box.on .onair-dot{background:#00e676;box-shadow:0 0 12px #00e676;animation:blink 1s infinite}
-.onair-box.on .onair-text{color:#00e676}
-.onair-box.off .onair-text{color:#ff2b2b}
-@keyframes blink{50%{opacity:.4}}
-.dj-info{font-size:14px;line-height:1.5;font-weight:700}
-.dj-info b{color:#fff;font-size:16px}
-.dj-info span{color:#aaa;font-size:12px}
-.vinyl-col{text-align:center}
-.vinyl-wrap{position:relative;width:260px;height:260px;margin:0 auto 6px;cursor:pointer}
-.vinyl{width:260px;height:260px;border-radius:50%;background:repeating-radial-gradient(circle at center,#111 0px,#111 2px,#222 3px,#111 4px);border:6px solid #000;box-shadow:0 0 0 5px #ffcc00,0 10px 30px rgba(0,0,0,.7);position:relative;animation:spin 4s linear infinite;animation-play-state:paused}
-.vinyl.playing{animation-play-state:running}
-.vinyl:after{content:"";position:absolute;inset:78px;border-radius:50%;background:#ff2b2b;border:3px solid #fff}
-.vinyl-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;text-align:center;width:110px}
-.vinyl-label b{font-size:16px;color:#fff;display:block;line-height:1.1}
-.vinyl-label span{font-size:10px;color:#ffcc00;font-weight:900;letter-spacing:1px}
-.vinyl-hole{width:18px;height:18px;background:#fff;border-radius:50%;margin:8px auto 0}
-.play-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;width:82px;height:82px;border-radius:50%;background:rgba(0,0,0,.65);border:3px solid #fff;color:#fff;font-size:36px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.vinyl-text{font-weight:900;font-size:16px;margin-top:12px;color:#ffcc00;letter-spacing:1px}
-#testoOnda{font-size:17px;font-weight:800;margin:8px 0 2px}
-#oraAgg{font-size:12px;color:#9db4ff}
-.hero-img{margin:14px 0 0;border-radius:12px;overflow:hidden;border:2px solid #1a2f7a;position:relative;height:210px;background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80') center/cover}
-.hero-img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(2,10,46,.7))}
-.hero-caption{position:absolute;left:12px;bottom:10px;z-index:2;text-align:left}
-.hero-caption b{font-size:15px}
-.hero-caption span{display:block;font-size:12px;color:#dbe6ff}
-.sezione{margin-top:18px}
-.sezione h3{font-size:16px;margin-bottom:10px;color:#ffcc00;text-align:left}
-.card{background:#0a1a5e;border:1px solid #1e3a8a;border-radius:12px;padding:13px;margin:8px 0;text-align:left;font-size:14px}
-.card b{color:#ffcc00}
-input,textarea{width:100%;padding:11px;border-radius:9px;border:1px solid #334;background:#fff;color:#111;font-size:15px;margin-top:8px}
-.btn{padding:12px 18px;border:0;border-radius:999px;background:#ffcc00;color:#000;font-weight:900;cursor:pointer;margin-top:10px;width:100%}
-.btn-dark{background:#fff;color:#111}
-#adminBox,#adminPalinsesto{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);align-items:center;justify-content:center;z-index:99;padding:14px}
-#adminBox>div,#adminPalinsesto>div{background:#0a1a5e;padding:20px;border-radius:16px;width:100%;max-width:460px;border:2px solid #00e676;text-align:center}
-footer{text-align:center;padding:18px;color:#7a8ac2;font-size:12px}
-@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static}.player-flex{flex-direction:column;gap:10px}.player-left{text-align:center;min-width:0}.logo{font-size:54px}.vinyl-wrap,.vinyl{width:240px;height:240px}.vinyl:after{inset:70px}}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:0 10px 40px}
+.menu{position:sticky;top:0;z-index:100;background:#000;border-bottom:2px solid #1db954;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.menu-logo{font-size:22px;font-weight:900;letter-spacing:1px}
+.menu-logo span{color:#1db954}
+.menu-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.menu-links a{color:#fff;text-decoration:none;background:#1a1a1a;border:1px solid #333;padding:8px 14px;border-radius:20px;font-size:14px;font-weight:bold}
+.top{padding:25px 15px 10px}
+.logo{font-size:42px;font-weight:900;letter-spacing:1px}
+.logo span{color:#1db954}
+.sub{color:#1db954;letter-spacing:4px;font-size:14px;margin-top:5px;text-transform:uppercase}
+.rdx-box{max-width:340px;margin:15px auto;padding:14px;border-radius:15px;font-weight:900;font-size:22px}
+.rdx-on{background:#0a3d1f;border:2px solid #1db954;color:#1db954}
+.rdx-off{background:#3d0a0a;border:2px solid #ff2d2d;color:#ff2d2d}
+.rdx-sotto{font-size:13px;font-weight:normal;color:#ccc;margin-top:4px}
+.contatore-box{background:#1a1a1a;border:1px solid #333;border-radius:15px;max-width:320px;margin:10px auto;padding:12px}
+.contatore-num{font-size:32px;font-weight:900;color:#1db954}
+.contatore-label{font-size:13px;color:#ccc}
+.brano{color:#1db954;margin-top:8px;font-size:14px}
+.vinile{width:200px;height:200px;border-radius:50%;margin:20px auto;background:radial-gradient(circle,#222 0%,#000 60%,#111 100%);border:5px solid #1db954;display:flex;align-items:center;justify-content:center;font-size:60px;cursor:pointer}
+.vinile.playing{animation:gira 3s linear infinite}
+@keyframes gira{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+#stato{margin:10px 0;color:#ccc}
+.main-wrap{display:flex;gap:15px;max-width:1100px;margin:20px auto;align-items:flex-start;padding:0 10px}
+.sinistra{flex:1;min-width:280px}
+.chat-destra{width:340px;flex-shrink:0;position:sticky;top:70px;background:#151515;border:1px solid #2a2a2a;border-radius:15px;overflow:hidden;text-align:left}
+.chat-titolo{background:#1db954;color:#000;font-weight:900;padding:12px;text-align:center}
+.chat-frame{width:100%;height:500px;border:none;background:#fff}
+.chat-nota{padding:10px;font-size:12px;color:#aaa;text-align:center}
+.layout{display:flex;gap:15px;justify-content:center;max-width:1000px;margin:20px auto;padding:0 10px;flex-wrap:wrap}
+.box{flex:1;min-width:260px;background:#151515;border:1px solid #2a2a2a;border-radius:15px;padding:20px;text-align:left;scroll-margin-top:70px}
+.box h2{color:#1db954;margin-bottom:10px;font-size:20px}
+.box p{color:#ddd;line-height:1.6;font-size:15px}
+.footer{margin-top:30px;padding:20px;font-size:12px;color:#666}
+@media(max-width:800px){.main-wrap{flex-direction:column}.chat-destra{width:100%;position:static}.chat-frame{height:400px}}
 </style>
 </head>
 <body>
-
-<div class="player-area">
-  <h2>🎧 RADIO SAMAX - <span>TOCCA IL VINILE</span></h2>
-  <div class="player-flex">
-    <div class="player-left">
-      <div class="logo" id="logoSegreto" onclick="tapLogo()"><span class="r">radio</span><span class="s">samax</span></div>
-      <div class="onair-box off" id="onairBox"><div class="onair-dot"></div><div class="onair-text" id="onairText">OFF AIR</div></div>
-      <div class="dj-info"><b>DJ SAMAX 🇮🇹</b><br>TRASMETTE DA<br>PORTO AZZURRO<br>ISOLA D'ELBA<br><span>www.radiosamax.com</span></div>
-    </div>
-    <div class="vinyl-col">
-      <div class="vinyl-wrap" onclick="togglePlay()">
-        <div class="vinyl" id="vinylDisc"></div>
-        <div class="vinyl-label"><b>RADIO<br>SAMAX</b><span>PORTO AZZURRO</span><div class="vinyl-hole"></div></div>
-        <div class="play-overlay" id="playOverlay">▶️</div>
+<div class="menu">
+  <div class="menu-logo">Radio<span>Samax</span></div>
+  <div class="menu-links">
+    <a href="#inonda">📻 In Onda Ora</a>
+    <a href="#chisiamo">ℹ️ Chi Siamo</a>
+    <a href="#chat">💬 Chat</a>
+  </div>
+</div>
+<div class="main-wrap">
+  <div class="sinistra">
+    <div class="top">
+      <div class="logo">Radio<span>Samax</span></div>
+      <div class="sub">In Onda Ora Live</div>
+      <div id="rdxBox" class="rdx-box rdx-off"><span id="rdxTesto">● RDX OFF-LINE</span><div class="rdx-sotto" id="rdxSotto">Mixxx non sta trasmettendo</div></div>
+      <div class="contatore-box">
+        <div class="contatore-num">👥 <span id="numAscoltatori">--</span></div>
+        <div class="contatore-label">ASCOLTATORI ORA</div>
+        <div class="brano" id="branoOra">🎵 Caricamento brano...</div>
+        <div style="font-size:11px;color:#888;margin-top:6px" id="ultimoAgg">Aggiornato ora</div>
       </div>
-      <div class="vinyl-text" id="vinylText">▶️ PREMI IL VINILE PER ASCOLTARE</div>
+    </div>
+    <div class="vinile" id="vinile" onclick="togglePlay()">▶</div>
+    <div id="stato">Tocca il vinile per ascoltare</div>
+    <div class="layout">
+      <div class="box" id="inonda">
+        <h2>📻 In Onda Ora</h2>
+        <p>La radio dell'Isola d'Elba. Musica, dediche e buona compagnia con Samax.</p>
+      </div>
+      <div class="box" id="chisiamo">
+        <h2>ℹ️ Chi Siamo</h2>
+        <p>RadioSamax nasce dall'Isola d'Elba con una passione: farvi compagnia con la musica migliore.</p>
+      </div>
     </div>
   </div>
-  <div id="testoOnda">Caricamento programma...</div>
-  <div id="oraAgg">Aggiornamento in tempo reale</div>
-  <div id="erroreAudio" style="display:none;color:#ff5252;font-size:12px;font-weight:800;margin-top:6px">⚠️ Nessun DJ in onda in questo momento. Riprova tra poco.</div>
+  <div class="chat-destra" id="chat">
+    <div class="chat-titolo">💬 CHAT ASCOLTATORI LIVE</div>
+    <iframe class="chat-frame" src="https://tlk.io/radiosamax"></iframe>
+    <div class="chat-nota">Scrivi il tuo nome e chatta con tutti!</div>
+  </div>
 </div>
-
-<div style="background:#0055aa;padding:18px 14px;text-align:center;border-bottom:4px solid #ffcc00">
-  <span style="background:#ff2b2b;color:#fff;font-weight:900;padding:4px 10px;border-radius:20px;font-size:11px;letter-spacing:1px">⭐ PUBBLICITÀ ⭐</span>
-  <h2 style="font-size:32px;font-weight:900;letter-spacing:1px;margin:10px 0 4px;color:#fff">🤿 NEMO SUB <span style="color:#ffcc00">PORTO AZZURRO</span></h2>
-  <p style="font-size:14px;font-weight:700;color:#fff">ALLA SCOPERTA DEI FONDALI MARINI DI PORTO AZZURRO</p>
-  <p style="font-size:14px;font-weight:700;color:#fff;margin-top:4px">PER INFO <b style="color:#ffcc00">CONTATTATE DJ SAMAX</b> 📻</p>
-</div>
-
-<div class="layout">
-  <aside class="sidebar">
-    <h3>⛴️ TRAGHETTI ELBA</h3>
-    <div class="meteo">🌤️<br><b>24°</b><br><span>Porto Azzurro - Sole<br>Mare calmo</span></div>
-    <div class="side-card"><b>Piombino → Portoferraio</b><span>Moby • Toremar • Blu Navy</span><div class="ora">Partenze: 08:30 - 10:15 - 13:30 - 17:45</div><span class="tag green">IN ORARIO</span></div>
-    <div class="side-card"><b>Portoferraio → Piombino</b><span>Ritorno in terraferma</span><div class="ora">Partenze: 09:30 - 12:00 - 16:00 - 19:15</div><span class="tag green">IN ORARIO</span></div>
-    <div class="side-card"><b>Piombino → Rio Marina</b><span>Toremar - 45 min</span><div class="ora">Partenze: 09:00 - 14:30 - 18:00</div><span class="tag yellow">CONTROLLA</span></div>
-  </aside>
-
-  <main>
-    <div class="hero-img"><div class="hero-caption"><b>Porto Azzurro - Isola d'Elba</b><span>La tua radio, dal mare alla tua casa</span></div></div>
-    <div class="sezione">
-      <h3>📅 In onda oggi</h3>
-      <div id="listaPalinsesto"></div>
-      <div style="font-size:11px;color:#7a8ac2;margin-top:6px">Gli orari li decide il DJ. Non sono fissi.</div>
-    </div>
-  </main>
-
-  <aside class="sidebar">
-    <h3>📰 NEWS ELBA</h3>
-    <div class="side-card"><b>🏖️ Porto Azzurro: spiagge piene nel weekend</b><span>Tanti turisti a Barbarossa e Reale. Previsto sole per tutta la settimana.</span><span class="tag">OGGI</span></div>
-    <div class="side-card"><b>🎶 Festa a Capoliveri sabato sera</b><span>Musica live in piazza e stand gastronomici dalle 19:00.</span><span class="tag yellow">EVENTI</span></div>
-    <div class="side-card"><b>🚧 Lavori sulla strada Portoferraio - Porto Azzurro</b><span>Rallentamenti possibili dalle 9 alle 12.</span><span class="tag">VIABILITÀ</span></div>
-    <div class="side-card"><b>🐬 Avvistata balena vicino a Capo d'Enfola</b><span>Escursioni in barca piene per il weekend.</span><span class="tag green">MARE</span></div>
-    <div class="side-card"><b>🤿 NEMO SUB PORTO AZZURRO - Ultimi posti</b><span>Immersioni guidate e snorkeling. Per info contattate DJ SAMAX in radio!</span><span class="tag yellow">PUBBLICITÀ</span></div>
-  </aside>
-</div>
-
-<footer>© 2026 Radio Samax - Porto Azzurro - Isola d'Elba<br>NEMO SUB PORTO AZZURRO - Per info contattate DJ SAMAX</footer>
-
-<audio id="audioPlayer" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
-
-<div id="adminBox"><div>
-  <h3 style="color:#ffcc00;margin-bottom:6px">✏️ Cosa c'è in onda?</h3>
-  <p style="color:#cbd5ff;font-size:13px">Scrivi e premi SALVA. Tutti vedono il testo subito.</p>
-  <input id="inputOnda" placeholder="Es: Ora Vasco Rossi - Vita Spericolata">
-  <button class="btn" onclick="salvaOnda()">💾 SALVA PER TUTTI</button>
-  <button class="btn" onclick="document.getElementById('adminBox').style.display='none';document.getElementById('adminPalinsesto').style.display='flex'">📅 Modifica Orari</button>
-  <button class="btn btn-dark" onclick="document.getElementById('adminBox').style.display='none'">Chiudi</button>
-</div></div>
-
-<div id="adminPalinsesto"><div>
-  <h3 style="color:#ffcc00;margin-bottom:6px">✏️ In onda oggi - Decidi tu</h3>
-  <p style="color:#cbd5ff;font-size:13px">Scrivi una riga per programma. Es:<br>10:00 — Samax Mattina 🎵</p>
-  <textarea id="inputPalinsesto" rows="6" placeholder="07:00 — Buongiorno Elba ☀️"></textarea>
-  <button class="btn" onclick="salvaPalinsesto()">💾 SALVA ORARI PER TUTTI</button>
-  <button class="btn btn-dark" onclick="document.getElementById('adminPalinsesto').style.display='none'">Chiudi</button>
-</div></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div class="footer">RadioSamax © 2026</div>
+<audio id="radio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <script>
-const SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let tapCount=0, tapTimer=null;
-function tapLogo(){
-  tapCount++;
-  if(tapTimer) clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>{tapCount=0;},1500);
-  if(tapCount>=5){tapCount=0;document.getElementById('adminBox').style.display='flex';}
-}
-async function caricaProgramma(){
-  let {data} = await supabaseClient.from('programma').select('testo').eq('id',1).single();
-  if(data && data.testo){document.getElementById('testoOnda').innerText = data.testo;document.getElementById('oraAgg').innerText = "Aggiornato alle " + new Date().toLocaleTimeString('it-IT');}
-}
-caricaProgramma();
-supabaseClient.channel('programma-live').on('postgres_changes',{event:'*',schema:'public',table:'programma'},(p)=>{if(p.new && p.new.testo){document.getElementById('testoOnda').innerText = p.new.testo;document.getElementById('oraAgg').innerText = "Aggiornato alle " + new Date().toLocaleTimeString('it-IT');}}).subscribe();
-async function salvaOnda(){
-  let t=document.getElementById('inputOnda').value.trim();
-  if(!t){alert('Scrivi prima qualcosa');return;}
-  let {error}=await supabaseClient.from('programma').update({testo:t,updated_at:new Date().toISOString()}).eq('id',1);
-  if(error){alert('Errore: '+error.message);return;}
-  document.getElementById('testoOnda').innerText=t;document.getElementById('inputOnda').value='';document.getElementById('adminBox').style.display='none';alert('Fatto! Ora tutti vedono: '+t);
-}
-async function caricaPalinsesto(){
-  let {data} = await supabaseClient.from('palinsesto').select('testo').eq('id',1).single();
-  if(data && data.testo){mostraPalinsesto(data.testo);}
-}
-function mostraPalinsesto(testo){
-  let righe = testo.split('\n').filter(r=>r.trim()!=='');
-  document.getElementById('listaPalinsesto').innerHTML = righe.map(r=>{
-    let parts = r.split('—');
-    if(parts.length>1) return `<div class="card"><b>${parts[0].trim()}</b> — ${parts.slice(1).join('—').trim()}</div>`;
-    return `<div class="card">${r}</div>`;
-  }).join('');
-}
-caricaPalinsesto();
-supabaseClient.channel('palinsesto-live').on('postgres_changes',{event:'*',schema:'public',table:'palinsesto'},(p)=>{if(p.new && p.new.testo) mostraPalinsesto(p.new.testo);}).subscribe();
-async function salvaPalinsesto(){
-  let t=document.getElementById('inputPalinsesto').value.trim();
-  if(!t){alert('Scrivi almeno un programma');return;}
-  let {error}=await supabaseClient.from('palinsesto').update({testo:t}).eq('id',1);
-  if(error){alert('Errore: '+error.message);return;}
-  mostraPalinsesto(t);
-  document.getElementById('adminPalinsesto').style.display='none';
-  alert('Orari salvati! Ora tutti vedono i TUOI orari.');
-}
-let audio=document.getElementById('audioPlayer');
+let audio=document.getElementById('radio');
+let vinile=document.getElementById('vinile');
+let stato=document.getElementById('stato');
 let playing=false;
-function aggiornaOnAir(){
-  let box=document.getElementById('onairBox');
-  let txt=document.getElementById('onairText');
-  let vinyl=document.getElementById('vinylDisc');
-  let overlay=document.getElementById('playOverlay');
-  let vtext=document.getElementById('vinylText');
-  if(playing){box.className='onair-box on';txt.innerText='ON AIR';vinyl.classList.add('playing');overlay.innerText='⏸️';vtext.innerText='⏸️ IN ONDA - PREMI PER METTERE IN PAUSA';}
-  else{box.className='onair-box off';txt.innerText='OFF AIR';vinyl.classList.remove('playing');overlay.innerText='▶️';vtext.innerText='▶️ PREMI IL VINILE PER ASCOLTARE';}
-}
 function togglePlay(){
-  if(playing){audio.pause();playing=false;}
-  else{audio.play().catch(()=>{document.getElementById('erroreAudio').style.display='block';});playing=true;}
-  aggiornaOnAir();
+  if(!playing){audio.play();playing=true;vinile.innerHTML='⏸';vinile.classList.add('playing');stato.innerHTML='Stai ascoltando RadioSamax...';}
+  else{audio.pause();playing=false;vinile.innerHTML='▶';vinile.classList.remove('playing');stato.innerHTML='In pausa - tocca per ripartire';}
 }
-audio.addEventListener('play',()=>{playing=true;document.getElementById('erroreAudio').style.display='none';aggiornaOnAir();});
-audio.addEventListener('pause',()=>{playing=false;aggiornaOnAir();});
-audio.addEventListener('error',()=>{document.getElementById('erroreAudio').style.display='block';});
+function aggiornaContatore(){
+  fetch('https://s1.free-shoutcast.com:18404/7.html').then(r=>r.text()).then(testo=>{
+    let parti=testo.split(',');let ascoltatori=parti[0];let isOnline=parti[1];let brano=parti[6]||'';brano=brano.replace(/<[^>]*>/g,'').trim();
+    let rdxBox=document.getElementById('rdxBox');
+    if(isOnline=='1'){rdxBox.className='rdx-box rdx-on';document.getElementById('rdxTesto').innerText='● RDX ON-LINE';document.getElementById('rdxSotto').innerText='Mixxx sta trasmettendo - sei in diretta!';document.getElementById('numAscoltatori').innerText=ascoltatori;if(brano)document.getElementById('branoOra').innerText='🎵 Ora in onda: '+brano;}
+    else{rdxBox.className='rdx-box rdx-off';document.getElementById('rdxTesto').innerText='● RDX OFF-LINE';document.getElementById('rdxSotto').innerText='Mixxx non sta trasmettendo';document.getElementById('numAscoltatori').innerText='0';document.getElementById('branoOra').innerText='🎵 Radio in pausa';}
+    let ora=new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});document.getElementById('ultimoAgg').innerText='Aggiornato alle '+ora;
+  }).catch(e=>{document.getElementById('rdxBox').className='rdx-box rdx-off';document.getElementById('rdxTesto').innerText='● RDX OFF-LINE';});
+}
+aggiornaContatore();setInterval(aggiornaContatore,15000);
 </script>
 </body>
 </html>
