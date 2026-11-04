@@ -62,18 +62,27 @@ var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var titoloEl = document.getElementById('titoloCanzone');
+var statoAttuale = 'offline';
+var contatoreOfflineDiFila = 0;
 
 function setLive(online, titolo){
   if(online){
+    statoAttuale = 'online';
+    contatoreOfflineDiFila = 0;
     dot.className = 'dot green';
     txt.textContent = 'LIVE - IN ONDA';
     txt.style.color = '#00ff5a';
     if(titolo) titoloEl.textContent = '🎵 In onda: ' + titolo;
   } else {
-    dot.className = 'dot red';
-    txt.textContent = 'OFFLINE - RADIO SPENTA';
-    txt.style.color = '#ff9999';
-    titoloEl.textContent = '';
+    // Aspetta 2 volte OFFLINE di fila prima di diventare rosso, così non balla
+    contatoreOfflineDiFila++;
+    if(contatoreOfflineDiFila >= 2){
+      statoAttuale = 'offline';
+      dot.className = 'dot red';
+      txt.textContent = 'OFFLINE - RADIO SPENTA';
+      txt.style.color = '#ff9999';
+      titoloEl.textContent = '';
+    }
   }
 }
 
@@ -92,41 +101,41 @@ btn.onclick = function() {
   }
 };
 
-// SE LA MUSICA SI SENTE DAVVERO, FORZA VERDE - questa è la correzione
+// SE SENTI LA MUSICA, E' VERO CHE SEI IN ONDA
 audio.addEventListener('playing', function(){ setLive(true); });
 audio.addEventListener('error', function(){ setLive(false); });
 
-fetch('https://api.counterapi.dev/v1/radiosamax-sito/visite/up')
+// --- CONTATORE NUOVO CHE FUNZIONA ---
+fetch('https://abacus.jasoncameron.dev/hit/radiosamax-sito/visite')
 .then(r => r.json())
-.then(d => { document.getElementById('visite').textContent = d.count; })
-.catch(() => { document.getElementById('visite').textContent = '—'; });
+.then(d => { document.getElementById('visite').textContent = d.value; })
+.catch(() => {
+  // Se anche questo fallisce, prova il vecchio
+  fetch('https://api.counterapi.dev/v1/radiosamax-sito/visite/up')
+  .then(r => r.json()).then(d => { document.getElementById('visite').textContent = d.count; })
+  .catch(() => { document.getElementById('visite').textContent = '0'; });
+});
 
 function checkLive() {
-  // Prova con 7.html che è il sistema vecchio che funzionava, con 2 proxy diversi
+  if(!audio.paused) return; // Se sta suonando, è online, non controllare
   var target = 'http://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
-  var urls = [
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
-    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target)
-  ];
-  // Prova il primo, se fallisce prova il secondo
-  fetch(urls[0]).then(r => r.text()).then(parse7).catch(function(){
-    fetch(urls[1]).then(r => r.text()).then(parse7).catch(function(){});
-  });
-  function parse7(t){
-    // 7.html è così: ascoltatori, 1=online 0=offline, picco, max, unici, bitrate, titolo
+  var url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target);
+  fetch(url)
+  .then(r => r.text())
+  .then(t => {
     var pulito = t.replace(/<[^>]*>/g, '').trim();
     var parts = pulito.split(',');
-    // Se sta già suonando, non sovrascrivere con rosso
-    if(!audio.paused) return;
     if(parts.length >= 2 && parts[1].trim() === '1'){
       setLive(true, parts[6] ? parts[6].trim() : '');
     } else if(parts.length >= 2 && parts[1].trim() === '0'){
       setLive(false);
     }
-  }
+    // Se il testo è strano, non cambiare niente, resta come prima
+  })
+  .catch(() => { /* Se il server non risponde, non cambiare, resta come prima */ });
 }
 checkLive();
-setInterval(checkLive, 15000);
+setInterval(checkLive, 20000);
 </script>
 
 </body>
