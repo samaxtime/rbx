@@ -52,7 +52,7 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 
 <div class="palinsesto">
   <h2>📅 PROGRAMMA DI OGGI:</h2>
-  <p id="p-oggi"></p>
+  <p id="p-oggi">Caricamento...</p>
 </div>
 
 <div id="adminBox" class="admin-box">
@@ -82,26 +82,38 @@ var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var titoloEl = document.getElementById('titoloCanzone');
+var liveRisposto = false;
 
 function setLive(online, titolo){
+  liveRisposto = true;
   if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; if(titolo) titoloEl.textContent='🎵 In onda: '+titolo; }
   else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; titoloEl.textContent=''; }
 }
 btn.onclick = function(){
-  if(audio.paused){ audio.play(); vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; ora.textContent='Stai ascoltando RADIO SAMAX 🎶'; }
+  if(audio.paused){ audio.play(); vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; ora.textContent='Stai ascoltando RADIO SAMAX 🎶'; setLive(true); }
   else { audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; ora.textContent='Premi PLAY per ascoltare'; checkLive(); }
 };
 audio.addEventListener('playing', function(){ setLive(true); });
+audio.addEventListener('error', function(){ setLive(false); });
 
 function caricaPalinsesto(){
   fetch(SUPABASE_URL + '/rest/v1/palinsesto?id=eq.1&select=oggi', {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
   })
-  .then(r => r.json()).then(d => {
+  .then(r => {
+    if(!r.ok) throw new Error('Errore '+r.status);
+    return r.json();
+  }).then(d => {
     var testo = (d && d[0] && d[0].oggi) ? d[0].oggi : "";
-    document.getElementById('p-oggi').textContent = testo;
+    if(testo === ""){
+      document.getElementById('p-oggi').textContent = "Nessun programma oggi - torna dopo";
+    } else {
+      document.getElementById('p-oggi').textContent = testo;
+    }
     document.getElementById('in-oggi').value = testo;
-  }).catch(()=>{ document.getElementById('p-oggi').textContent = ""; });
+  }).catch(e => {
+    document.getElementById('p-oggi').textContent = "Errore palinsesto: " + e.message;
+  });
 }
 caricaPalinsesto();
 
@@ -123,7 +135,7 @@ function salvaPalinsesto(){
     document.getElementById('adminMsg').style.color='green';
     caricaPalinsesto();
   })
-  .catch(e => { document.getElementById('adminMsg').textContent='❌ Errore: '+e.message+' - controlla chiave e tabella'; document.getElementById('adminMsg').style.color='red'; });
+  .catch(e => { document.getElementById('adminMsg').textContent='❌ Errore: '+e.message+' - controlla tabella'; document.getElementById('adminMsg').style.color='red'; });
 }
 
 function cancellaPalinsesto(){
@@ -134,12 +146,24 @@ function cancellaPalinsesto(){
 }
 
 function checkLive(){
+  liveRisposto = false;
+  // FIX: se dopo 4 secondi nessuno risponde, metti OFFLINE, non restare bloccato
+  setTimeout(function(){
+    if(!liveRisposto && audio.paused){ setLive(false); }
+  }, 4000);
+
   var target='http://s1.free-shoutcast.com:18404/7.html?rand='+Date.now();
   var proxies=['https://api.allorigins.win/raw?url='+encodeURIComponent(target),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(target),'https://corsproxy.io/?url='+encodeURIComponent(target)];
-  var gia=false;
-  proxies.forEach(function(u){ fetch(u).then(r=>r.text()).then(t=>{ if(gia) return; var pulito=t.replace(/<[^>]*>/g,'').trim(); var parts=pulito.split(','); if(parts.length>=2 && parts[1].trim()==='1'){ gia=true; setLive(true, parts[6]?parts[6].trim():''); } else if(parts.length>=2 && parts[1].trim()==='0'){ setTimeout(function(){ if(!gia) setLive(false); },2500); } }).catch(()=>{}); });
+  proxies.forEach(function(u){
+    fetch(u).then(r=>r.text()).then(t=>{
+      if(liveRisposto) return;
+      var pulito=t.replace(/<[^>]*>/g,'').trim();
+      var parts=pulito.split(',');
+      if(parts.length>=2 && parts[1].trim()==='1'){ setLive(true, parts[6]?parts[6].trim():''); }
+    }).catch(()=>{});
+  });
 }
-checkLive(); setInterval(checkLive, 5000);
+checkLive(); setInterval(checkLive, 15000);
 </script>
 </body>
 </html>
