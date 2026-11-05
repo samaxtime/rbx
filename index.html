@@ -98,21 +98,22 @@ btn.onclick = function() {
 
 audio.addEventListener('playing', function(){ setLive(true); });
 
-// --- VISITATORI UNICI: 1 VOLTA SOLA PER TELEFONO ---
-if(localStorage.getItem('radiosamax_gia_contato') === 'si'){
-  fetch('https://abacus.jasoncameron.dev/info/radiosamax-sito/visite')
+// --- CONTATORE NUOVO, PARTE DA ZERO ---
+// Ho cambiato nome, così il vecchio 9 non c'è più
+var CONTATORE_NUOVO = 'radiosamax-2026-nuovo';
+if(localStorage.getItem('radiosamax_gia_contato_nuovo') === 'si'){
+  fetch('https://abacus.jasoncameron.dev/info/' + CONTATORE_NUOVO + '/visite')
   .then(r => r.json()).then(d => { document.getElementById('visite').textContent = d.value; })
-  .catch(() => { document.getElementById('visite').textContent = '—'; });
+  .catch(() => { document.getElementById('visite').textContent = '0'; });
 } else {
-  fetch('https://abacus.jasoncameron.dev/hit/radiosamax-sito/visite')
+  fetch('https://abacus.jasoncameron.dev/hit/' + CONTATORE_NUOVO + '/visite')
   .then(r => r.json()).then(d => {
     document.getElementById('visite').textContent = d.value;
-    localStorage.setItem('radiosamax_gia_contato', 'si');
+    localStorage.setItem('radiosamax_gia_contato_nuovo', 'si');
   })
-  .catch(() => { document.getElementById('visite').textContent = '—'; });
+  .catch(() => { document.getElementById('visite').textContent = '0'; });
 }
 
-// --- ASCOLTATORI ORA + LIVE PRIMA DI PLAY ---
 function checkLive() {
   var target = 'http://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
   var proxies = [
@@ -126,7 +127,6 @@ function checkLive() {
       if(giaRisposto) return;
       var pulito = t.replace(/<[^>]*>/g, '').trim();
       var parts = pulito.split(',');
-      // parts[0] = ascoltatori ora, parts[1] = 1 online 0 offline
       if(parts.length >= 2 && parts[1].trim() === '1'){
         giaRisposto = true;
         setLive(true, parts[6] ? parts[6].trim() : '', parts[0].trim());
