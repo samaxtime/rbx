@@ -39,7 +39,6 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 
 <button id="playBtn" class="play-btn">▶️ PLAY</button>
 <p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
-<p class="small" id="titoloCanzone"></p>
 
 <audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <p class="small">DJ Samax - radiosamax.com</p>
@@ -55,6 +54,7 @@ var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var testAudio = null;
 var timer = null;
 var giaDeciso = false;
+var isIPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 function mostraLive(online){
   if(giaDeciso) return;
@@ -91,19 +91,37 @@ function checkLive(){
   txt.textContent = 'Controllo in corso...';
   dot.className = 'dot red';
 
-  // 1 SECONDO: se non arriva niente = ROSSO
+  // 1 SECONDO
   timer = setTimeout(function(){ mostraLive(false); }, 1000);
 
-  testAudio = new Audio();
-  testAudio.preload = 'auto';
-  testAudio.muted = true;
-  testAudio.volume = 0;
-  testAudio.addEventListener('canplay', function(){ mostraLive(true); });
-  testAudio.addEventListener('playing', function(){ mostraLive(true); });
-  testAudio.addEventListener('canplaythrough', function(){ mostraLive(true); });
-  testAudio.addEventListener('error', function(){ mostraLive(false); });
-  testAudio.src = STREAM + '?check=' + Date.now();
-  try{ testAudio.load(); }catch(e){}
+  if(isIPhone){
+    // IPHONE: Safari blocca l'audio prima del tocco, quindi usiamo fetch che non è bloccato
+    // Se il server risponde = in onda, se non risponde = spento
+    var controller = new AbortController();
+    setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 1000);
+    fetch(STREAM + '?check=' + Date.now(), { method: 'GET', mode: 'no-cors', cache: 'no-store', signal: controller.signal })
+    .then(function(){ mostraLive(true); })
+    .catch(function(){ /* se abort perché sta scaricando = è in onda, non è errore */ });
+    // Se dopo 800ms sta ancora scaricando, vuol dire che lo stream c'è
+    setTimeout(function(){
+      if(!giaDeciso){
+        // Se fetch non ha dato errore, il server sta mandando dati = LIVE
+        mostraLive(true);
+      }
+    }, 800);
+  } else {
+    // PC / ANDROID: test audio normale
+    testAudio = new Audio();
+    testAudio.preload = 'auto';
+    testAudio.muted = true;
+    testAudio.volume = 0;
+    testAudio.addEventListener('canplay', function(){ mostraLive(true); });
+    testAudio.addEventListener('playing', function(){ mostraLive(true); });
+    testAudio.addEventListener('canplaythrough', function(){ mostraLive(true); });
+    testAudio.addEventListener('error', function(){ mostraLive(false); });
+    testAudio.src = STREAM + '?check=' + Date.now();
+    try{ testAudio.load(); }catch(e){}
+  }
 }
 
 checkLive();
