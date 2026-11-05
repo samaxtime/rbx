@@ -53,21 +53,37 @@ var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var staControllando = false;
+var stalloTimer = null;
 
 function mostraLive(online){
   if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; }
   else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; }
 }
 
+// Questa è la cosa nuova che hai chiesto tu:
+function staccaTutto(){
+  // Ferma la musica, ferma il vinile, torna a PLAY, torna OFFLINE
+  try{ audio.pause(); }catch(e){}
+  audio.src = STREAM;
+  audio.load();
+  vinyl.classList.remove('playing');
+  btn.textContent='▶️ PLAY';
+  ora.textContent='Mixxx ha staccato ON AIR - Radio spenta';
+  mostraLive(false);
+}
+
 btn.onclick = function(){
   if(audio.paused){
+    // Ricarica lo stream da zero, così se hai riattaccato Mixxx riparte pulito
+    audio.src = STREAM + '?t=' + Date.now();
+    audio.load();
     audio.play().catch(function(){});
     vinyl.classList.add('playing');
     btn.textContent='⏸️ STOP';
     ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
     mostraLive(true);
   } else {
-    audio.pause();
+    try{ audio.pause(); }catch(e){}
     vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY';
     ora.textContent='Premi PLAY per ascoltare';
@@ -75,22 +91,39 @@ btn.onclick = function(){
   }
 };
 
-audio.addEventListener('playing', function(){ mostraLive(true); });
-audio.addEventListener('error', function(){ mostraLive(false); });
-audio.addEventListener('stalled', function(){ /* se si blocca da solo, non fare niente, lascia che riparta */ });
+audio.addEventListener('playing', function(){
+  if(stalloTimer) clearTimeout(stalloTimer);
+  mostraLive(true);
+  vinyl.classList.add('playing');
+  btn.textContent='⏸️ STOP';
+  ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
+});
+
+// Se l'audio si blocca da solo perché hai staccato ON AIR in Mixxx
+audio.addEventListener('error', function(){ if(!audio.paused) staccaTutto(); });
+audio.addEventListener('ended', function(){ staccaTutto(); });
+audio.addEventListener('emptied', function(){ if(!audio.paused) staccaTutto(); });
+
+// Se si ferma per più di 3 secondi mentre dovrebbe suonare = hai staccato
+audio.addEventListener('stalled', function(){
+  if(stalloTimer) clearTimeout(stalloTimer);
+  stalloTimer = setTimeout(function(){
+    if(!audio.paused) staccaTutto();
+  }, 3000);
+});
+audio.addEventListener('waiting', function(){
+  if(stalloTimer) clearTimeout(stalloTimer);
+  stalloTimer = setTimeout(function(){
+    if(!audio.paused) staccaTutto();
+  }, 3000);
+});
 
 function checkLive(){
-  // REGOLA D'ORO: se stai ascoltando, NON testare. Sei LIVE e basta.
-  // Così non ci sono 2 audio insieme e non fa più rumori.
-  if(!audio.paused){
-    mostraLive(true);
-    return;
-  }
   if(staControllando) return;
   staControllando = true;
 
-  // Test silenzioso: prendi solo 1 pezzettino di stream e chiudi subito, senza audio
-  // Se arrivano dati = IN ONDA, se non arriva niente in 2,5s = SPENTO
+  // Ora controllo SEMPRE, anche se stai ascoltando.
+  // Uso fetch, non un secondo audio, così non fa rumori.
   var controller = new AbortController();
   var timeout = setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 2500);
   var arrivato = false;
@@ -108,21 +141,35 @@ function checkLive(){
   .then(function(){
     clearTimeout(timeout);
     staControllando = false;
-    if(!audio.paused) mostraLive(true);
-    else mostraLive(arrivato);
+    if(arrivato){
+      mostraLive(true);
+      // Se eri in PLAY ma si era fermato, non farlo ripartire da solo, aspetta che premi PLAY
+    } else {
+      // Stream morto = hai staccato ON AIR in Mixxx
+      if(!audio.paused){
+        staccaTutto();
+      } else {
+        mostraLive(false);
+      }
+    }
   })
   .catch(function(){
     clearTimeout(timeout);
     staControllando = false;
-    // Se fetch viene interrotto perché i dati sono arrivati, è LIVE
-    if(arrivato) mostraLive(true);
-    else if(!audio.paused) mostraLive(true);
-    else mostraLive(false);
+    if(arrivato){
+      mostraLive(true);
+    } else {
+      if(!audio.paused){
+        staccaTutto();
+      } else {
+        mostraLive(false);
+      }
+    }
   });
 }
 
 checkLive();
-setInterval(checkLive, 10000);
+setInterval(checkLive, 5000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 </script>
 </body>
