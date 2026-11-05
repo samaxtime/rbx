@@ -20,18 +20,9 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 .hole { width:10px; height:10px; background:white; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; }
 .play-btn { margin-top:18px; background:white; color:#c00000; border:none; padding:15px 45px; font-size:22px; font-weight:bold; border-radius:50px; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.4); }
 .small { color:#ffd9d9; font-size:13px; margin-top:6px; }
-.palinsesto { background: rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.35); border-radius:18px; padding:14px 16px; max-width:340px; margin:14px auto 0 auto; text-align:center; }
-.palinsesto h2 { margin:0 0 6px 0; font-size:17px; }
-.palinsesto p { margin:6px 0; font-size:16px; color:white; }
-.gear-top { position:fixed; top:10px; right:12px; z-index:100; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.4); color:white; width:38px; height:38px; border-radius:50%; font-size:19px; cursor:pointer; }
-.admin-box { display:none; background:white; color:black; border-radius:16px; padding:16px; max-width:340px; margin:12px auto; text-align:left; }
-.admin-box input { width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; font-size:15px; }
-.admin-box button { width:100%; padding:12px; background:#c00000; color:white; border:none; border-radius:10px; font-weight:bold; font-size:16px; margin-top:8px; }
 </style>
 </head>
 <body>
-
-<button class="gear-top" onclick="apriAdmin()">⚙️</button>
 
 <h1>🎙️ RADIO SAMAX</h1>
 <p class="sottotitolo">La Radio dell'Isola d'Elba</p>
@@ -50,120 +41,73 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 <p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
 <p class="small" id="titoloCanzone"></p>
 
-<div class="palinsesto">
-  <h2>📅 PROGRAMMA DI OGGI:</h2>
-  <p id="p-oggi">Caricamento...</p>
-</div>
-
-<div id="adminBox" class="admin-box">
-  <h3 style="margin:0;">🔐 Area DJ Samax</h3>
-  <p style="font-size:13px;">Password:</p>
-  <input type="password" id="adminPass" placeholder="Password">
-  <p style="font-size:13px;">Programma di oggi - scrivi una riga:</p>
-  <input type="text" id="in-oggi" placeholder="Es: Stasera 21:00 DJ Samax Live">
-  <button onclick="salvaPalinsesto()">💾 SALVA</button>
-  <button onclick="cancellaPalinsesto()" style="background:#666;">🗑️ CANCELLA - Lascia vuoto</button>
-  <button onclick="chiudiAdmin()" style="background:#333;">Chiudi</button>
-  <p id="adminMsg" style="font-size:13px; color:green;"></p>
-</div>
-
 <audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <p class="small">DJ Samax - radiosamax.com</p>
 
 <script>
-var SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
-var SUPABASE_KEY = "sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
-var PASSWORD_ADMIN = "astrea.astrea";
-
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
 var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
-var titoloEl = document.getElementById('titoloCanzone');
-var liveRisposto = false;
+var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
+var testAudio = null;
+var timer = null;
+var giaDeciso = false;
 
-function setLive(online, titolo){
-  liveRisposto = true;
-  if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; if(titolo) titoloEl.textContent='🎵 In onda: '+titolo; }
-  else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; titoloEl.textContent=''; }
+function mostraLive(online){
+  if(giaDeciso) return;
+  giaDeciso = true;
+  clearTimeout(timer);
+  if(testAudio){ try{ testAudio.pause(); testAudio.src=''; }catch(e){} testAudio=null; }
+  if(online){
+    dot.className='dot green';
+    txt.textContent='LIVE - IN ONDA';
+    txt.style.color='#00ff5a';
+  } else {
+    dot.className='dot red';
+    txt.textContent='OFFLINE - RADIO SPENTA';
+    txt.style.color='#ff9999';
+  }
 }
+
 btn.onclick = function(){
-  if(audio.paused){ audio.play(); vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; ora.textContent='Stai ascoltando RADIO SAMAX 🎶'; setLive(true); }
-  else { audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; ora.textContent='Premi PLAY per ascoltare'; checkLive(); }
+  if(audio.paused){
+    audio.play();
+    vinyl.classList.add('playing');
+    btn.textContent='⏸️ STOP';
+    ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
+  } else {
+    audio.pause();
+    vinyl.classList.remove('playing');
+    btn.textContent='▶️ PLAY';
+    ora.textContent='Premi PLAY per ascoltare';
+  }
 };
-audio.addEventListener('playing', function(){ setLive(true); });
-audio.addEventListener('error', function(){ setLive(false); });
-
-function caricaPalinsesto(){
-  fetch(SUPABASE_URL + '/rest/v1/palinsesto?id=eq.1&select=oggi', {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-  })
-  .then(r => {
-    if(!r.ok) throw new Error('Errore '+r.status);
-    return r.json();
-  }).then(d => {
-    var testo = (d && d[0] && d[0].oggi) ? d[0].oggi : "";
-    if(testo === ""){
-      document.getElementById('p-oggi').textContent = "Nessun programma oggi - torna dopo";
-    } else {
-      document.getElementById('p-oggi').textContent = testo;
-    }
-    document.getElementById('in-oggi').value = testo;
-  }).catch(e => {
-    document.getElementById('p-oggi').textContent = "Errore palinsesto: " + e.message;
-  });
-}
-caricaPalinsesto();
-
-function apriAdmin(){ document.getElementById('adminBox').style.display='block'; window.scrollTo(0, document.getElementById('adminBox').offsetTop - 80); }
-function chiudiAdmin(){ document.getElementById('adminBox').style.display='none'; }
-
-function salvaPalinsesto(){
-  var pass = document.getElementById('adminPass').value;
-  if(pass !== PASSWORD_ADMIN){ document.getElementById('adminMsg').textContent='❌ Password sbagliata'; document.getElementById('adminMsg').style.color='red'; return; }
-  document.getElementById('adminMsg').textContent='⏳ Salvo...';
-  var nuovo = { oggi: document.getElementById('in-oggi').value };
-  fetch(SUPABASE_URL + '/rest/v1/palinsesto?id=eq.1', {
-    method: 'PATCH',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-    body: JSON.stringify(nuovo)
-  }).then(r => {
-    if(!r.ok) throw new Error('errore '+r.status);
-    document.getElementById('adminMsg').textContent='✅ Salvato! Tutti lo vedono ora';
-    document.getElementById('adminMsg').style.color='green';
-    caricaPalinsesto();
-  })
-  .catch(e => { document.getElementById('adminMsg').textContent='❌ Errore: '+e.message+' - controlla tabella'; document.getElementById('adminMsg').style.color='red'; });
-}
-
-function cancellaPalinsesto(){
-  var pass = document.getElementById('adminPass').value;
-  if(pass !== PASSWORD_ADMIN){ document.getElementById('adminMsg').textContent='❌ Password sbagliata'; document.getElementById('adminMsg').style.color='red'; return; }
-  document.getElementById('in-oggi').value = "";
-  salvaPalinsesto();
-}
 
 function checkLive(){
-  liveRisposto = false;
-  // FIX: se dopo 4 secondi nessuno risponde, metti OFFLINE, non restare bloccato
-  setTimeout(function(){
-    if(!liveRisposto && audio.paused){ setLive(false); }
-  }, 4000);
+  giaDeciso = false;
+  txt.textContent = 'Controllo in corso...';
+  dot.className = 'dot red';
 
-  var target='http://s1.free-shoutcast.com:18404/7.html?rand='+Date.now();
-  var proxies=['https://api.allorigins.win/raw?url='+encodeURIComponent(target),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(target),'https://corsproxy.io/?url='+encodeURIComponent(target)];
-  proxies.forEach(function(u){
-    fetch(u).then(r=>r.text()).then(t=>{
-      if(liveRisposto) return;
-      var pulito=t.replace(/<[^>]*>/g,'').trim();
-      var parts=pulito.split(',');
-      if(parts.length>=2 && parts[1].trim()==='1'){ setLive(true, parts[6]?parts[6].trim():''); }
-    }).catch(()=>{});
-  });
+  // 1 SECONDO: se non arriva niente = ROSSO
+  timer = setTimeout(function(){ mostraLive(false); }, 1000);
+
+  testAudio = new Audio();
+  testAudio.preload = 'auto';
+  testAudio.muted = true;
+  testAudio.volume = 0;
+  testAudio.addEventListener('canplay', function(){ mostraLive(true); });
+  testAudio.addEventListener('playing', function(){ mostraLive(true); });
+  testAudio.addEventListener('canplaythrough', function(){ mostraLive(true); });
+  testAudio.addEventListener('error', function(){ mostraLive(false); });
+  testAudio.src = STREAM + '?check=' + Date.now();
+  try{ testAudio.load(); }catch(e){}
 }
-checkLive(); setInterval(checkLive, 15000);
+
+checkLive();
+setInterval(checkLive, 15000);
 </script>
 </body>
 </html>
