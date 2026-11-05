@@ -12,6 +12,7 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 .dot { display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:8px; vertical-align:middle; }
 .green { background:#00ff5a; box-shadow:0 0 12px #00ff5a; }
 .red { background:#ff2222; box-shadow:0 0 12px #ff2222; }
+.yellow { background:#ffcc00; box-shadow:0 0 12px #ffcc00; }
 .vinyl-wrap { position:relative; width:230px; height:230px; margin:12px auto; }
 .vinyl { width:230px; height:230px; border-radius:50%; background: repeating-radial-gradient(circle at center, #000 0px, #000 2px, #1a1a1a 3px, #000 4px); box-shadow: 0 0 0 5px #fff, 0 10px 30px rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; }
 .vinyl.playing { animation: spin 3s linear infinite; }
@@ -28,8 +29,8 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 <p class="sottotitolo">La Radio dell'Isola d'Elba</p>
 
 <div class="live-box">
-<span id="liveDot" class="dot red"></span>
-<span id="liveText">Controllo in corso...</span>
+<span id="liveDot" class="dot yellow"></span>
+<span id="liveText">Controllo...</span>
 </div>
 
 <div class="vinyl-wrap">
@@ -39,6 +40,7 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 
 <button id="playBtn" class="play-btn">▶️ PLAY</button>
 <p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
+<p class="small" id="debug" style="font-size:11px;opacity:0.9;background:#000;padding:8px;border-radius:8px;max-width:420px;margin:10px auto;word-break:break-all"></p>
 
 <audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <p class="small">DJ Samax - radiosamax.com</p>
@@ -50,82 +52,86 @@ var btn = document.getElementById('playBtn');
 var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
-var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
-var testAudio = null;
-var timer = null;
-var giaDeciso = false;
-var isIPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+var debugEl = document.getElementById('debug');
 
-function mostraLive(online){
-  if(giaDeciso) return;
-  giaDeciso = true;
-  clearTimeout(timer);
-  if(testAudio){ try{ testAudio.pause(); testAudio.src=''; }catch(e){} testAudio=null; }
-  if(online){
-    dot.className='dot green';
-    txt.textContent='LIVE - IN ONDA';
-    txt.style.color='#00ff5a';
-  } else {
-    dot.className='dot red';
-    txt.textContent='OFFLINE - RADIO SPENTA';
-    txt.style.color='#ff9999';
-  }
+function mostraLive(online, motivo){
+  if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; }
+  else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; }
+  if(motivo) debugEl.textContent = motivo + ' - ' + new Date().toLocaleTimeString('it-IT');
 }
 
 btn.onclick = function(){
-  if(audio.paused){
-    audio.play();
-    vinyl.classList.add('playing');
-    btn.textContent='⏸️ STOP';
-    ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
-  } else {
-    audio.pause();
-    vinyl.classList.remove('playing');
-    btn.textContent='▶️ PLAY';
-    ora.textContent='Premi PLAY per ascoltare';
-  }
+  if(audio.paused){ audio.play(); vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; ora.textContent='Stai ascoltando RADIO SAMAX 🎶'; }
+  else { audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; ora.textContent='Premi PLAY per ascoltare'; }
 };
 
 function checkLive(){
-  giaDeciso = false;
-  txt.textContent = 'Controllo in corso...';
-  dot.className = 'dot red';
+  debugEl.textContent = 'Provo HTTPS diretto...';
 
-  // 1 SECONDO
-  timer = setTimeout(function(){ mostraLive(false); }, 1000);
+  // ORA USIAMO HTTPS, NON HTTP - prima il browser lo bloccava
+  var targetHttps = 'https://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
 
-  if(isIPhone){
-    // IPHONE: Safari blocca l'audio prima del tocco, quindi usiamo fetch che non è bloccato
-    // Se il server risponde = in onda, se non risponde = spento
-    var controller = new AbortController();
-    setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 1000);
-    fetch(STREAM + '?check=' + Date.now(), { method: 'GET', mode: 'no-cors', cache: 'no-store', signal: controller.signal })
-    .then(function(){ mostraLive(true); })
-    .catch(function(){ /* se abort perché sta scaricando = è in onda, non è errore */ });
-    // Se dopo 800ms sta ancora scaricando, vuol dire che lo stream c'è
-    setTimeout(function(){
-      if(!giaDeciso){
-        // Se fetch non ha dato errore, il server sta mandando dati = LIVE
-        mostraLive(true);
-      }
-    }, 800);
-  } else {
-    // PC / ANDROID: test audio normale
-    testAudio = new Audio();
-    testAudio.preload = 'auto';
-    testAudio.muted = true;
-    testAudio.volume = 0;
-    testAudio.addEventListener('canplay', function(){ mostraLive(true); });
-    testAudio.addEventListener('playing', function(){ mostraLive(true); });
-    testAudio.addEventListener('canplaythrough', function(){ mostraLive(true); });
-    testAudio.addEventListener('error', function(){ mostraLive(false); });
-    testAudio.src = STREAM + '?check=' + Date.now();
-    try{ testAudio.load(); }catch(e){}
+  // 1. PRIMA PROVA DIRETTA, SENZA PROXY - a volte free-shoutcast lascia passare
+  fetch(targetHttps).then(function(r){ return r.text(); }).then(function(t){
+    var pulito = t.replace(/<[^>]*>/g,'').trim();
+    var parti = pulito.split(',');
+    if(parti.length >= 2 && (parti[1].trim()==='1' || parti[1].trim()==='0')){
+      if(parti[1].trim()==='1') mostraLive(true, 'DIRETTO HTTPS: Mixxx collegato 7.html=1');
+      else mostraLive(false, 'DIRETTO HTTPS: Mixxx spento 7.html=0');
+      return;
+    }
+    provaProxy();
+  }).catch(function(){ provaProxy(); });
+
+  function provaProxy(){
+    debugEl.textContent = 'Diretto bloccato, provo proxy HTTPS...';
+    var urls = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetHttps),
+      'https://api.allorigins.win/get?url=' + encodeURIComponent(targetHttps),
+      'https://corsproxy.io/?url=' + encodeURIComponent(targetHttps)
+    ];
+    var finito = false, risposte = 0, ultimo = '';
+    urls.forEach(function(u){
+      fetch(u).then(function(r){ return r.text(); }).then(function(t){
+        if(finito) return;
+        try{ var j = JSON.parse(t); if(j.contents) t = j.contents; }catch(e){}
+        var pulito = t.replace(/<[^>]*>/g,'').trim();
+        var parti = pulito.split(',');
+        risposte++; ultimo = pulito.substring(0,80);
+        if(parti.length >= 2 && (parti[1].trim()==='1' || parti[1].trim()==='0')){
+          finito = true;
+          if(parti[1].trim()==='1') mostraLive(true, 'PROXY: Mixxx collegato 7.html=1');
+          else mostraLive(false, 'PROXY: Mixxx spento 7.html=0');
+        } else if(risposte >= 3){
+          finito = true;
+          provaAudio(ultimo);
+        }
+      }).catch(function(e){
+        risposte++; ultimo = 'errore ' + e.message;
+        if(risposte >= 3 && !finito){ finito = true; provaAudio(ultimo); }
+      });
+    });
+  }
+
+  function provaAudio(ultimo){
+    // Ultima spiaggia: se 7.html non passa, usiamo lo stream
+    // Se lo stream carica in 2 secondi = server manda dati = per ora VERDE
+    debugEl.textContent = '7.html bloccato [' + ultimo + '], provo stream...';
+    var ta = new Audio();
+    ta.preload = 'auto'; ta.muted = true; ta.volume = 0;
+    var fatto = false;
+    setTimeout(function(){ if(!fatto) mostraLive(false, 'Stream non carica = OFFLINE'); }, 2000);
+    ta.addEventListener('canplay', function(){ if(!fatto){ fatto=true; mostraLive(true, 'Stream carica = IN ONDA (7.html bloccato da free-shoutcast)'); } });
+    ta.addEventListener('playing', function(){ if(!fatto){ fatto=true; mostraLive(true, 'Stream suona = IN ONDA'); } });
+    ta.addEventListener('error', function(){ if(!fatto){ fatto=true; mostraLive(false, 'Stream errore = OFFLINE'); } });
+    ta.src = 'https://s1.free-shoutcast.com/stream/18404?check=' + Date.now();
+    try{ ta.load(); }catch(e){}
   }
 }
 
 checkLive();
-setInterval(checkLive, 15000);
+setInterval(checkLive, 5000);
+document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 </script>
 </body>
 </html>
