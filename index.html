@@ -52,7 +52,6 @@ var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
-var testAudio = null;
 var staControllando = false;
 
 function mostraLive(online){
@@ -62,11 +61,10 @@ function mostraLive(online){
 
 btn.onclick = function(){
   if(audio.paused){
-    audio.play();
+    audio.play().catch(function(){});
     vinyl.classList.add('playing');
     btn.textContent='⏸️ STOP';
     ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
-    // Se hai premuto PLAY e parte, sei LIVE - non serve altro test
     mostraLive(true);
   } else {
     audio.pause();
@@ -77,13 +75,13 @@ btn.onclick = function(){
   }
 };
 
-// Se l'audio principale va in errore da solo = spento
-audio.addEventListener('error', function(){ mostraLive(false); });
 audio.addEventListener('playing', function(){ mostraLive(true); });
+audio.addEventListener('error', function(){ mostraLive(false); });
+audio.addEventListener('stalled', function(){ /* se si blocca da solo, non fare niente, lascia che riparta */ });
 
 function checkLive(){
-  // FIX IPHONE: se la musica sta già suonando, non fare il secondo test
-  // Safari blocca il secondo audio e direbbe OFFLINE anche se sei in onda
+  // REGOLA D'ORO: se stai ascoltando, NON testare. Sei LIVE e basta.
+  // Così non ci sono 2 audio insieme e non fa più rumori.
   if(!audio.paused){
     mostraLive(true);
     return;
@@ -91,34 +89,40 @@ function checkLive(){
   if(staControllando) return;
   staControllando = true;
 
-  testAudio = new Audio();
-  testAudio.preload = 'auto';
-  testAudio.muted = true;
-  testAudio.volume = 0;
-  var deciso = false;
+  // Test silenzioso: prendi solo 1 pezzettino di stream e chiudi subito, senza audio
+  // Se arrivano dati = IN ONDA, se non arriva niente in 2,5s = SPENTO
+  var controller = new AbortController();
+  var timeout = setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 2500);
+  var arrivato = false;
 
-  function finisci(online){
-    if(deciso) return;
-    deciso = true;
+  fetch(STREAM + '?check=' + Date.now(), { signal: controller.signal, cache: 'no-store' })
+  .then(function(res){
+    if(!res.body) throw new Error('no body');
+    var reader = res.body.getReader();
+    return reader.read().then(function(r){
+      if(r.value && r.value.length > 0) arrivato = true;
+      try{ controller.abort(); }catch(e){}
+      try{ reader.cancel(); }catch(e){}
+    });
+  })
+  .then(function(){
+    clearTimeout(timeout);
     staControllando = false;
-    try{ testAudio.pause(); testAudio.src=''; }catch(e){}
-    testAudio = null;
-    // Se nel frattempo l'utente ha premuto PLAY, non sovrascrivere
     if(!audio.paused) mostraLive(true);
-    else mostraLive(online);
-  }
-
-  testAudio.addEventListener('canplay', function(){ finisci(true); });
-  testAudio.addEventListener('playing', function(){ finisci(true); });
-  testAudio.addEventListener('error', function(){ finisci(false); });
-  setTimeout(function(){ finisci(false); }, 2500);
-
-  testAudio.src = STREAM + '?check=' + Date.now();
-  try{ testAudio.load(); }catch(e){ finisci(false); }
+    else mostraLive(arrivato);
+  })
+  .catch(function(){
+    clearTimeout(timeout);
+    staControllando = false;
+    // Se fetch viene interrotto perché i dati sono arrivati, è LIVE
+    if(arrivato) mostraLive(true);
+    else if(!audio.paused) mostraLive(true);
+    else mostraLive(false);
+  });
 }
 
 checkLive();
-setInterval(checkLive, 4000);
+setInterval(checkLive, 10000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 </script>
 </body>
