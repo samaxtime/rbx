@@ -71,11 +71,9 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 <p class="small">DJ Samax - radiosamax.com</p>
 
 <script>
-// ====== DATI JSONBIN ======
-var BIN_ID = "METTI_QUI_BIN_ID";
-var API_KEY = "METTI_QUI_API_KEY";
+var SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
+var SUPABASE_KEY = "sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
 var PASSWORD_ADMIN = "astrea.astrea";
-// ===========================
 
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
@@ -96,9 +94,11 @@ btn.onclick = function(){
 audio.addEventListener('playing', function(){ setLive(true); });
 
 function caricaPalinsesto(){
-  fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', { headers: { 'X-Master-Key': API_KEY } })
+  fetch(SUPABASE_URL + '/rest/v1/palinsesto?id=eq.1&select=oggi', {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  })
   .then(r => r.json()).then(d => {
-    var testo = (d.record && d.record.oggi) ? d.record.oggi : "";
+    var testo = (d && d[0] && d[0].oggi) ? d[0].oggi : "";
     document.getElementById('p-oggi').textContent = testo;
     document.getElementById('in-oggi').value = testo;
   }).catch(()=>{ document.getElementById('p-oggi').textContent = ""; });
@@ -111,13 +111,19 @@ function chiudiAdmin(){ document.getElementById('adminBox').style.display='none'
 function salvaPalinsesto(){
   var pass = document.getElementById('adminPass').value;
   if(pass !== PASSWORD_ADMIN){ document.getElementById('adminMsg').textContent='❌ Password sbagliata'; document.getElementById('adminMsg').style.color='red'; return; }
+  document.getElementById('adminMsg').textContent='⏳ Salvo...';
   var nuovo = { oggi: document.getElementById('in-oggi').value };
-  fetch('https://api.jsonbin.io/v3/b/' + BIN_ID, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+  fetch(SUPABASE_URL + '/rest/v1/palinsesto?id=eq.1', {
+    method: 'PATCH',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
     body: JSON.stringify(nuovo)
-  }).then(()=>{ document.getElementById('adminMsg').textContent='✅ Salvato!'; document.getElementById('adminMsg').style.color='green'; caricaPalinsesto(); })
-  .catch(()=>{ document.getElementById('adminMsg').textContent='Errore, riprova'; });
+  }).then(r => {
+    if(!r.ok) throw new Error('errore '+r.status);
+    document.getElementById('adminMsg').textContent='✅ Salvato! Tutti lo vedono ora';
+    document.getElementById('adminMsg').style.color='green';
+    caricaPalinsesto();
+  })
+  .catch(e => { document.getElementById('adminMsg').textContent='❌ Errore: '+e.message+' - controlla chiave e tabella'; document.getElementById('adminMsg').style.color='red'; });
 }
 
 function cancellaPalinsesto(){
