@@ -54,18 +54,16 @@ var txt = document.getElementById('liveText');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var staControllando = false;
 var stalloTimer = null;
+var appenaPremutoPlay = false;
 
 function mostraLive(online){
   if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; }
   else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; }
 }
 
-// Questa è la cosa nuova che hai chiesto tu:
 function staccaTutto(){
-  // Ferma la musica, ferma il vinile, torna a PLAY, torna OFFLINE
+  // Non toccare src qui, altrimenti fa un loop e si ferma da solo
   try{ audio.pause(); }catch(e){}
-  audio.src = STREAM;
-  audio.load();
   vinyl.classList.remove('playing');
   btn.textContent='▶️ PLAY';
   ora.textContent='Mixxx ha staccato ON AIR - Radio spenta';
@@ -74,15 +72,17 @@ function staccaTutto(){
 
 btn.onclick = function(){
   if(audio.paused){
-    // Ricarica lo stream da zero, così se hai riattaccato Mixxx riparte pulito
-    audio.src = STREAM + '?t=' + Date.now();
-    audio.load();
+    appenaPremutoPlay = true;
+    // Non cambiare src ogni volta, usa quello che c'è già, così non fa emptied
     audio.play().catch(function(){});
     vinyl.classList.add('playing');
     btn.textContent='⏸️ STOP';
     ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
     mostraLive(true);
+    // Dopo 2 secondi, puoi fidarti degli eventi di stallo
+    setTimeout(function(){ appenaPremutoPlay = false; }, 2000);
   } else {
+    if(stalloTimer) clearTimeout(stalloTimer);
     try{ audio.pause(); }catch(e){}
     vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY';
@@ -99,77 +99,61 @@ audio.addEventListener('playing', function(){
   ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
 });
 
-// Se l'audio si blocca da solo perché hai staccato ON AIR in Mixxx
-audio.addEventListener('error', function(){ if(!audio.paused) staccaTutto(); });
-audio.addEventListener('ended', function(){ staccaTutto(); });
-audio.addEventListener('emptied', function(){ if(!audio.paused) staccaTutto(); });
+// Se l'audio va in errore mentre sta suonando = hai staccato ON AIR
+audio.addEventListener('error', function(){
+  if(!audio.paused && !appenaPremutoPlay) staccaTutto();
+});
 
-// Se si ferma per più di 3 secondi mentre dovrebbe suonare = hai staccato
-audio.addEventListener('stalled', function(){
+// Se si blocca mentre dovrebbe suonare, aspetta 4 secondi e poi stacca tutto
+function controllaStallo(){
+  if(appenaPremutoPlay) return;
   if(stalloTimer) clearTimeout(stalloTimer);
   stalloTimer = setTimeout(function(){
-    if(!audio.paused) staccaTutto();
-  }, 3000);
-});
-audio.addEventListener('waiting', function(){
-  if(stalloTimer) clearTimeout(stalloTimer);
-  stalloTimer = setTimeout(function(){
-    if(!audio.paused) staccaTutto();
-  }, 3000);
-});
+    if(!audio.paused && !appenaPremutoPlay) staccaTutto();
+  }, 4000);
+}
+audio.addEventListener('stalled', controllaStallo);
+audio.addEventListener('waiting', controllaStallo);
+audio.addEventListener('suspend', controllaStallo);
 
 function checkLive(){
+  // REGOLA FIX: se stai ascoltando, NON controllare con fetch.
+  // Il fetch su free-shoutcast viene bloccato e ti metteva OFFLINE anche se suonava.
+  if(!audio.paused){
+    mostraLive(true);
+    return;
+  }
   if(staControllando) return;
   staControllando = true;
 
-  // Ora controllo SEMPRE, anche se stai ascoltando.
-  // Uso fetch, non un secondo audio, così non fa rumori.
-  var controller = new AbortController();
-  var timeout = setTimeout(function(){ try{ controller.abort(); }catch(e){} }, 2500);
-  var arrivato = false;
+  // Controllo solo quando sei in pausa, con un audio di test muto e corto
+  var testAudio = new Audio();
+  testAudio.preload = 'auto';
+  testAudio.muted = true;
+  testAudio.volume = 0;
+  var deciso = false;
 
-  fetch(STREAM + '?check=' + Date.now(), { signal: controller.signal, cache: 'no-store' })
-  .then(function(res){
-    if(!res.body) throw new Error('no body');
-    var reader = res.body.getReader();
-    return reader.read().then(function(r){
-      if(r.value && r.value.length > 0) arrivato = true;
-      try{ controller.abort(); }catch(e){}
-      try{ reader.cancel(); }catch(e){}
-    });
-  })
-  .then(function(){
-    clearTimeout(timeout);
+  function finisci(online){
+    if(deciso) return;
+    deciso = true;
     staControllando = false;
-    if(arrivato){
-      mostraLive(true);
-      // Se eri in PLAY ma si era fermato, non farlo ripartire da solo, aspetta che premi PLAY
-    } else {
-      // Stream morto = hai staccato ON AIR in Mixxx
-      if(!audio.paused){
-        staccaTutto();
-      } else {
-        mostraLive(false);
-      }
-    }
-  })
-  .catch(function(){
-    clearTimeout(timeout);
-    staControllando = false;
-    if(arrivato){
-      mostraLive(true);
-    } else {
-      if(!audio.paused){
-        staccaTutto();
-      } else {
-        mostraLive(false);
-      }
-    }
-  });
+    try{ testAudio.pause(); testAudio.src=''; }catch(e){}
+    testAudio = null;
+    if(!audio.paused) mostraLive(true);
+    else mostraLive(online);
+  }
+
+  testAudio.addEventListener('canplay', function(){ finisci(true); });
+  testAudio.addEventListener('playing', function(){ finisci(true); });
+  testAudio.addEventListener('error', function(){ finisci(false); });
+  setTimeout(function(){ finisci(false); }, 2500);
+
+  testAudio.src = STREAM + '?check=' + Date.now();
+  try{ testAudio.load(); }catch(e){ finisci(false); }
 }
 
 checkLive();
-setInterval(checkLive, 5000);
+setInterval(checkLive, 8000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 </script>
 </body>
