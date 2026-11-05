@@ -19,11 +19,19 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 .label { width:82px; height:82px; border-radius:50%; background:#ff0000; display:flex; align-items:center; justify-content:center; text-align:center; font-size:11px; font-weight:bold; line-height:1.2; color:white; border:3px solid white; }
 .hole { width:10px; height:10px; background:white; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2; }
 .play-btn { margin-top:18px; background:white; color:#c00000; border:none; padding:15px 45px; font-size:22px; font-weight:bold; border-radius:50px; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.4); }
-.play-btn:active { transform:scale(0.96); }
 .small { color:#ffd9d9; font-size:13px; margin-top:6px; }
+.palinsesto { background: rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.35); border-radius:18px; padding:14px 16px; max-width:340px; margin:14px auto 0 auto; text-align:center; }
+.palinsesto h2 { margin:0 0 6px 0; font-size:17px; }
+.palinsesto p { margin:6px 0; font-size:16px; color:white; }
+.gear-top { position:fixed; top:10px; right:12px; z-index:100; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.4); color:white; width:38px; height:38px; border-radius:50%; font-size:19px; cursor:pointer; }
+.admin-box { display:none; background:white; color:black; border-radius:16px; padding:16px; max-width:340px; margin:12px auto; text-align:left; }
+.admin-box input { width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; font-size:15px; }
+.admin-box button { width:100%; padding:12px; background:#c00000; color:white; border:none; border-radius:10px; font-weight:bold; font-size:16px; margin-top:8px; }
 </style>
 </head>
 <body>
+
+<button class="gear-top" onclick="apriAdmin()">⚙️</button>
 
 <h1>🎙️ RADIO SAMAX</h1>
 <p class="sottotitolo">La Radio dell'Isola d'Elba</p>
@@ -34,9 +42,7 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 </div>
 
 <div class="vinyl-wrap">
-  <div id="vinyl" class="vinyl">
-    <div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div>
-  </div>
+  <div id="vinyl" class="vinyl"><div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div></div>
   <div class="hole"></div>
 </div>
 
@@ -44,13 +50,33 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 <p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
 <p class="small" id="titoloCanzone"></p>
 
-<audio id="radioAudio" preload="none">
-<source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg">
-</audio>
+<div class="palinsesto">
+  <h2>📅 PROGRAMMA DI OGGI:</h2>
+  <p id="p-oggi"></p>
+</div>
 
+<div id="adminBox" class="admin-box">
+  <h3 style="margin:0;">🔐 Area DJ Samax</h3>
+  <p style="font-size:13px;">Password:</p>
+  <input type="password" id="adminPass" placeholder="Password">
+  <p style="font-size:13px;">Programma di oggi - scrivi una riga:</p>
+  <input type="text" id="in-oggi" placeholder="Es: Stasera 21:00 DJ Samax Live">
+  <button onclick="salvaPalinsesto()">💾 SALVA</button>
+  <button onclick="cancellaPalinsesto()" style="background:#666;">🗑️ CANCELLA - Lascia vuoto</button>
+  <button onclick="chiudiAdmin()" style="background:#333;">Chiudi</button>
+  <p id="adminMsg" style="font-size:13px; color:green;"></p>
+</div>
+
+<audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <p class="small">DJ Samax - radiosamax.com</p>
 
 <script>
+// ====== DATI JSONBIN ======
+var BIN_ID = "METTI_QUI_BIN_ID";
+var API_KEY = "METTI_QUI_API_KEY";
+var PASSWORD_ADMIN = "astrea.astrea";
+// ===========================
+
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
@@ -60,61 +86,54 @@ var txt = document.getElementById('liveText');
 var titoloEl = document.getElementById('titoloCanzone');
 
 function setLive(online, titolo){
-  if(online){
-    dot.className = 'dot green';
-    txt.textContent = 'LIVE - IN ONDA';
-    txt.style.color = '#00ff5a';
-    if(titolo) titoloEl.textContent = '🎵 In onda: ' + titolo;
-  } else {
-    dot.className = 'dot red';
-    txt.textContent = 'OFFLINE - RADIO SPENTA';
-    txt.style.color = '#ff9999';
-    titoloEl.textContent = '';
-  }
+  if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; if(titolo) titoloEl.textContent='🎵 In onda: '+titolo; }
+  else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; titoloEl.textContent=''; }
 }
-
-btn.onclick = function() {
-  if (audio.paused) {
-    audio.play();
-    vinyl.classList.add('playing');
-    btn.textContent = '⏸️ STOP';
-    ora.textContent = 'Stai ascoltando RADIO SAMAX 🎶';
-  } else {
-    audio.pause();
-    vinyl.classList.remove('playing');
-    btn.textContent = '▶️ PLAY';
-    ora.textContent = 'Premi PLAY per ascoltare';
-    checkLive();
-  }
+btn.onclick = function(){
+  if(audio.paused){ audio.play(); vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; ora.textContent='Stai ascoltando RADIO SAMAX 🎶'; }
+  else { audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; ora.textContent='Premi PLAY per ascoltare'; checkLive(); }
 };
-
 audio.addEventListener('playing', function(){ setLive(true); });
 
-function checkLive() {
-  var target = 'http://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
-  var proxies = [
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
-    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target),
-    'https://corsproxy.io/?url=' + encodeURIComponent(target)
-  ];
-  var giaRisposto = false;
-  proxies.forEach(function(u){
-    fetch(u).then(r => r.text()).then(t => {
-      if(giaRisposto) return;
-      var pulito = t.replace(/<[^>]*>/g, '').trim();
-      var parts = pulito.split(',');
-      if(parts.length >= 2 && parts[1].trim() === '1'){
-        giaRisposto = true;
-        setLive(true, parts[6] ? parts[6].trim() : '');
-      } else if(parts.length >= 2 && parts[1].trim() === '0'){
-        setTimeout(function(){ if(!giaRisposto) setLive(false); }, 2500);
-      }
-    }).catch(()=>{});
-  });
+function caricaPalinsesto(){
+  fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', { headers: { 'X-Master-Key': API_KEY } })
+  .then(r => r.json()).then(d => {
+    var testo = (d.record && d.record.oggi) ? d.record.oggi : "";
+    document.getElementById('p-oggi').textContent = testo;
+    document.getElementById('in-oggi').value = testo;
+  }).catch(()=>{ document.getElementById('p-oggi').textContent = ""; });
 }
-checkLive();
-setInterval(checkLive, 5000);
-</script>
+caricaPalinsesto();
 
+function apriAdmin(){ document.getElementById('adminBox').style.display='block'; window.scrollTo(0, document.getElementById('adminBox').offsetTop - 80); }
+function chiudiAdmin(){ document.getElementById('adminBox').style.display='none'; }
+
+function salvaPalinsesto(){
+  var pass = document.getElementById('adminPass').value;
+  if(pass !== PASSWORD_ADMIN){ document.getElementById('adminMsg').textContent='❌ Password sbagliata'; document.getElementById('adminMsg').style.color='red'; return; }
+  var nuovo = { oggi: document.getElementById('in-oggi').value };
+  fetch('https://api.jsonbin.io/v3/b/' + BIN_ID, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+    body: JSON.stringify(nuovo)
+  }).then(()=>{ document.getElementById('adminMsg').textContent='✅ Salvato!'; document.getElementById('adminMsg').style.color='green'; caricaPalinsesto(); })
+  .catch(()=>{ document.getElementById('adminMsg').textContent='Errore, riprova'; });
+}
+
+function cancellaPalinsesto(){
+  var pass = document.getElementById('adminPass').value;
+  if(pass !== PASSWORD_ADMIN){ document.getElementById('adminMsg').textContent='❌ Password sbagliata'; document.getElementById('adminMsg').style.color='red'; return; }
+  document.getElementById('in-oggi').value = "";
+  salvaPalinsesto();
+}
+
+function checkLive(){
+  var target='http://s1.free-shoutcast.com:18404/7.html?rand='+Date.now();
+  var proxies=['https://api.allorigins.win/raw?url='+encodeURIComponent(target),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(target),'https://corsproxy.io/?url='+encodeURIComponent(target)];
+  var gia=false;
+  proxies.forEach(function(u){ fetch(u).then(r=>r.text()).then(t=>{ if(gia) return; var pulito=t.replace(/<[^>]*>/g,'').trim(); var parts=pulito.split(','); if(parts.length>=2 && parts[1].trim()==='1'){ gia=true; setLive(true, parts[6]?parts[6].trim():''); } else if(parts.length>=2 && parts[1].trim()==='0'){ setTimeout(function(){ if(!gia) setLive(false); },2500); } }).catch(()=>{}); });
+}
+checkLive(); setInterval(checkLive, 5000);
+</script>
 </body>
 </html>
