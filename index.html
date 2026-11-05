@@ -52,38 +52,24 @@ var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
+var testAudio = null;
 var staControllando = false;
-var stalloTimer = null;
-var appenaPremutoPlay = false;
 
 function mostraLive(online){
   if(online){ dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a'; }
   else { dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999'; }
 }
 
-function staccaTutto(){
-  // Non toccare src qui, altrimenti fa un loop e si ferma da solo
-  try{ audio.pause(); }catch(e){}
-  vinyl.classList.remove('playing');
-  btn.textContent='▶️ PLAY';
-  ora.textContent='Mixxx ha staccato ON AIR - Radio spenta';
-  mostraLive(false);
-}
-
 btn.onclick = function(){
   if(audio.paused){
-    appenaPremutoPlay = true;
-    // Non cambiare src ogni volta, usa quello che c'è già, così non fa emptied
-    audio.play().catch(function(){});
+    audio.play();
     vinyl.classList.add('playing');
     btn.textContent='⏸️ STOP';
     ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
+    // Se hai premuto PLAY e parte, sei LIVE - non serve altro test
     mostraLive(true);
-    // Dopo 2 secondi, puoi fidarti degli eventi di stallo
-    setTimeout(function(){ appenaPremutoPlay = false; }, 2000);
   } else {
-    if(stalloTimer) clearTimeout(stalloTimer);
-    try{ audio.pause(); }catch(e){}
+    audio.pause();
     vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY';
     ora.textContent='Premi PLAY per ascoltare';
@@ -91,34 +77,13 @@ btn.onclick = function(){
   }
 };
 
-audio.addEventListener('playing', function(){
-  if(stalloTimer) clearTimeout(stalloTimer);
-  mostraLive(true);
-  vinyl.classList.add('playing');
-  btn.textContent='⏸️ STOP';
-  ora.textContent='Stai ascoltando RADIO SAMAX 🎶';
-});
-
-// Se l'audio va in errore mentre sta suonando = hai staccato ON AIR
-audio.addEventListener('error', function(){
-  if(!audio.paused && !appenaPremutoPlay) staccaTutto();
-});
-
-// Se si blocca mentre dovrebbe suonare, aspetta 4 secondi e poi stacca tutto
-function controllaStallo(){
-  if(appenaPremutoPlay) return;
-  if(stalloTimer) clearTimeout(stalloTimer);
-  stalloTimer = setTimeout(function(){
-    if(!audio.paused && !appenaPremutoPlay) staccaTutto();
-  }, 4000);
-}
-audio.addEventListener('stalled', controllaStallo);
-audio.addEventListener('waiting', controllaStallo);
-audio.addEventListener('suspend', controllaStallo);
+// Se l'audio principale va in errore da solo = spento
+audio.addEventListener('error', function(){ mostraLive(false); });
+audio.addEventListener('playing', function(){ mostraLive(true); });
 
 function checkLive(){
-  // REGOLA FIX: se stai ascoltando, NON controllare con fetch.
-  // Il fetch su free-shoutcast viene bloccato e ti metteva OFFLINE anche se suonava.
+  // FIX IPHONE: se la musica sta già suonando, non fare il secondo test
+  // Safari blocca il secondo audio e direbbe OFFLINE anche se sei in onda
   if(!audio.paused){
     mostraLive(true);
     return;
@@ -126,8 +91,7 @@ function checkLive(){
   if(staControllando) return;
   staControllando = true;
 
-  // Controllo solo quando sei in pausa, con un audio di test muto e corto
-  var testAudio = new Audio();
+  testAudio = new Audio();
   testAudio.preload = 'auto';
   testAudio.muted = true;
   testAudio.volume = 0;
@@ -139,6 +103,7 @@ function checkLive(){
     staControllando = false;
     try{ testAudio.pause(); testAudio.src=''; }catch(e){}
     testAudio = null;
+    // Se nel frattempo l'utente ha premuto PLAY, non sovrascrivere
     if(!audio.paused) mostraLive(true);
     else mostraLive(online);
   }
@@ -153,7 +118,7 @@ function checkLive(){
 }
 
 checkLive();
-setInterval(checkLive, 8000);
+setInterval(checkLive, 4000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 </script>
 </body>
