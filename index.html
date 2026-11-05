@@ -6,8 +6,6 @@
 <title>RADIO SAMAX - Live</title>
 <style>
 body { text-align:center; font-family:sans-serif; background: linear-gradient(180deg, #7a0000 0%, #c00000 45%, #4d0000 100%); color:white; padding:20px; margin:0; min-height:100vh; }
-.top-visite { background: rgba(0,0,0,0.35); display:inline-block; padding:8px 18px; border-radius:30px; font-size:16px; color:#ffd9d9; margin-bottom:5px; border:1px solid rgba(255,255,255,0.3); }
-.top-visite b { color:white; font-size:20px; }
 h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a0000, 0 0 20px rgba(0,0,0,0.5); }
 .sottotitolo { color:#ffd9d9; font-size:16px; margin:5px 0 0 0; }
 .live-box { display:inline-block; padding:9px 20px; border-radius:30px; background:#1a0000; font-weight:bold; margin:15px 0; font-size:18px; border:2px solid white; }
@@ -26,9 +24,6 @@ h1 { font-size:42px; margin:10px 0 0 0; color:white; text-shadow: 0 3px 0 #7a000
 </style>
 </head>
 <body>
-
-<div class="top-visite">🎧 In ascolto ora: <b id="ascoltatori">0</b></div>
-<div style="font-size:13px; color:#ffd9d9;">👀 Visitatori unici totali: <b id="visite" style="color:white;">...</b></div>
 
 <h1>🎙️ RADIO SAMAX</h1>
 <p class="sottotitolo">La Radio dell'Isola d'Elba</p>
@@ -63,21 +58,18 @@ var ora = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var titoloEl = document.getElementById('titoloCanzone');
-var ascoltatoriEl = document.getElementById('ascoltatori');
 
-function setLive(online, titolo, ascoltatori){
+function setLive(online, titolo){
   if(online){
     dot.className = 'dot green';
     txt.textContent = 'LIVE - IN ONDA';
     txt.style.color = '#00ff5a';
     if(titolo) titoloEl.textContent = '🎵 In onda: ' + titolo;
-    if(ascoltatori !== undefined) ascoltatoriEl.textContent = ascoltatori;
   } else {
     dot.className = 'dot red';
     txt.textContent = 'OFFLINE - RADIO SPENTA';
     txt.style.color = '#ff9999';
     titoloEl.textContent = '';
-    ascoltatoriEl.textContent = '0';
   }
 }
 
@@ -98,22 +90,6 @@ btn.onclick = function() {
 
 audio.addEventListener('playing', function(){ setLive(true); });
 
-// --- CONTATORE NUOVO, PARTE DA ZERO ---
-// Ho cambiato nome, così il vecchio 9 non c'è più
-var CONTATORE_NUOVO = 'radiosamax-2026-nuovo';
-if(localStorage.getItem('radiosamax_gia_contato_nuovo') === 'si'){
-  fetch('https://abacus.jasoncameron.dev/info/' + CONTATORE_NUOVO + '/visite')
-  .then(r => r.json()).then(d => { document.getElementById('visite').textContent = d.value; })
-  .catch(() => { document.getElementById('visite').textContent = '0'; });
-} else {
-  fetch('https://abacus.jasoncameron.dev/hit/' + CONTATORE_NUOVO + '/visite')
-  .then(r => r.json()).then(d => {
-    document.getElementById('visite').textContent = d.value;
-    localStorage.setItem('radiosamax_gia_contato_nuovo', 'si');
-  })
-  .catch(() => { document.getElementById('visite').textContent = '0'; });
-}
-
 function checkLive() {
   var target = 'http://s1.free-shoutcast.com:18404/7.html?rand=' + Date.now();
   var proxies = [
@@ -129,7 +105,7 @@ function checkLive() {
       var parts = pulito.split(',');
       if(parts.length >= 2 && parts[1].trim() === '1'){
         giaRisposto = true;
-        setLive(true, parts[6] ? parts[6].trim() : '', parts[0].trim());
+        setLive(true, parts[6] ? parts[6].trim() : '');
       } else if(parts.length >= 2 && parts[1].trim() === '0'){
         setTimeout(function(){ if(!giaRisposto) setLive(false); }, 2500);
       }
