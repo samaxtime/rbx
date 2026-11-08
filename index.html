@@ -15,10 +15,9 @@
 body{margin:0;padding:0;text-align:center;font-family:Arial,sans-serif;background:#000;color:white;min-height:100vh}
 h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#fff;text-shadow:0 0 15px #ff0000,0 0 30px #ff2222;font-weight:900}
 .sottotitolo{color:#ff9a9a;font-size:13px;letter-spacing:3px;margin:6px 0 0 0;font-weight:bold}
-.live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222}
+.live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222;min-width:210px;min-height:42px}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}.yellow{background:#ffcc00;box-shadow:0 0 14px #ffcc00}
-#onlineBanner{display:none;max-width:440px;margin:14px auto 0 auto;padding:10px 14px;background:#00a845;border-radius:16px;font-weight:900;font-size:14px}
 #countdownBox{display:none;max-width:440px;margin:16px auto 0 auto;padding:18px 14px;background:linear-gradient(135deg,#ff0000,#ff6600,#ff0000);background-size:300% 300%;border-radius:20px;border:2px solid #ffcc00;box-shadow:0 0 30px #ff0000,0 0 60px rgba(255,0,0,0.6);animation:fuoco 2s infinite;will-change:background-position}
 @keyframes fuoco{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 #countdownBox small{font-size:12px;letter-spacing:4px;font-weight:900;color:#ffcc00}
@@ -57,9 +56,7 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 <h1>RADIO<br>SAMAX</h1>
 <p class="sottotitolo">LA RADIO DELL'ISOLA D'ELBA</p>
 
-<div class="live-box"><span id="liveDot" class="dot yellow"></span><span id="liveText">Controllo...</span></div>
-
-<div id="onlineBanner">🟢 SIAMO IN ONDA - PREMI PLAY!</div>
+<div class="live-box"><span id="liveDot" class="dot yellow"></span><span id="liveText"></span></div>
 
 <div id="countdownBox">
   <small id="countdownLabel">⏳ PROSSIMO PROGRAMMA</small>
@@ -176,7 +173,6 @@ async function caricaDaSheet(){
     if(lista.length>0) mostraProgrammi(lista); else mostraProgrammi(PROGRAMMI_DEFAULT);
   }catch(e){ mostraProgrammi(PROGRAMMI_DEFAULT); }
 }
-// Carica programmi DOPO che la pagina si vede - cosi' il PLAY appare subito
 if(window.requestIdleCallback){ requestIdleCallback(function(){ caricaDaSheet(); }); } else { setTimeout(caricaDaSheet, 100); }
 setInterval(caricaDaSheet,60000);
 var audio = document.getElementById('radioAudio');
@@ -185,30 +181,34 @@ var btn = document.getElementById('playBtn');
 var oraEl = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
-var onlineBanner = document.getElementById('onlineBanner');
 var titoloLive = document.getElementById('titoloLive');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var isOnline = null; var failCount = 0; var staControllando = false; var testAudio = null;
+// CONTROLLO INVISIBILE - nessuno vede "Controllo", solo il risultato finale
 function mostraLive(online){
   if(online){ failCount = 0; } else { failCount++; }
   if(!online && failCount < 2 && isOnline === true){ return; }
   if(online === isOnline && !audio.paused && online) return;
   isOnline = online;
   if(online){
+    // SOLO QUESTO: verde + LIVE - IN ONDA
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
-    onlineBanner.style.display='block'; vinyl.classList.remove('offline');
+    vinyl.classList.remove('offline');
     btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='MIDNIGHT FREQUENCY';
     if(audio.paused) oraEl.textContent='Premi PLAY per ascoltare';
   } else {
+    // SOLO QUESTO: rosso + OFFLINE - RADIO SPENTA
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
-    onlineBanner.style.display='none'; vinyl.classList.add('offline'); vinyl.classList.remove('playing');
+    vinyl.classList.add('offline'); vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY'; titoloLive.textContent='RADIO OFFLINE'; oraEl.textContent='';
     if(!audio.paused) audio.pause();
   }
 }
 btn.onclick = function(){
   if(!audio.paused){ audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare'; checkLive(); return; }
+  // Se OFFLINE -> alert come ora
   if(isOnline === false){ alert("RADIO SAMAX al momento non è online. Torna presto!"); checkLive(); return; }
+  // Se ONLINE -> PLAY ok
   oraEl.textContent='Connessione in corso... 🎶';
   audio.src = STREAM + '?play=' + Date.now();
   audio.play().then(function(){ vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶'; mostraLive(true); }).catch(function(){ oraEl.textContent='Non riesco a collegarmi, riprovo...'; btn.textContent='▶️ PLAY'; mostraLive(false); });
