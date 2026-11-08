@@ -12,12 +12,7 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 .live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222;box-shadow:0 0 18px rgba(255,0,0,0.7)}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}.yellow{background:#ffcc00;box-shadow:0 0 14px #ffcc00}
-#offlineBanner{display:none;max-width:440px;margin:14px auto 0 auto;padding:16px 14px;background:#ff0000;border-radius:16px;box-shadow:0 0 25px #ff0000}
-#offlineBanner b{font-size:20px;display:block}
-#offlineBanner span{font-size:14px;display:block;margin-top:4px}
 #onlineBanner{display:none;max-width:440px;margin:14px auto 0 auto;padding:10px 14px;background:#00a845;border-radius:16px;font-weight:900;font-size:14px}
-
-/* COUNTDOWN */
 #countdownBox{display:none;max-width:440px;margin:14px auto 0 auto;padding:14px 12px;background:linear-gradient(135deg,#ff0000,#a00000);border-radius:16px;box-shadow:0 0 25px rgba(255,0,0,0.7)}
 #countdownBox small{font-size:11px;letter-spacing:2px;opacity:0.9}
 #countdownBox b{font-size:18px;display:block;margin-top:2px}
@@ -25,7 +20,6 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 #countdownSub{font-size:12px;margin-top:2px;opacity:0.9}
 #countdownBox.in-onda{background:linear-gradient(135deg,#00a845,#006e2e);box-shadow:0 0 25px rgba(0,255,90,0.6)}
 #countdownBox.in-onda #countdownTimer{font-size:22px}
-
 .programmi{max-width:440px;margin:16px auto 0 auto;padding:0 12px;text-align:left}
 .programmi h3{color:#fff;font-size:16px;letter-spacing:2px;margin:0 0 10px 4px;display:flex;align-items:center;gap:8px}
 .programmi h3 span{background:#ff0000;color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;letter-spacing:1px}
@@ -59,7 +53,6 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 
 <div class="live-box"><span id="liveDot" class="dot yellow"></span><span id="liveText">Controllo...</span></div>
 
-<div id="offlineBanner"><b> ><span> <br> <br> </span></div>
 <div id="onlineBanner">🟢 SIAMO IN ONDA - PREMI PLAY!</div>
 
 <!-- COUNTDOWN PROSSIMO PROGRAMMA -->
@@ -91,15 +84,11 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 <script>
 var SHEET_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 var listaProgrammiGlobale = [];
-
-// ===== CONVERTE DATA ITALIANA IN DATA VERA =====
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
-  var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,
-  "gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
+  var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
   var d = dataStr.toLowerCase().trim();
   var giorno=0, mese=0, anno=0;
-  // Formato 07/11/2026 oppure 07-11-2026
   if(d.indexOf("/")>-1 || d.indexOf("-")>-1 && d.match(/^\d/)){
     var sep = d.indexOf("/")>-1 ? "/" : "-";
     var p = d.split(sep);
@@ -108,7 +97,6 @@ function parseDataOra(dataStr, oraStr){
       else { giorno=parseInt(p[0]); mese=parseInt(p[1])-1; anno=parseInt(p[2]); }
     }
   } else {
-    // Formato "7 novembre 2026"
     var parti = d.split(/\s+/);
     if(parti.length>=2){
       giorno = parseInt(parti[0]);
@@ -131,8 +119,6 @@ function formattaCountdown(diffMs){
   if(gg>0) return gg + "g " + pad(hh) + ":" + pad(mm) + ":" + pad(ss);
   return pad(hh) + ":" + pad(mm) + ":" + pad(ss);
 }
-
-// ===== COUNTDOWN - SOLO VISUALE, NESSUN AUTOPLAY =====
 function aggiornaCountdown(){
   var box = document.getElementById('countdownBox');
   if(!listaProgrammiGlobale || listaProgrammiGlobale.length===0){ box.style.display='none'; return; }
@@ -143,9 +129,7 @@ function aggiornaCountdown(){
     var dt = parseDataOra(p.data, p.ora);
     if(!dt) continue;
     var diff = dt - ora;
-    // Se è iniziato da meno di 2 ore, è IN ONDA
     if(diff <= 0 && diff > -2*60*60*1000){ inOnda = p; }
-    // Prossimo futuro più vicino
     if(diff > 0 && diff < diffProssimo){ diffProssimo = diff; prossimo = p; }
   }
   if(inOnda){
@@ -167,7 +151,6 @@ function aggiornaCountdown(){
   box.style.display='none';
 }
 setInterval(aggiornaCountdown, 1000);
-
 function mostraProgrammi(lista){
   listaProgrammiGlobale = lista;
   var oraNow = new Date();
@@ -211,14 +194,12 @@ async function caricaDaSheet(){
   }catch(e){ mostraProgrammi(PROGRAMMI_DEFAULT); }
 }
 caricaDaSheet(); setInterval(caricaDaSheet,60000);
-
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
 var oraEl = document.getElementById('oraInOnda');
 var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
-var offlineBanner = document.getElementById('offlineBanner');
 var onlineBanner = document.getElementById('onlineBanner');
 var titoloLive = document.getElementById('titoloLive');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
@@ -228,14 +209,14 @@ function mostraLive(online){
   isOnline = online;
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
-    offlineBanner.style.display='none'; onlineBanner.style.display='block';
+    onlineBanner.style.display='block';
     vinyl.classList.remove('offline');
     btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP';
     titoloLive.textContent='MIDNIGHT FREQUENCY';
     if(audio.paused) oraEl.textContent='Premi PLAY per ascoltare';
   } else {
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
-    offlineBanner.style.display='block'; onlineBanner.style.display='none';
+    onlineBanner.style.display='none';
     vinyl.classList.add('offline'); vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY';
     titoloLive.textContent='RADIO OFFLINE';
