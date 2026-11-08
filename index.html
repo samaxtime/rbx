@@ -13,13 +13,16 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}.yellow{background:#ffcc00;box-shadow:0 0 14px #ffcc00}
 #onlineBanner{display:none;max-width:440px;margin:14px auto 0 auto;padding:10px 14px;background:#00a845;border-radius:16px;font-weight:900;font-size:14px}
-#countdownBox{display:none;max-width:440px;margin:14px auto 0 auto;padding:14px 12px;background:linear-gradient(135deg,#ff0000,#a00000);border-radius:16px;box-shadow:0 0 25px rgba(255,0,0,0.7)}
-#countdownBox small{font-size:11px;letter-spacing:2px;opacity:0.9}
-#countdownBox b{font-size:18px;display:block;margin-top:2px}
-#countdownTimer{font-size:32px;font-weight:900;letter-spacing:2px;margin-top:4px;font-variant-numeric:tabular-nums}
-#countdownSub{font-size:12px;margin-top:2px;opacity:0.9}
-#countdownBox.in-onda{background:linear-gradient(135deg,#00a845,#006e2e);box-shadow:0 0 25px rgba(0,255,90,0.6)}
-#countdownBox.in-onda #countdownTimer{font-size:22px}
+#countdownBox{display:none;max-width:440px;margin:16px auto 0 auto;padding:18px 14px;background:linear-gradient(135deg,#ff0000,#ff6600,#ff0000);background-size:300% 300%;border-radius:20px;border:2px solid #ffcc00;box-shadow:0 0 30px #ff0000,0 0 60px rgba(255,0,0,0.6);animation:fuoco 2s infinite, pulseBox 1.2s infinite;position:relative;overflow:hidden}
+@keyframes fuoco{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes pulseBox{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+#countdownBox small{font-size:12px;letter-spacing:4px;opacity:1;font-weight:900;color:#ffcc00;text-shadow:0 0 10px #ffcc00}
+#countdownBox b{font-size:24px;display:block;margin-top:4px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 0 15px #fff}
+#countdownTimer{font-size:48px;font-weight:900;letter-spacing:4px;margin-top:6px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 10px #fff,0 0 25px #ffcc00,0 0 40px #ff0000;line-height:1}
+#countdownSub{font-size:13px;margin-top:6px;opacity:1;font-weight:bold;color:#fff}
+#countdownBox.in-onda{background:linear-gradient(135deg,#00ff5a,#00a845,#00ff5a);background-size:300% 300%;border:2px solid #fff;box-shadow:0 0 30px #00ff5a,0 0 60px rgba(0,255,90,0.7);animation:fuoco 1.5s infinite, pulseBox 0.8s infinite}
+#countdownBox.in-onda #countdownTimer{font-size:28px;text-shadow:0 0 15px #fff}
+#countdownBox.in-onda small{color:#fff;text-shadow:0 0 10px #fff}
 .programmi{max-width:440px;margin:16px auto 0 auto;padding:0 12px;text-align:left}
 .programmi h3{color:#fff;font-size:16px;letter-spacing:2px;margin:0 0 10px 4px;display:flex;align-items:center;gap:8px}
 .programmi h3 span{background:#ff0000;color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;letter-spacing:1px}
@@ -230,7 +233,7 @@ btn.onclick = function(){
   }
   if(isOnline === false){
     oraEl.textContent='Sto controllando se la radio è tornata... ⏳';
-    alert("al momento off.line...");
+    alert("RADIO SAMAX al momento non è online. Torna presto!");
     btn.textContent='▶️ PLAY';
     oraEl.textContent='';
     checkLive();
