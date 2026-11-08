@@ -207,12 +207,12 @@ var txt = document.getElementById('liveText');
 var onlineBanner = document.getElementById('onlineBanner');
 var titoloLive = document.getElementById('titoloLive');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
-var testAudio=null; var staControllando=false;
 var isOnline = null;
 var failCount = 0;
+var staControllando = false;
+var testAudio = null;
 function mostraLive(online){
   if(online){ failCount = 0; } else { failCount++; }
-  // Serve 2 controlli negativi di fila per dire OFFLINE = niente falsi allarmi
   if(!online && failCount < 2 && isOnline === true){ return; }
   if(online === isOnline && !audio.paused && online) return;
   isOnline = online;
@@ -254,22 +254,46 @@ btn.onclick = function(){
 };
 audio.addEventListener('error', function(){ mostraLive(false); });
 audio.addEventListener('playing', function(){ mostraLive(true); });
-audio.addEventListener('stalled', function(){ if(audio.paused) checkLive(); });
-audio.addEventListener('waiting', function(){ if(audio.paused) checkLive(); });
+
+// CONTROLLO VERO - SOLO LOAD, SENZA PLAY - FUNZIONA SU IPHONE
 function checkLive(){
   if(!audio.paused){ mostraLive(true); return; }
-  if(staControllando) return; staControllando=true;
-  testAudio=new Audio(); testAudio.preload='auto'; testAudio.muted=true; testAudio.volume=0; var deciso=false;
-  function finisci(online){ if(deciso) return; deciso=true; staControllando=false; try{testAudio.pause();testAudio.src='';}catch(e){} testAudio=null; if(!audio.paused) mostraLive(true); else mostraLive(online); }
+  if(staControllando) return;
+  staControllando = true;
+  // Pulisci test vecchio
+  try{ if(testAudio){ testAudio.pause(); testAudio.src=''; testAudio=null; } }catch(e){}
+  testAudio = new Audio();
+  testAudio.preload = 'auto';
+  testAudio.muted = true;
+  var deciso = false;
+  var timer = null;
+  function finisci(online){
+    if(deciso) return; deciso = true;
+    clearTimeout(timer);
+    staControllando = false;
+    try{ testAudio.pause(); testAudio.src=''; }catch(e){}
+    testAudio = null;
+    if(!audio.paused) mostraLive(true); else mostraLive(online);
+  }
+  // Se arriva anche solo 1 secondo di audio = MIXXX ACCESO
   testAudio.addEventListener('canplay', function(){ finisci(true); });
   testAudio.addEventListener('playing', function(){ finisci(true); });
+  testAudio.addEventListener('canplaythrough', function(){ finisci(true); });
+  testAudio.addEventListener('loadedmetadata', function(){
+    // Se i metadati arrivano ma poi non parte, aspetta ancora un po'
+    setTimeout(function(){ if(!deciso && testAudio && testAudio.readyState >= 2) finisci(true); }, 500);
+  });
+  // Se il server chiude la connessione / 404 / MIXXX spento = errore
   testAudio.addEventListener('error', function(){ finisci(false); });
   testAudio.addEventListener('stalled', function(){ finisci(false); });
-  setTimeout(function(){ finisci(false); },1200);
+  testAudio.addEventListener('abort', function(){ finisci(false); });
+  // Timeout 3 sec: se in 3 sec non arriva niente = OFFLINE
+  timer = setTimeout(function(){ finisci(false); }, 3000);
   testAudio.src = STREAM + '?check=' + Date.now();
-  try{ testAudio.play().catch(function(){}); }catch(e){ finisci(false); }
+  try{ testAudio.load(); }catch(e){ finisci(false); }
+  // ATTENZIONE: niente testAudio.play() qui! Su iPhone blocca tutto.
 }
-checkLive(); setInterval(checkLive,1500);
+checkLive(); setInterval(checkLive,4000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
 window.addEventListener('online', checkLive);
 window.addEventListener('focus', checkLive);
