@@ -3,43 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - Live</title>
+<title>RADIO SAMAX - Live | La Radio dell'Isola d'Elba</title>
+<meta name="description" content="RADIO SAMAX - La Radio dell'Isola d'Elba. Ascolta in diretta DJ Samax.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://s1.free-shoutcast.com">
+<link rel="preconnect" href="https://docs.google.com">
+<link rel="dns-prefetch" href="https://s1.free-shoutcast.com">
+<link rel="dns-prefetch" href="https://docs.google.com">
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:0;text-align:center;font-family:Arial,sans-serif;background: radial-gradient(circle at 50% 0%, #2a0000 0%, #000 55%, #000 100%);color:white;min-height:100vh}
-h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#fff;text-shadow:0 0 5px #ff0000,0 0 15px #ff0000,0 0 30px #ff2222,0 0 45px #ff0000;font-weight:900}
+body{margin:0;padding:0;text-align:center;font-family:Arial,sans-serif;background:#000;color:white;min-height:100vh}
+h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#fff;text-shadow:0 0 15px #ff0000,0 0 30px #ff2222;font-weight:900}
 .sottotitolo{color:#ff9a9a;font-size:13px;letter-spacing:3px;margin:6px 0 0 0;font-weight:bold}
-.live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222;box-shadow:0 0 18px rgba(255,0,0,0.7)}
+.live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
 .green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}.yellow{background:#ffcc00;box-shadow:0 0 14px #ffcc00}
 #onlineBanner{display:none;max-width:440px;margin:14px auto 0 auto;padding:10px 14px;background:#00a845;border-radius:16px;font-weight:900;font-size:14px}
-#countdownBox{display:none;max-width:440px;margin:16px auto 0 auto;padding:18px 14px;background:linear-gradient(135deg,#ff0000,#ff6600,#ff0000);background-size:300% 300%;border-radius:20px;border:2px solid #ffcc00;box-shadow:0 0 30px #ff0000,0 0 60px rgba(255,0,0,0.6);animation:fuoco 2s infinite, pulseBox 1.2s infinite;position:relative;overflow:hidden}
+#countdownBox{display:none;max-width:440px;margin:16px auto 0 auto;padding:18px 14px;background:linear-gradient(135deg,#ff0000,#ff6600,#ff0000);background-size:300% 300%;border-radius:20px;border:2px solid #ffcc00;box-shadow:0 0 30px #ff0000,0 0 60px rgba(255,0,0,0.6);animation:fuoco 2s infinite;will-change:background-position}
 @keyframes fuoco{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-@keyframes pulseBox{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
-#countdownBox small{font-size:12px;letter-spacing:4px;opacity:1;font-weight:900;color:#ffcc00;text-shadow:0 0 10px #ffcc00}
-#countdownBox b{font-size:24px;display:block;margin-top:4px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 0 15px #fff}
-#countdownTimer{font-size:48px;font-weight:900;letter-spacing:4px;margin-top:6px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 10px #fff,0 0 25px #ffcc00,0 0 40px #ff0000;line-height:1}
-#countdownSub{font-size:13px;margin-top:6px;opacity:1;font-weight:bold;color:#fff}
-#countdownBox.in-onda{background:linear-gradient(135deg,#00ff5a,#00a845,#00ff5a);background-size:300% 300%;border:2px solid #fff;box-shadow:0 0 30px #00ff5a,0 0 60px rgba(0,255,90,0.7);animation:fuoco 1.5s infinite, pulseBox 0.8s infinite}
-#countdownBox.in-onda #countdownTimer{font-size:28px;text-shadow:0 0 15px #fff}
-#countdownBox.in-onda small{color:#fff;text-shadow:0 0 10px #fff}
+#countdownBox small{font-size:12px;letter-spacing:4px;font-weight:900;color:#ffcc00}
+#countdownBox b{font-size:24px;display:block;margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+#countdownTimer{font-size:48px;font-weight:900;letter-spacing:4px;margin-top:6px;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 10px #fff,0 0 25px #ffcc00;line-height:1}
+#countdownSub{font-size:13px;margin-top:6px;font-weight:bold;color:#fff}
+#countdownBox.in-onda{background:linear-gradient(135deg,#00ff5a,#00a845,#00ff5a);background-size:300% 300%;border:2px solid #fff;box-shadow:0 0 30px #00ff5a;animation:fuoco 1.5s infinite}
+#countdownBox.in-onda #countdownTimer{font-size:28px}
 .programmi{max-width:440px;margin:16px auto 0 auto;padding:0 12px;text-align:left}
 .programmi h3{color:#fff;font-size:16px;letter-spacing:2px;margin:0 0 10px 4px;display:flex;align-items:center;gap:8px}
 .programmi h3 span{background:#ff0000;color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;letter-spacing:1px}
-.card{background:linear-gradient(135deg, rgba(255,0,0,0.22) 0%, rgba(255,255,255,0.06) 100%);border:1.5px solid #ff2222;border-radius:16px;padding:14px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 18px rgba(255,0,0,0.25)}
+.card{background:rgba(255,0,0,0.12);border:1.5px solid #ff2222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
 .card.prossimo{border:2.5px solid #ffcc00;box-shadow:0 0 20px rgba(255,204,0,0.4)}
-.mini-vinyl{width:56px;height:56px;min-width:56px;border-radius:50%;background:repeating-radial-gradient(circle,#000 0,#000 2px,#222 3px,#000 4px);border:2.5px solid #ff0000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;box-shadow:0 0 12px rgba(255,0,0,0.6)}
+.mini-vinyl{width:56px;height:56px;min-width:56px;border-radius:50%;background:#111;border:2.5px solid #ff0000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
 .card b{font-size:18px;line-height:1.1}.card span{font-size:13px;color:#ffb3b3;display:block;margin-top:2px}
-.card .ora{margin-left:auto;font-size:13px;color:#fff;background:#ff0000;padding:8px 11px;border-radius:20px;font-weight:900;white-space:nowrap;text-align:center;line-height:1.3;box-shadow:0 0 12px rgba(255,0,0,0.6)}
+.card .ora{margin-left:auto;font-size:13px;color:#fff;background:#ff0000;padding:8px 11px;border-radius:20px;font-weight:900;white-space:nowrap;text-align:center;line-height:1.3}
 .card .count-mini{font-size:11px;background:#ffcc00;color:#000;padding:3px 7px;border-radius:10px;margin-top:5px;display:inline-block;font-weight:900}
 #aggiornato{font-size:11px;color:#777;margin:4px 0 0 4px;text-align:left}
 .vinyl-wrap{position:relative;width:210px;height:210px;margin:18px auto 5px auto}
-.vinyl{width:210px;height:210px;border-radius:50%;background:repeating-radial-gradient(circle at center,#000 0px,#000 2px,#1a1a1a 3px,#000 4px);box-shadow:0 0 0 3px #ff0000,0 0 25px #ff0000,0 0 50px rgba(255,0,0,0.6),0 15px 35px rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.vinyl.offline{filter:grayscale(1);opacity:0.5;box-shadow:0 0 0 3px #555,0 0 10px #333}
-.vinyl::before{content:'';position:absolute;width:100%;height:100%;background:linear-gradient(135deg,rgba(255,255,255,0.3) 0%,transparent 35%,transparent 65%,rgba(255,0,0,0.25) 100%);border-radius:50%}
+.vinyl{width:210px;height:210px;border-radius:50%;background:#111;border:3px solid #ff0000;box-shadow:0 0 25px #ff0000,0 15px 35px rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;position:relative;will-change:transform}
+.vinyl.offline{filter:grayscale(1);opacity:0.5;box-shadow:0 0 0 3px #555}
 .vinyl.playing{animation:spin 3s linear infinite}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.label{width:78px;height:78px;border-radius:50%;background:radial-gradient(circle,#ff3333 0%,#a00000 75%);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:900;line-height:1.25;color:white;border:3px solid white;box-shadow:0 0 18px #ff0000;z-index:1}
+.label{width:78px;height:78px;border-radius:50%;background:radial-gradient(circle,#ff3333 0%,#a00000 75%);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:900;line-height:1.25;color:white;border:3px solid white;z-index:1}
 .hole{width:12px;height:12px;background:white;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;border:2px solid #222}
 .now-playing{margin:12px 0 0 0;color:#ff5555;font-weight:900;letter-spacing:2px;font-size:12px}
 .titolo-live{font-size:22px;font-weight:900;margin:4px 0 0 0}
@@ -101,16 +104,11 @@ function parseDataOra(dataStr, oraStr){
     }
   } else {
     var parti = d.split(/\s+/);
-    if(parti.length>=2){
-      giorno = parseInt(parti[0]);
-      mese = mesi[parti[1]];
-      anno = parti.length>=3 ? parseInt(parti[2]) : new Date().getFullYear();
-    }
+    if(parti.length>=2){ giorno = parseInt(parti[0]); mese = mesi[parti[1]]; anno = parti.length>=3 ? parseInt(parti[2]) : new Date().getFullYear(); }
   }
   if(!giorno || mese===undefined || isNaN(mese) || !anno) return null;
   var oraParts = (oraStr||"21:00").split(":");
-  var hh = parseInt(oraParts[0])||0; var mm = parseInt(oraParts[1])||0;
-  return new Date(anno, mese, giorno, hh, mm, 0);
+  return new Date(anno, mese, giorno, parseInt(oraParts[0])||0, parseInt(oraParts[1])||0, 0);
 }
 function formattaCountdown(diffMs){
   var totSec = Math.floor(diffMs/1000);
@@ -125,12 +123,9 @@ function formattaCountdown(diffMs){
 function aggiornaCountdown(){
   var box = document.getElementById('countdownBox');
   if(!listaProgrammiGlobale || listaProgrammiGlobale.length===0){ box.style.display='none'; return; }
-  var ora = new Date();
-  var prossimo = null; var diffProssimo = Infinity; var inOnda = null;
+  var ora = new Date(); var prossimo = null; var diffProssimo = Infinity; var inOnda = null;
   for(var i=0;i<listaProgrammiGlobale.length;i++){
-    var p = listaProgrammiGlobale[i];
-    var dt = parseDataOra(p.data, p.ora);
-    if(!dt) continue;
+    var p = listaProgrammiGlobale[i]; var dt = parseDataOra(p.data, p.ora); if(!dt) continue;
     var diff = dt - ora;
     if(diff <= 0 && diff > -2*60*60*1000){ inOnda = p; }
     if(diff > 0 && diff < diffProssimo){ diffProssimo = diff; prossimo = p; }
@@ -140,38 +135,26 @@ function aggiornaCountdown(){
     document.getElementById('countdownLabel').textContent='🔴 IN ONDA ORA';
     document.getElementById('countdownNome').textContent=inOnda.nome;
     document.getElementById('countdownTimer').textContent='IN ONDA';
-    document.getElementById('countdownSub').textContent=inOnda.desc + ' • ' + inOnda.ora + ' • ' + inOnda.data;
-    return;
+    document.getElementById('countdownSub').textContent=inOnda.desc + ' • ' + inOnda.ora + ' • ' + inOnda.data; return;
   }
   if(prossimo){
     box.style.display='block'; box.className='';
     document.getElementById('countdownLabel').textContent='⏳ PROSSIMO PROGRAMMA';
     document.getElementById('countdownNome').textContent=prossimo.nome;
     document.getElementById('countdownTimer').textContent=formattaCountdown(diffProssimo);
-    document.getElementById('countdownSub').textContent=prossimo.desc + ' • ' + prossimo.ora + ' • ' + prossimo.data + '';
-    return;
+    document.getElementById('countdownSub').textContent=prossimo.desc + ' • ' + prossimo.ora + ' • ' + prossimo.data + ''; return;
   }
   box.style.display='none';
 }
 setInterval(aggiornaCountdown, 1000);
 function mostraProgrammi(lista){
   listaProgrammiGlobale = lista;
-  var oraNow = new Date();
-  var html="";
-  var prossimoIdx = -1; var diffMin = Infinity;
-  for(var j=0;j<lista.length;j++){
-    var dt = parseDataOra(lista[j].data, lista[j].ora);
-    if(dt){ var d = dt - oraNow; if(d>0 && d<diffMin){ diffMin=d; prossimoIdx=j; } }
-  }
+  var oraNow = new Date(); var html=""; var prossimoIdx = -1; var diffMin = Infinity;
+  for(var j=0;j<lista.length;j++){ var dt = parseDataOra(lista[j].data, lista[j].ora); if(dt){ var d = dt - oraNow; if(d>0 && d<diffMin){ diffMin=d; prossimoIdx=j; } } }
   for(var i=0;i<lista.length;i++){
     var dataHtml = lista[i].data ? "<br><span style='font-size:11px;color:#fff;background:#333;padding:2px 6px;border-radius:10px'>"+lista[i].data+"</span>" : "";
-    var countMini = "";
-    var dt2 = parseDataOra(lista[i].data, lista[i].ora);
-    if(dt2){
-      var diff2 = dt2 - oraNow;
-      if(i===prossimoIdx && diff2>0) countMini = "<span class='count-mini'>⏳ tra " + formattaCountdown(diff2) + "</span>";
-      else if(diff2<=0 && diff2>-2*60*60*1000) countMini = "<span class='count-mini' style='background:#00ff5a'>🔴 IN ONDA</span>";
-    }
+    var countMini = ""; var dt2 = parseDataOra(lista[i].data, lista[i].ora);
+    if(dt2){ var diff2 = dt2 - oraNow; if(i===prossimoIdx && diff2>0) countMini = "<span class='count-mini'>⏳ tra " + formattaCountdown(diff2) + "</span>"; else if(diff2<=0 && diff2>-2*60*60*1000) countMini = "<span class='count-mini' style='background:#00ff5a'>🔴 IN ONDA</span>"; }
     var classe = (i===prossimoIdx) ? "card prossimo" : "card";
     html += '<div class="'+classe+'"><div class="mini-vinyl">RS</div><div><b>'+lista[i].nome+'</b><span>'+lista[i].desc+'</span>'+countMini+'</div><div class="ora">'+lista[i].ora+dataHtml+'</div></div>';
   }
@@ -183,21 +166,19 @@ async function caricaDaSheet(){
   try{
     var r = await fetch(SHEET_URL + '&t=' + Date.now());
     if(!r.ok) throw new Error('sheet');
-    var testo = await r.text();
-    var righe = testo.split('\n'); var lista=[];
+    var testo = await r.text(); var righe = testo.split('\n'); var lista=[];
     for(var i=1;i<righe.length;i++){
       var riga = righe[i].trim(); if(!riga) continue;
       var parti = riga.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
-      var nome=(parti[0]||"").replace(/"/g,"").trim();
-      var desc=(parti[1]||"").replace(/"/g,"").trim();
-      var ora=(parti[2]||"").replace(/"/g,"").trim();
-      var data=(parti[3]||"").replace(/"/g,"").trim();
+      var nome=(parti[0]||"").replace(/"/g,"").trim(); var desc=(parti[1]||"").replace(/"/g,"").trim(); var ora=(parti[2]||"").replace(/"/g,"").trim(); var data=(parti[3]||"").replace(/"/g,"").trim();
       if(nome) lista.push({nome:nome.toUpperCase(), desc:desc.toUpperCase(), ora:ora, data:data});
     }
     if(lista.length>0) mostraProgrammi(lista); else mostraProgrammi(PROGRAMMI_DEFAULT);
   }catch(e){ mostraProgrammi(PROGRAMMI_DEFAULT); }
 }
-caricaDaSheet(); setInterval(caricaDaSheet,60000);
+// Carica programmi DOPO che la pagina si vede - cosi' il PLAY appare subito
+if(window.requestIdleCallback){ requestIdleCallback(function(){ caricaDaSheet(); }); } else { setTimeout(caricaDaSheet, 100); }
+setInterval(caricaDaSheet,60000);
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
@@ -207,10 +188,7 @@ var txt = document.getElementById('liveText');
 var onlineBanner = document.getElementById('onlineBanner');
 var titoloLive = document.getElementById('titoloLive');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
-var isOnline = null;
-var failCount = 0;
-var staControllando = false;
-var testAudio = null;
+var isOnline = null; var failCount = 0; var staControllando = false; var testAudio = null;
 function mostraLive(online){
   if(online){ failCount = 0; } else { failCount++; }
   if(!online && failCount < 2 && isOnline === true){ return; }
@@ -218,80 +196,46 @@ function mostraLive(online){
   isOnline = online;
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
-    onlineBanner.style.display='block';
-    vinyl.classList.remove('offline');
-    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP';
-    titoloLive.textContent='MIDNIGHT FREQUENCY';
+    onlineBanner.style.display='block'; vinyl.classList.remove('offline');
+    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='MIDNIGHT FREQUENCY';
     if(audio.paused) oraEl.textContent='Premi PLAY per ascoltare';
   } else {
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
-    onlineBanner.style.display='none';
-    vinyl.classList.add('offline'); vinyl.classList.remove('playing');
-    btn.textContent='▶️ PLAY';
-    titoloLive.textContent='RADIO OFFLINE';
-    oraEl.textContent='';
+    onlineBanner.style.display='none'; vinyl.classList.add('offline'); vinyl.classList.remove('playing');
+    btn.textContent='▶️ PLAY'; titoloLive.textContent='RADIO OFFLINE'; oraEl.textContent='';
     if(!audio.paused) audio.pause();
   }
 }
 btn.onclick = function(){
-  if(!audio.paused){
-    audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare'; checkLive(); return;
-  }
-  if(isOnline === false){
-    alert("RADIO SAMAX al momento non è online. Torna presto!");
-    checkLive();
-    return;
-  }
+  if(!audio.paused){ audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare'; checkLive(); return; }
+  if(isOnline === false){ alert("RADIO SAMAX al momento non è online. Torna presto!"); checkLive(); return; }
   oraEl.textContent='Connessione in corso... 🎶';
   audio.src = STREAM + '?play=' + Date.now();
-  audio.play().then(function(){
-    vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶'; mostraLive(true);
-  }).catch(function(){
-    oraEl.textContent='Non riesco a collegarmi, riprovo...';
-    btn.textContent='▶️ PLAY';
-    mostraLive(false);
-  });
+  audio.play().then(function(){ vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶'; mostraLive(true); }).catch(function(){ oraEl.textContent='Non riesco a collegarmi, riprovo...'; btn.textContent='▶️ PLAY'; mostraLive(false); });
 };
 audio.addEventListener('error', function(){ mostraLive(false); });
 audio.addEventListener('playing', function(){ mostraLive(true); });
-
-// CONTROLLO VERO - SOLO LOAD, SENZA PLAY - FUNZIONA SU IPHONE
 function checkLive(){
   if(!audio.paused){ mostraLive(true); return; }
-  if(staControllando) return;
-  staControllando = true;
-  // Pulisci test vecchio
+  if(staControllando) return; staControllando = true;
   try{ if(testAudio){ testAudio.pause(); testAudio.src=''; testAudio=null; } }catch(e){}
-  testAudio = new Audio();
-  testAudio.preload = 'auto';
-  testAudio.muted = true;
-  var deciso = false;
-  var timer = null;
+  testAudio = new Audio(); testAudio.preload = 'auto'; testAudio.muted = true;
+  var deciso = false; var timer = null;
   function finisci(online){
-    if(deciso) return; deciso = true;
-    clearTimeout(timer);
-    staControllando = false;
-    try{ testAudio.pause(); testAudio.src=''; }catch(e){}
-    testAudio = null;
+    if(deciso) return; deciso = true; clearTimeout(timer); staControllando = false;
+    try{ testAudio.pause(); testAudio.src=''; }catch(e){} testAudio = null;
     if(!audio.paused) mostraLive(true); else mostraLive(online);
   }
-  // Se arriva anche solo 1 secondo di audio = MIXXX ACCESO
   testAudio.addEventListener('canplay', function(){ finisci(true); });
   testAudio.addEventListener('playing', function(){ finisci(true); });
   testAudio.addEventListener('canplaythrough', function(){ finisci(true); });
-  testAudio.addEventListener('loadedmetadata', function(){
-    // Se i metadati arrivano ma poi non parte, aspetta ancora un po'
-    setTimeout(function(){ if(!deciso && testAudio && testAudio.readyState >= 2) finisci(true); }, 500);
-  });
-  // Se il server chiude la connessione / 404 / MIXXX spento = errore
+  testAudio.addEventListener('loadedmetadata', function(){ setTimeout(function(){ if(!deciso && testAudio && testAudio.readyState >= 2) finisci(true); }, 500); });
   testAudio.addEventListener('error', function(){ finisci(false); });
   testAudio.addEventListener('stalled', function(){ finisci(false); });
   testAudio.addEventListener('abort', function(){ finisci(false); });
-  // Timeout 3 sec: se in 3 sec non arriva niente = OFFLINE
   timer = setTimeout(function(){ finisci(false); }, 3000);
   testAudio.src = STREAM + '?check=' + Date.now();
   try{ testAudio.load(); }catch(e){ finisci(false); }
-  // ATTENZIONE: niente testAudio.play() qui! Su iPhone blocca tutto.
 }
 checkLive(); setInterval(checkLive,4000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
