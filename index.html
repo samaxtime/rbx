@@ -58,7 +58,6 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 
 <div id="onlineBanner">🟢 SIAMO IN ONDA - PREMI PLAY!</div>
 
-<!-- COUNTDOWN PROSSIMO PROGRAMMA -->
 <div id="countdownBox">
   <small id="countdownLabel">⏳ PROSSIMO PROGRAMMA</small>
   <b id="countdownNome">-</b>
@@ -86,13 +85,14 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 
 <script>
 var SHEET_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
+var PROGRAMMI_DEFAULT = [{nome:"MIDNIGHT FREQUENCY", desc:"LIVE DJ SAMAX", ora:"21:00", data:""}];
 var listaProgrammiGlobale = [];
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
   var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
   var d = dataStr.toLowerCase().trim();
   var giorno=0, mese=0, anno=0;
-  if(d.indexOf("/")>-1 || d.indexOf("-")>-1 && d.match(/^\d/)){
+  if((d.indexOf("/")>-1 || d.indexOf("-")>-1) && d.match(/^\d/)){
     var sep = d.indexOf("/")>-1 ? "/" : "-";
     var p = d.split(sep);
     if(p.length===3){
@@ -107,7 +107,7 @@ function parseDataOra(dataStr, oraStr){
       anno = parti.length>=3 ? parseInt(parti[2]) : new Date().getFullYear();
     }
   }
-  if(!giorno || mese===undefined || !anno) return null;
+  if(!giorno || mese===undefined || isNaN(mese) || !anno) return null;
   var oraParts = (oraStr||"21:00").split(":");
   var hh = parseInt(oraParts[0])||0; var mm = parseInt(oraParts[1])||0;
   return new Date(anno, mese, giorno, hh, mm, 0);
@@ -182,6 +182,7 @@ function mostraProgrammi(lista){
 async function caricaDaSheet(){
   try{
     var r = await fetch(SHEET_URL + '&t=' + Date.now());
+    if(!r.ok) throw new Error('sheet');
     var testo = await r.text();
     var righe = testo.split('\n'); var lista=[];
     for(var i=1;i<righe.length;i++){
@@ -208,7 +209,12 @@ var titoloLive = document.getElementById('titoloLive');
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var testAudio=null; var staControllando=false;
 var isOnline = null;
+var failCount = 0;
 function mostraLive(online){
+  if(online){ failCount = 0; } else { failCount++; }
+  // Serve 2 controlli negativi di fila per dire OFFLINE = niente falsi allarmi
+  if(!online && failCount < 2 && isOnline === true){ return; }
+  if(online === isOnline && !audio.paused && online) return;
   isOnline = online;
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
@@ -232,14 +238,12 @@ btn.onclick = function(){
     audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare'; checkLive(); return;
   }
   if(isOnline === false){
-    oraEl.textContent='Sto controllando se la radio è tornata... ⏳';
     alert("RADIO SAMAX al momento non è online. Torna presto!");
-    btn.textContent='▶️ PLAY';
-    oraEl.textContent='';
     checkLive();
     return;
   }
   oraEl.textContent='Connessione in corso... 🎶';
+  audio.src = STREAM + '?play=' + Date.now();
   audio.play().then(function(){
     vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶'; mostraLive(true);
   }).catch(function(){
@@ -250,6 +254,8 @@ btn.onclick = function(){
 };
 audio.addEventListener('error', function(){ mostraLive(false); });
 audio.addEventListener('playing', function(){ mostraLive(true); });
+audio.addEventListener('stalled', function(){ if(audio.paused) checkLive(); });
+audio.addEventListener('waiting', function(){ if(audio.paused) checkLive(); });
 function checkLive(){
   if(!audio.paused){ mostraLive(true); return; }
   if(staControllando) return; staControllando=true;
@@ -258,12 +264,15 @@ function checkLive(){
   testAudio.addEventListener('canplay', function(){ finisci(true); });
   testAudio.addEventListener('playing', function(){ finisci(true); });
   testAudio.addEventListener('error', function(){ finisci(false); });
-  setTimeout(function(){ finisci(false); },2500);
+  testAudio.addEventListener('stalled', function(){ finisci(false); });
+  setTimeout(function(){ finisci(false); },1200);
   testAudio.src = STREAM + '?check=' + Date.now();
-  try{ testAudio.load(); }catch(e){ finisci(false); }
+  try{ testAudio.play().catch(function(){}); }catch(e){ finisci(false); }
 }
-checkLive(); setInterval(checkLive,4000);
+checkLive(); setInterval(checkLive,1500);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
+window.addEventListener('online', checkLive);
+window.addEventListener('focus', checkLive);
 </script>
 </body>
 </html>
