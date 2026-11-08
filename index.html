@@ -59,7 +59,7 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 
 <div class="live-box"><span id="liveDot" class="dot yellow"></span><span id="liveText">Controllo...</span></div>
 
-<div id="offlineBanner"><b>🔴 RADIO OFFLINE</b><span>Al momento non siamo in onda.<br>Torniamo presto con DJ Samax! 🎶<br>Riprova tra poco.</span></div>
+<div id="offlineBanner"><b> ><span> <br> <br> </span></div>
 <div id="onlineBanner">🟢 SIAMO IN ONDA - PREMI PLAY!</div>
 
 <!-- COUNTDOWN PROSSIMO PROGRAMMA -->
@@ -239,7 +239,7 @@ function mostraLive(online){
     vinyl.classList.add('offline'); vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY';
     titoloLive.textContent='RADIO OFFLINE';
-    oraEl.textContent='Torniamo presto! Premi PLAY per riprovare 🎶';
+    oraEl.textContent='';
     if(!audio.paused) audio.pause();
   }
 }
