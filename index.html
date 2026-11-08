@@ -74,7 +74,7 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 <div class="vinyl-wrap"><div id="vinyl" class="vinyl"><div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div></div><div class="hole"></div></div>
 
 <p class="now-playing">NOW PLAYING</p>
-<p class="titolo-live" id="titoloLive">MIDNIGHT FREQUENCY</p>
+<p class="titolo-live" id="titoloLive">RADIO SAMAX</p>
 <p class="sotto-live">LIVE • DJ SAMAX • ON AIR</p>
 
 <button id="playBtn" class="play-btn">▶️ PLAY</button>
@@ -194,7 +194,7 @@ function mostraLive(online){
     // SOLO QUESTO: verde + LIVE - IN ONDA
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
     vinyl.classList.remove('offline');
-    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='MIDNIGHT FREQUENCY';
+    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='RADIO SAMAX FREQUENCY';
     if(audio.paused) oraEl.textContent='Premi PLAY per ascoltare';
   } else {
     // SOLO QUESTO: rosso + OFFLINE - RADIO SPENTA
