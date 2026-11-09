@@ -50,19 +50,19 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 </style>
 </head>
 <body>
-<h1>RADIO<br>SAMAX</h1>
+<h1>RADIO SAMAX</h1>
 <p class="sottotitolo">LA RADIO DELL'ISOLA D'ELBA</p>
 <div class="live-box"><span id="liveDot" class="dot yellow"></span><span id="liveText"></span></div>
 <div id="countdownBox"><small id="countdownLabel">⏳ PROSSIMO PROGRAMMA</small><b id="countdownNome">-</b><div id="countdownTimer">00:00:00</div><div id="countdownSub">-</div></div>
-<div class="programmi"><h3>📻 PROGRAMMI <span>IN ONDA</span></h3><div id="listaProgrammi"><p style="color:#aaa;font-size:13px">Carico programmi...</p></div><p id="aggiornato"></p></div>
+<div class="programmi"><h3>📻 PEOSSIMI PROGRAMMI <span>IN ONDA</span></h3><div id="listaProgrammi"><p style="color:#aaa;font-size:13px">Carico programmi...</p></div><p id="aggiornato"></p></div>
 <div class="vinyl-wrap"><div id="vinyl" class="vinyl"><div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div></div><div class="hole"></div></div>
-<p class="now-playing">NOW PLAYING</p><p class="titolo-live" id="titoloLive">RADIO SAMAX</p><p class="sotto-live">LIVE • DJ SAMAX • ON AIR</p>
+<p class="now-playing">NOW PLAYING</p><p class="titolo-live" id="titoloLive"> </p><p class="sotto-live">LIVE • DJ SAMAX • ON AIR</p>
 <button id="playBtn" class="play-btn">▶️ PLAY</button><p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
 <audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
 <p class="footer">DJ Samax - radiosamax.com</p>
 <script>
 var SHEET_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
-var PROGRAMMI_DEFAULT = [{nome:"RADIO SAMAX FREQUENCY", desc:"LIVE DJ SAMAX", ora:"", data:""}];
+var PROGRAMMI_DEFAULT = [{nome:"", desc:"LIVE DJ SAMAX", ora:"", data:""}];
 var listaProgrammiGlobale = [];
 var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
 var SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
@@ -157,7 +157,7 @@ function mostraLive(online){
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
     vinyl.classList.remove('offline');
-    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='RADIO SAMAX FREQUENCY';
+    btn.textContent = audio.paused ? '▶️ PLAY' : '⏸️ STOP'; titoloLive.textContent='';
     if(audio.paused) oraEl.textContent='Premi PLAY per ascoltare';
   } else {
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
