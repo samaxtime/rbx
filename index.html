@@ -80,6 +80,7 @@ var haCliccato = false;
 var fermatoManualmente = false;
 var inAutoPlay = false;
 var timerAutoPlay = null;
+var autoPlayGiaProgrammato = false;
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
   var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
@@ -135,47 +136,51 @@ var isOnline = false; var failCount = 0; var staControllando = false; var testAu
 // --- CHIP: CONTROLLO -> SLEEP 1 SEC -> PLAY ---
 function avviaAudio(){
   if(!audio.paused) return;
-  if(inAutoPlay) return;
-  inAutoPlay = true;
+  inAutoPlay = false;
+  autoPlayGiaProgrammato = false;
+  if(timerAutoPlay) clearTimeout(timerAutoPlay);
   oraEl.textContent='Connessione in corso... 🎶';
   audio.src = STREAM + '?play=' + Date.now();
   var p = audio.play();
   if(p && p.then){
     p.then(function(){
-      inAutoPlay = false;
       vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶';
       stoAscoltando=true; heartbeat(); mostraLive(true);
     }).catch(function(){
-      inAutoPlay = false;
       oraEl.textContent='Tocca PLAY per ascoltare 🎶';
       btn.textContent='▶️ PLAY';
+      autoPlayGiaProgrammato = false;
     });
-  } else { inAutoPlay = false; }
+  }
 }
 function chipAutoPlay(){
-  // Se ONLINE e non fermato a mano -> SLEEP 1 SECONDO -> PLAY
-  if(isOnline && audio.paused && !fermatoManualmente){
-    if(timerAutoPlay) clearTimeout(timerAutoPlay);
-    oraEl.textContent='Radio online... parto tra 1 secondo... 🎶';
-    timerAutoPlay = setTimeout(function(){ avviaAudio(); }, 1000);
-  }
+  // FIX: se è già programmato, non riprogrammarlo ogni 4 sec o non parte mai
+  if(!isOnline || !audio.paused || fermatoManualmente || autoPlayGiaProgrammato) return;
+  autoPlayGiaProgrammato = true;
+  oraEl.textContent='Radio online... parto tra 1 secondo... 🎶';
+  timerAutoPlay = setTimeout(function(){ avviaAudio(); }, 1000);
 }
 function mostraLive(online){
   if(online){ failCount = 0; } else { failCount++; }
   if(!online && failCount < 2 && isOnline === true){ return; }
+  var eraOnline = isOnline;
   isOnline = online;
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
     vinyl.classList.remove('offline');
     if(!audio.paused){
       btn.textContent='⏸️ STOP'; titoloLive.textContent='';
+      autoPlayGiaProgrammato = false;
     } else {
       btn.textContent='▶️ PLAY'; titoloLive.textContent='';
       chipAutoPlay();
     }
   } else {
-    // OFFLINE -> NIENTE
+    // OFFLINE -> NIENTE + RESET per la prossima volta
     if(timerAutoPlay) clearTimeout(timerAutoPlay);
+    autoPlayGiaProgrammato = false;
+    inAutoPlay = false;
+    fermatoManualmente = false; // FIX: sblocca, così la prossima volta ONLINE riparte!
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
     vinyl.classList.add('offline'); vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY'; titoloLive.textContent='RADIO OFFLINE'; oraEl.textContent='Radio offline - attendo che vada in onda...';
@@ -184,22 +189,20 @@ function mostraLive(online){
 }
 btn.onclick = function(){
   haCliccato = true;
-  // Se sta suonando -> STOP
   if(!audio.paused){
     if(timerAutoPlay) clearTimeout(timerAutoPlay);
+    autoPlayGiaProgrammato = false;
     audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare';
     stoAscoltando=false; fermatoManualmente=true; heartbeat(); return;
   }
-  // Se è in pausa:
   if(isOnline === false){
-    // OFFLINE -> NIENTE, aspetta controllo positivo
     oraEl.textContent='Radio ancora offline - attendo...';
     fermatoManualmente = false;
     checkLive();
     return;
   }
-  // ONLINE -> PLAY subito, bottone aspetta solo STOP
   fermatoManualmente = false;
+  autoPlayGiaProgrammato = false;
   avviaAudio();
 };
 document.addEventListener('click', function(){
