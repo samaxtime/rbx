@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RADIO SAMAX - Live | La Radio dell'Isola d'Elba</title>
-<meta name="description" content="RADIO SAMAX - La Radio dell'Isola d'Elba. Ascolta in diretta DJ Samax.">
 <meta name="theme-color" content="#000000">
-<link rel="preconnect" href="https://s1.free-shoutcast.com">
-<link rel="preconnect" href="https://docs.google.com">
 <style>
 *{box-sizing:border-box}
 body{margin:0;padding:0;text-align:center;font-family:Arial,sans-serif;background:#000;color:white;min-height:100vh}
@@ -15,8 +12,7 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 .sottotitolo{color:#ff9a9a;font-size:13px;letter-spacing:3px;margin:6px 0 0 0;font-weight:bold}
 .live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222;min-width:230px;min-height:42px}
 .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
-.green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}.yellow{background:#ffcc00;box-shadow:0 0 14px #ffcc00}
-#countdownBox{display:none !important}
+.green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}
 .programmi{max-width:440px;margin:16px auto 0 auto;padding:0 12px;text-align:left}
 .programmi h3{color:#fff;font-size:16px;letter-spacing:2px;margin:0 0 10px 4px;display:flex;align-items:center;gap:8px}
 .programmi h3 span{background:#ff0000;color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;letter-spacing:1px}
@@ -46,7 +42,6 @@ h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#f
 <h1>RADIO SAMAX</h1>
 <p class="sottotitolo">LA RADIO DELL'ISOLA D'ELBA</p>
 <div class="live-box"><span id="liveDot" class="dot red"></span><span id="liveText" style="color:#ff9999">OFFLINE - RADIO SPENTA</span></div>
-<div id="countdownBox"><small id="countdownLabel">⏳ PROSSIMO PROGRAMMA</small><b id="countdownNome">-</b><div id="countdownTimer">00:00:00</div><div id="countdownSub">-</div></div>
 <div class="programmi"><h3>📻 PROSSIMI PROGRAMMI <span>IN ONDA</span></h3><div id="listaProgrammi"><p style="color:#aaa;font-size:13px">Carico programmi...</p></div><p id="aggiornato"></p></div>
 <div class="vinyl-wrap"><div id="vinyl" class="vinyl offline"><div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div></div><div class="hole"></div></div>
 <p class="now-playing">NOW PLAYING</p><p class="titolo-live" id="titoloLive">RADIO OFFLINE</p><p class="sotto-live">LIVE • DJ SAMAX • ON AIR</p>
@@ -76,11 +71,7 @@ window.addEventListener('beforeunload', esciSubito);
 document.addEventListener('visibilitychange', function(){ if(document.hidden){ esciSubito(); } else { heartbeat(); } });
 setInterval(heartbeat, 2000);
 heartbeat();
-var haCliccato = false;
-var fermatoManualmente = false;
-var inAutoPlay = false;
-var timerAutoPlay = null;
-var autoPlayGiaProgrammato = false;
+
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
   var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
@@ -98,8 +89,6 @@ function formattaCountdown(diffMs){
   if(gg>0) return gg + "g " + pad(hh) + ":" + pad(mm) + ":" + pad(ss);
   return pad(hh) + ":" + pad(mm) + ":" + pad(ss);
 }
-function aggiornaCountdown(){ return; }
-setInterval(aggiornaCountdown, 1000);
 function mostraProgrammi(lista){
   listaProgrammiGlobale = lista; var oraNow = new Date(); var html=""; var prossimoIdx = -1; var diffMin = Infinity;
   for(var j=0;j<lista.length;j++){ var dt = parseDataOra(lista[j].data, lista[j].ora); if(dt){ var d = dt - oraNow; if(d>0 && d<diffMin){ diffMin=d; prossimoIdx=j; } } }
@@ -112,7 +101,6 @@ function mostraProgrammi(lista){
   }
   document.getElementById('listaProgrammi').innerHTML = html;
   document.getElementById('aggiornato').innerText = "Ultimo aggiornamento: " + new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-  aggiornaCountdown();
 }
 async function caricaDaSheet(){
   try{
@@ -124,6 +112,7 @@ async function caricaDaSheet(){
 }
 if(window.requestIdleCallback){ requestIdleCallback(function(){ caricaDaSheet(); }); } else { setTimeout(caricaDaSheet, 100); }
 setInterval(caricaDaSheet,60000);
+
 var audio = document.getElementById('radioAudio');
 var vinyl = document.getElementById('vinyl');
 var btn = document.getElementById('playBtn');
@@ -132,12 +121,13 @@ var dot = document.getElementById('liveDot');
 var txt = document.getElementById('liveText');
 var titoloLive = document.getElementById('titoloLive');
 var isOnline = false; var failCount = 0; var staControllando = false; var testAudio = null;
+var fermatoManualmente = false;
+var autoPlayBloccato = false;
+var timerAutoPlay = null;
 
-// --- CHIP: CONTROLLO -> SLEEP 1 SEC -> PLAY ---
+// --- NUOVO: PLAY AUTOMATICO ---
 function avviaAudio(){
   if(!audio.paused) return;
-  inAutoPlay = false;
-  autoPlayGiaProgrammato = false;
   if(timerAutoPlay) clearTimeout(timerAutoPlay);
   oraEl.textContent='Connessione in corso... 🎶';
   audio.src = STREAM + '?play=' + Date.now();
@@ -145,42 +135,38 @@ function avviaAudio(){
   if(p && p.then){
     p.then(function(){
       vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶';
-      stoAscoltando=true; heartbeat(); mostraLive(true);
+      stoAscoltando=true; heartbeat(); autoPlayBloccato = false;
     }).catch(function(){
-      oraEl.textContent='Tocca PLAY per ascoltare 🎶';
+      // Browser ha bloccato l'autoplay: serve 1 tocco
+      autoPlayBloccato = true;
+      oraEl.textContent='Radio online! Tocca PLAY per attivare l\'audio 🔊';
       btn.textContent='▶️ PLAY';
-      autoPlayGiaProgrammato = false;
     });
   }
 }
-function chipAutoPlay(){
-  // FIX: se è già programmato, non riprogrammarlo ogni 4 sec o non parte mai
-  if(!isOnline || !audio.paused || fermatoManualmente || autoPlayGiaProgrammato) return;
-  autoPlayGiaProgrammato = true;
-  oraEl.textContent='Radio online... parto tra 1 secondo... 🎶';
-  timerAutoPlay = setTimeout(function(){ avviaAudio(); }, 1000);
+function tentaAutoPlay(){
+  // Se OFFLINE non fa niente. Se ONLINE e non sta suonando e l'utente non ha premuto STOP, parte da solo
+  if(!isOnline || !audio.paused || fermatoManualmente) return;
+  if(timerAutoPlay) clearTimeout(timerAutoPlay);
+  timerAutoPlay = setTimeout(avviaAudio, 800);
 }
 function mostraLive(online){
   if(online){ failCount = 0; } else { failCount++; }
   if(!online && failCount < 2 && isOnline === true){ return; }
-  var eraOnline = isOnline;
   isOnline = online;
   if(online){
     dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
     vinyl.classList.remove('offline');
     if(!audio.paused){
       btn.textContent='⏸️ STOP'; titoloLive.textContent='';
-      autoPlayGiaProgrammato = false;
     } else {
       btn.textContent='▶️ PLAY'; titoloLive.textContent='';
-      chipAutoPlay();
+      tentaAutoPlay(); // <-- QUI PARTE DA SOLO QUANDO DIVENTA VERDE
     }
   } else {
-    // OFFLINE -> NIENTE + RESET per la prossima volta
     if(timerAutoPlay) clearTimeout(timerAutoPlay);
-    autoPlayGiaProgrammato = false;
-    inAutoPlay = false;
-    fermatoManualmente = false; // FIX: sblocca, così la prossima volta ONLINE riparte!
+    fermatoManualmente = false;
+    autoPlayBloccato = false;
     dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
     vinyl.classList.add('offline'); vinyl.classList.remove('playing');
     btn.textContent='▶️ PLAY'; titoloLive.textContent='RADIO OFFLINE'; oraEl.textContent='Radio offline - attendo che vada in onda...';
@@ -188,10 +174,8 @@ function mostraLive(online){
   }
 }
 btn.onclick = function(){
-  haCliccato = true;
   if(!audio.paused){
     if(timerAutoPlay) clearTimeout(timerAutoPlay);
-    autoPlayGiaProgrammato = false;
     audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare';
     stoAscoltando=false; fermatoManualmente=true; heartbeat(); return;
   }
@@ -202,12 +186,14 @@ btn.onclick = function(){
     return;
   }
   fermatoManualmente = false;
-  autoPlayGiaProgrammato = false;
+  autoPlayBloccato = false;
   avviaAudio();
 };
+// Se il browser aveva bloccato, al primo tocco ovunque parte da solo
 document.addEventListener('click', function(){
-  haCliccato = true;
-  if(isOnline && audio.paused && !fermatoManualmente) chipAutoPlay();
+  if(isOnline && audio.paused && !fermatoManualmente && autoPlayBloccato){
+    avviaAudio();
+  }
 });
 audio.addEventListener('error', function(){ stoAscoltando=false; heartbeat(); mostraLive(false); });
 audio.addEventListener('playing', function(){ stoAscoltando=true; heartbeat(); mostraLive(true); });
