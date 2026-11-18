@@ -3,256 +3,212 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - Live | La Radio dell'Isola d'Elba</title>
-<meta name="theme-color" content="#000000">
+<title>RADIO SAMAX - In Diretta</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;padding:0;text-align:center;font-family:Arial,sans-serif;background:#000;color:white;min-height:100vh}
-h1{font-size:42px;margin:14px 0 0 0;line-height:0.95;letter-spacing:2px;color:#fff;text-shadow:0 0 15px #ff0000,0 0 30px #ff2222;font-weight:900}
-.sottotitolo{color:#ff9a9a;font-size:13px;letter-spacing:3px;margin:6px 0 0 0;font-weight:bold}
-.live-box{display:inline-block;padding:9px 20px;border-radius:30px;background:#0a0a0a;font-weight:900;margin:12px 0 0 0;font-size:15px;border:1.5px solid #ff2222;min-width:230px;min-height:42px}
-.dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:8px;vertical-align:middle}
-.green{background:#00ff5a;box-shadow:0 0 14px #00ff5a}.red{background:#ff2222;box-shadow:0 0 14px #ff2222}
-.programmi{max-width:440px;margin:16px auto 0 auto;padding:0 12px;text-align:left}
-.programmi h3{color:#fff;font-size:16px;letter-spacing:2px;margin:0 0 10px 4px;display:flex;align-items:center;gap:8px}
-.programmi h3 span{background:#ff0000;color:#fff;font-size:11px;padding:4px 9px;border-radius:20px;letter-spacing:1px}
-.card{background:rgba(255,0,0,0.12);border:1.5px solid #ff2222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
-.card.prossimo{border:2.5px solid #ffcc00;box-shadow:0 0 20px rgba(255,204,0,0.4)}
-.mini-vinyl{width:56px;height:56px;min-width:56px;border-radius:50%;background:#111;border:2.5px solid #ff0000;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
-.card b{font-size:18px;line-height:1.1}.card span{font-size:13px;color:#ffb3b3;display:block;margin-top:2px}
-.card .ora{margin-left:auto;font-size:13px;color:#fff;background:#ff0000;padding:8px 11px;border-radius:20px;font-weight:900;white-space:nowrap;text-align:center;line-height:1.3}
-.card .count-mini{font-size:11px;background:#ffcc00;color:#000;padding:3px 7px;border-radius:10px;margin-top:5px;display:inline-block;font-weight:900}
-#aggiornato{font-size:11px;color:#777;margin:4px 0 0 4px;text-align:left}
-.vinyl-wrap{position:relative;width:210px;height:210px;margin:18px auto 5px auto}
-.vinyl{width:210px;height:210px;border-radius:50%;background:#111;border:3px solid #ff0000;box-shadow:0 0 25px #ff0000,0 15px 35px rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;position:relative}
-.vinyl.offline{filter:grayscale(1);opacity:0.5;box-shadow:0 0 0 3px #555}
-.vinyl.playing{animation:spin 3s linear infinite}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.label{width:78px;height:78px;border-radius:50%;background:radial-gradient(circle,#ff3333 0%,#a00000 75%);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;font-weight:900;line-height:1.25;color:white;border:3px solid white;z-index:1}
-.hole{width:12px;height:12px;background:white;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;border:2px solid #222}
-.now-playing{margin:12px 0 0 0;color:#ff5555;font-weight:900;letter-spacing:2px;font-size:12px}
-.titolo-live{font-size:22px;font-weight:900;margin:4px 0 0 0}
-.sotto-live{color:#aaa;font-size:12px;margin:4px 0 0 0}
-.play-btn{margin-top:16px;background:#ff0000;color:white;border:none;padding:16px 58px;font-size:22px;font-weight:900;border-radius:50px;cursor:pointer;box-shadow:0 0 20px #ff0000,0 8px 20px rgba(0,0,0,0.5)}
-.small{color:#ffb3b3;font-size:13px;margin-top:9px}
-.footer{font-size:12px;color:#888;margin:20px 0 10px 0}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0a;color:#fff;font-family:Arial,Helvetica,sans-serif;text-align:center;padding:20px 12px 60px}
+  .logo{font-size:42px;font-weight:900;letter-spacing:2px;color:#ff1e1e;text-shadow:0 0 20px #ff1e1e}
+  .logo span{color:#fff}
+  .sottotitolo{color:#ccc;margin-top:4px;font-size:14px}
+  .badge{display:inline-block;margin:18px auto;padding:8px 18px;border-radius:20px;font-weight:800;font-size:14px}
+  .offline{background:#333;color:#ff5555}
+  .online{background:#00c853;color:#fff;animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.6}}
+  .card{background:#1a1a1a;border:1px solid #333;border-radius:16px;max-width:520px;margin:14px auto;padding:20px;text-align:left}
+  .card h2{font-size:20px;margin-bottom:6px}
+  .card p{color:#bbb;font-size:14px;line-height:1.5}
+  .ora{font-size:13px;color:#ffcc00;margin-top:8px;font-weight:700}
+  .countdown{font-size:38px;font-weight:900;color:#ffcc00;margin:10px 0 2px;text-align:center;letter-spacing:2px}
+  .count-label{text-align:center;color:#aaa;font-size:13px}
+  .btn{display:block;max-width:520px;margin:16px auto;background:#ff1e1e;color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-weight:800;font-size:17px}
+  .prog{max-width:520px;margin:20px auto;text-align:left}
+  .prog h3{margin-bottom:10px;font-size:18px}
+  .prog-item{background:#141414;border:1px solid #222;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .prog-item b{font-size:15px}
+  .prog-item span{font-size:12px;color:#aaa;display:block;margin-top:3px}
+  .footer{margin-top:30px;color:#666;font-size:12px}
 </style>
 </head>
 <body>
-<h1>RADIO SAMAX</h1>
-<p class="sottotitolo">LA RADIO DELL'ISOLA D'ELBA</p>
-<div class="live-box"><span id="liveDot" class="dot red"></span><span id="liveText" style="color:#ff9999">OFFLINE - RADIO SPENTA</span></div>
-<div class="programmi"><h3>📻 PROSSIMI PROGRAMMI <span>IN ONDA</span></h3><div id="listaProgrammi"><p style="color:#aaa;font-size:13px">Carico programmi...</p></div><p id="aggiornato"></p></div>
-<div class="vinyl-wrap"><div id="vinyl" class="vinyl offline"><div class="label">RADIO<br>SAMAX<br>DJ SAMAX</div></div><div class="hole"></div></div>
-<p class="now-playing">NOW PLAYING</p><p class="titolo-live" id="titoloLive">RADIO OFFLINE</p><p class="sotto-live">LIVE • DJ SAMAX • ON AIR</p>
-<button id="playBtn" class="play-btn">▶️ PLAY</button><p class="small" id="oraInOnda">Premi PLAY per ascoltare</p>
-<audio id="radioAudio" preload="none"><source src="https://s1.free-shoutcast.com/stream/18404" type="audio/mpeg"></audio>
-<p class="footer">DJ Samax - radiosamax.com</p>
+
+<div class="logo">RADIO <span>SAMAX</span></div>
+<div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
+
+<div id="stato" class="badge offline">● OFFLINE - RADIO SPENTA</div>
+
+<div class="card">
+  <div id="titolo">Caricamento programma...</div>
+  <div id="countdown" class="countdown">--:--:--</div>
+  <div id="count-label" class="count-label">⏳ tra</div>
+  <div id="dettaglio"></div>
+</div>
+
+<a class="btn" href="https://radiosamax.com" onclick="location.reload();return false;">🔄 AGGIORNA</a>
+
+<div class="prog">
+  <h3>📅 Prossimi Programmi</h3>
+  <div id="lista">Caricamento...</div>
+</div>
+
+<div class="footer">© RADIO SAMAX - radiosamax.com<br><span id="orologio"></span></div>
+
 <script>
-var SHEET_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
-var PROGRAMMI_DEFAULT = [{nome:"", desc:"LIVE DJ SAMAX", ora:"", data:""}];
-var listaProgrammiGlobale = [];
-var STREAM = 'https://s1.free-shoutcast.com/stream/18404';
-var SUPABASE_URL = "https://ndxlwxgtfvexoqwzucrg.supabase.co";
-var SUPABASE_KEY = "sb_publishable_6FHjJSEzo2HMCBqeMdNvlA_FltIei6y";
-var HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-var mioId = null;
-try{ mioId = localStorage.getItem('samax_mio_id'); }catch(e){}
-if(!mioId){ mioId = 'u' + Date.now() + '_' + Math.floor(Math.random()*99999); try{ localStorage.setItem('samax_mio_id', mioId); }catch(e){} }
-var stoAscoltando = false;
-async function heartbeat(){
-  try{ await fetch(SUPABASE_URL + '/rest/v1/presenza?on_conflict=id', { method:'POST', headers:HEADERS, body:JSON.stringify({ id:mioId, play: stoAscoltando?1:0, updated_at:new Date().toISOString() }), keepalive:true }); }catch(e){}
-}
-function esciSubito(){
-  try{ fetch(SUPABASE_URL + '/rest/v1/presenza?id=eq.' + encodeURIComponent(mioId), { method:'DELETE', headers:HEADERS, keepalive:true }).catch(function(){}); }catch(e){}
-}
-window.addEventListener('pagehide', esciSubito);
-window.addEventListener('beforeunload', esciSubito);
-document.addEventListener('visibilitychange', function(){ if(document.hidden){ esciSubito(); } else { heartbeat(); } });
-setInterval(heartbeat, 2000);
-heartbeat();
+// ============================================================
+// 1. LINK FOGLIO GOOGLE - INCOLLA QUI IL TUO LINK CSV
+// Deve essere tipo:
+// https://docs.google.com/spreadsheets/d/ID/export?format=csv
+// ============================================================
+const SHEET_CSV_URL = "INCOLLA QUI IL LINK DEL TUO FOGLIO GOOGLE";
+
+// ============================================================
+// 2. FIX DATE ITALIANE - capisce "18 novembre 2026"
+// ============================================================
+const MESI_ITA = {
+  'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,
+  'maggio':4,'giugno':5,'luglio':6,'agosto':7,
+  'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,
+  'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11
+};
 
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
-  var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
-  var d = (""+dataStr).toLowerCase().trim().replace(/\./g,"").replace(/"/g,"");
-  var giorno=0, mese=-1, anno=0;
-  if(d.match(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/)){
-    var p = d.split(/[-/]/);
-    anno = parseInt(p[0]); mese = parseInt(p[1])-1; giorno = parseInt(p[2]);
-  } else if(d.match(/^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/)){
-    var p2 = d.split(/[-/]/);
-    giorno = parseInt(p2[0]); mese = parseInt(p2[1])-1; anno = parseInt(p2[2]);
-    if(anno < 100) anno += 2000;
-  } else if(d.match(/^\d{1,2}[- ]?[a-z]+[- ]?\d{2,4}$/)){
-    var parti = d.split(/[\s-]+/);
-    giorno = parseInt(parti[0]);
-    var nomeMese = parti[1].substring(0,3);
-    for(var k in mesi){ if(k.substring(0,3) === nomeMese){ mese = mesi[k]; break; } }
-    anno = parseInt(parti[2]);
-    if(anno < 100) anno += 2000;
+  dataStr = String(dataStr).trim().toLowerCase();
+  oraStr = String(oraStr || "00:00").trim();
+  let giorno, mese, anno;
+
+  // Caso 1: "18 novembre 2026" oppure "18 nov 2026"
+  let m = dataStr.match(/(\d{1,2})\s+([a-zà]+)\s+(\d{4})/);
+  if(m){
+    giorno = parseInt(m[1]);
+    mese = MESI_ITA[m[2]];
+    anno = parseInt(m[3]);
+  } else if(dataStr.includes('/')){
+    // Caso 2: "18/11/2026"
+    let p = dataStr.split('/');
+    giorno = parseInt(p[0]); mese = parseInt(p[1])-1; anno = parseInt(p[2]);
+  } else if(dataStr.includes('-')){
+    // Caso 3: "2026-11-18"
+    let p = dataStr.split('-');
+    if(p[0].length === 4){ anno=parseInt(p[0]); mese=parseInt(p[1])-1; giorno=parseInt(p[2]); }
+    else { giorno=parseInt(p[0]); mese=parseInt(p[1])-1; anno=parseInt(p[2]); }
   } else {
     return null;
   }
-  if(!giorno || mese < 0 || mese > 11 || !anno) return null;
-  var oraTxt = (""+(oraStr||"21:00")).replace(".",":").trim();
-  var oraParts = oraTxt.split(":");
-  var h = parseInt(oraParts[0])||0;
-  var m = parseInt(oraParts[1])||0;
-  return new Date(anno, mese, giorno, h, m, 0);
-}
-function formattaCountdown(diffMs){
-  var totSec = Math.floor(diffMs/1000); var gg = Math.floor(totSec/86400); var hh = Math.floor((totSec%86400)/3600); var mm = Math.floor((totSec%3600)/60); var ss = totSec%60;
-  var pad = function(n){ return n<10 ? "0"+n : ""+n; };
-  if(gg>0) return gg + "g " + pad(hh) + ":" + pad(mm) + ":" + pad(ss);
-  return pad(hh) + ":" + pad(mm) + ":" + pad(ss);
-}
-function mostraProgrammi(lista){
-  listaProgrammiGlobale = lista; var oraNow = new Date(); var html=""; var prossimoIdx = -1; var diffMin = Infinity;
-  for(var j=0;j<lista.length;j++){ var dt = parseDataOra(lista[j].data, lista[j].ora); if(dt){ var d = dt - oraNow; if(d>0 && d<diffMin){ diffMin=d; prossimoIdx=j; } } }
-  for(var i=0;i<lista.length;i++){
-    var dataHtml = lista[i].data ? "<br><span style='font-size:11px;color:#fff;background:#333;padding:2px 6px;border-radius:10px'>"+lista[i].data+"</span>" : "";
-    var countMini = ""; var dt2 = parseDataOra(lista[i].data, lista[i].ora);
-    if(dt2){ var diff2 = dt2 - oraNow; if(i===prossimoIdx && diff2>0) countMini = "<span class='count-mini' data-count='"+dt2.getTime()+"'>⏳ tra " + formattaCountdown(diff2) + "</span>"; else if(diff2<=0 && diff2>-2*60*60*1000) countMini = "<span class='count-mini' style='background:#00ff5a'>🔴 IN ONDA</span>"; }
-    var classe = (i===prossimoIdx) ? "card prossimo" : "card";
-    html += '<div class="'+classe+'"><div class="mini-vinyl">RS</div><div><b>'+lista[i].nome+'</b><span>'+lista[i].desc+'</span>'+countMini+'</div><div class="ora">'+lista[i].ora+dataHtml+'</div></div>';
-  }
-  document.getElementById('listaProgrammi').innerHTML = html;
-  document.getElementById('aggiornato').innerText = "Ultimo aggiornamento: " + new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
-}
-function aggiornaCountdown(){
-  var oraNow = new Date().getTime();
-  var els = document.querySelectorAll('[data-count]');
-  for(var k=0;k<els.length;k++){
-    var diff = parseInt(els[k].getAttribute('data-count')) - oraNow;
-    if(diff>0){
-      els[k].textContent = "⏳ tra " + formattaCountdown(diff);
-    } else {
-      els[k].textContent = "🔴 IN ONDA";
-      els[k].style.background = "#00ff5a";
-    }
-  }
-}
-setInterval(aggiornaCountdown, 1000);
+  if(mese===undefined || isNaN(giorno) || isNaN(anno)) return null;
 
-async function caricaDaSheet(){
+  let o = oraStr.match(/(\d{1,2})[:.](\d{2})/);
+  let ore = o ? parseInt(o[1]) : 0;
+  let minuti = o ? parseInt(o[2]) : 0;
+  return new Date(anno, mese, giorno, ore, minuti, 0);
+}
+
+function formatCountdown(ms){
+  if(ms < 0) ms = 0;
+  let tot = Math.floor(ms/1000);
+  let h = Math.floor(tot/3600);
+  let min = Math.floor((tot%3600)/60);
+  let sec = tot%60;
+  return String(h).padStart(2,'0')+":"+String(min).padStart(2,'0')+":"+String(sec).padStart(2,'0');
+}
+
+function parseCSV(text){
+  // Gestisce virgole dentro le virgolette
+  let righe = [];
+  let riga = [], campo = '', inVirgolette = false;
+  for(let i=0;i<text.length;i++){
+    let c = text[i];
+    if(c === '"'){ inVirgolette = !inVirgolette; }
+    else if(c === ',' && !inVirgolette){ riga.push(campo); campo=''; }
+    else if((c === '\n' || c === '\r') && !inVirgolette){
+      if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); riga=[]; campo=''; }
+      if(c === '\r' && text[i+1] === '\n') i++;
+    } else { campo += c; }
+  }
+  if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); }
+  return righe;
+}
+
+let programmi = [];
+let programmaCorrente = null;
+
+async function carica(){
   try{
-    var r = await fetch(SHEET_URL + '&t=' + Date.now()); if(!r.ok) throw new Error('sheet');
-    var testo = await r.text(); var righe = testo.split('\n'); var lista=[];
-    for(var i=1;i<righe.length;i++){ var riga = righe[i].trim(); if(!riga) continue; var parti = riga.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/); var nome=(parti[0]||"").replace(/"/g,"").trim(); var desc=(parti[1]||"").replace(/"/g,"").trim(); var ora=(parti[2]||"").replace(/"/g,"").trim(); var data=(parti[3]||"").replace(/"/g,"").trim(); if(nome) lista.push({nome:nome.toUpperCase(), desc:desc.toUpperCase(), ora:ora, data:data}); }
-    if(lista.length>0) mostraProgrammi(lista); else mostraProgrammi(PROGRAMMI_DEFAULT);
-  }catch(e){ mostraProgrammi(PROGRAMMI_DEFAULT); }
-}
-if(window.requestIdleCallback){ requestIdleCallback(function(){ caricaDaSheet(); }); } else { setTimeout(caricaDaSheet, 100); }
-setInterval(caricaDaSheet,60000);
-
-var audio = document.getElementById('radioAudio');
-var vinyl = document.getElementById('vinyl');
-var btn = document.getElementById('playBtn');
-var oraEl = document.getElementById('oraInOnda');
-var dot = document.getElementById('liveDot');
-var txt = document.getElementById('liveText');
-var titoloLive = document.getElementById('titoloLive');
-var isOnline = false; var failCount = 0; var staControllando = false; var testAudio = null;
-var fermatoManualmente = false;
-var autoPlayBloccato = false;
-var timerAutoPlay = null;
-function avviaAudio(){
-  if(!audio.paused) return;
-  if(timerAutoPlay) clearTimeout(timerAutoPlay);
-  oraEl.textContent='Connessione in corso... 🎶';
-  audio.src = STREAM + '?play=' + Date.now();
-  var p = audio.play();
-  if(p && p.then){
-    p.then(function(){
-      vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶';
-      stoAscoltando=true; heartbeat(); autoPlayBloccato = false;
-    }).catch(function(){
-      autoPlayBloccato = true;
-      oraEl.textContent='Radio online! Tocca PLAY per attivare l\'audio 🔊';
-      btn.textContent='▶️ PLAY';
-    });
-  }
-}
-function tentaAutoPlay(){
-  if(!isOnline || !audio.paused || fermatoManualmente) return;
-  if(timerAutoPlay) clearTimeout(timerAutoPlay);
-  timerAutoPlay = setTimeout(avviaAudio, 800);
-}
-function mostraLive(online){
-  if(online){ failCount = 0; } else { failCount++; }
-  if(!online && failCount < 2 && isOnline === true){ return; }
-  isOnline = online;
-  if(online){
-    dot.className='dot green'; txt.textContent='LIVE - IN ONDA'; txt.style.color='#00ff5a';
-    vinyl.classList.remove('offline');
-    if(!audio.paused){
-      btn.textContent='⏸️ STOP'; titoloLive.textContent='';
-    } else {
-      btn.textContent='▶️ PLAY'; titoloLive.textContent='';
-      tentaAutoPlay();
+    let res = await fetch(SHEET_CSV_URL);
+    let text = await res.text();
+    let righe = parseCSV(text);
+    programmi = [];
+    // Salta riga 1 = intestazione. Colonne: A=Titolo, B=Descrizione, C=Ora, D=Data
+    for(let i=1;i<righe.length;i++){
+      let r = righe[i];
+      if(!r[0] || !r[2] || !r[3]) continue;
+      let dataOra = parseDataOra(r[3], r[2]);
+      if(!dataOra) continue;
+      programmi.push({ titolo:r[0], descrizione:r[1]||'', ora:r[2], data:r[3], quando:dataOra });
     }
+    programmi.sort((a,b)=>a.quando - b.quando);
+    mostraLista();
+  }catch(e){
+    document.getElementById('lista').innerHTML = "Non riesco a caricare il foglio. Controlla il link.";
+    // Fallback: programma di esempio per non lasciare vuoto
+    programmi = [{ titolo:"SERA RADIO SAMAX IN DIRETTA LIVE PER VOI ORE 20:30 - DJ SAMAX", descrizione:"QUALITÀ", ora:"22:00", data:"18 novembre 2026", quando: parseDataOra("18 novembre 2026","22:00") }];
+  }
+}
+
+function mostraLista(){
+  let html = "";
+  programmi.forEach(p=>{
+    html += `<div class="prog-item"><b>${p.titolo}</b><span>📅 ${p.data} - 🕒 ${p.ora}</span><span>${p.descrizione}</span></div>`;
+  });
+  document.getElementById('lista').innerHTML = html || "Nessun programma";
+}
+
+function aggiorna(){
+  let ora = new Date();
+  document.getElementById('orologio').textContent = "Ora: " + ora.toLocaleTimeString('it-IT') + " - " + ora.toLocaleDateString('it-IT');
+
+  if(programmi.length === 0) return;
+
+  // Trova il prossimo programma, o quello in onda (entro 2 ore dall'inizio)
+  let prossimo = null;
+  let inOnda = null;
+  for(let p of programmi){
+    let diff = p.quando - ora;
+    if(diff <= 0 && diff > -2*60*60*1000){ inOnda = p; }
+    if(diff > 0 && !prossimo){ prossimo = p; }
+  }
+
+  let statoEl = document.getElementById('stato');
+  let titoloEl = document.getElementById('titolo');
+  let countEl = document.getElementById('countdown');
+  let labelEl = document.getElementById('count-label');
+  let detEl = document.getElementById('dettaglio');
+
+  if(inOnda){
+    statoEl.textContent = "● IN ONDA - LIVE";
+    statoEl.className = "badge online";
+    titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`;
+    countEl.textContent = "IN ONDA";
+    labelEl.textContent = "Stai ascoltando ora";
+    detEl.innerHTML = `<div class="ora">📅 ${inOnda.data} - 🕒 ${inOnda.ora}</div>`;
+    programmaCorrente = inOnda;
+  } else if(prossimo){
+    statoEl.textContent = "● OFFLINE - RADIO SPENTA";
+    statoEl.className = "badge offline";
+    titoloEl.innerHTML = `<h2>${prossimo.titolo}</h2><p>${prossimo.descrizione}</p>`;
+    countEl.textContent = formatCountdown(prossimo.quando - ora);
+    labelEl.textContent = "⏳ tra";
+    detEl.innerHTML = `<div class="ora">📅 ${prossimo.data} - 🕒 ${prossimo.ora}</div>`;
+    programmaCorrente = prossimo;
   } else {
-    if(timerAutoPlay) clearTimeout(timerAutoPlay);
-    fermatoManualmente = false;
-    autoPlayBloccato = false;
-    dot.className='dot red'; txt.textContent='OFFLINE - RADIO SPENTA'; txt.style.color='#ff9999';
-    vinyl.classList.add('offline'); vinyl.classList.remove('playing');
-    btn.textContent='▶️ PLAY'; titoloLive.textContent='RADIO OFFLINE'; oraEl.textContent='Radio offline - attendo che vada in onda...';
-    if(!audio.paused) audio.pause();
+    titoloEl.innerHTML = `<h2>Nessun programma in arrivo</h2>`;
+    countEl.textContent = "--:--:--";
   }
 }
-btn.onclick = function(){
-  if(!audio.paused){
-    if(timerAutoPlay) clearTimeout(timerAutoPlay);
-    audio.pause(); vinyl.classList.remove('playing'); btn.textContent='▶️ PLAY'; oraEl.textContent='Premi PLAY per ascoltare';
-    stoAscoltando=false; fermatoManualmente=true; heartbeat(); return;
-  }
-  if(isOnline === false){
-    oraEl.textContent='Radio ancora offline - attendo...';
-    fermatoManualmente = false;
-    checkLive();
-    return;
-  }
-  fermatoManualmente = false;
-  autoPlayBloccato = false;
-  avviaAudio();
-};
-document.addEventListener('click', function(){
-  if(isOnline && audio.paused && !fermatoManualmente && autoPlayBloccato){
-    avviaAudio();
-  }
-});
-audio.addEventListener('error', function(){ stoAscoltando=false; heartbeat(); mostraLive(false); });
-audio.addEventListener('playing', function(){ stoAscoltando=true; heartbeat(); mostraLive(true); });
-audio.addEventListener('pause', function(){ stoAscoltando=false; heartbeat(); });
-function checkLive(){
-  if(!audio.paused){ mostraLive(true); return; }
-  if(staControllando) return; staControllando = true;
-  try{ if(testAudio){ testAudio.pause(); testAudio.src=''; testAudio=null; } }catch(e){}
-  testAudio = new Audio(); testAudio.preload = 'auto'; testAudio.muted = true;
-  var deciso = false; var timer = null;
-  function finisci(online){
-    if(deciso) return; deciso = true; clearTimeout(timer); staControllando = false;
-    try{ testAudio.pause(); testAudio.src=''; }catch(e){} testAudio = null;
-    if(!audio.paused) mostraLive(true); else mostraLive(online);
-  }
-  testAudio.addEventListener('canplay', function(){ finisci(true); });
-  testAudio.addEventListener('playing', function(){ finisci(true); });
-  testAudio.addEventListener('canplaythrough', function(){ finisci(true); });
-  testAudio.addEventListener('loadedmetadata', function(){ setTimeout(function(){ if(!deciso && testAudio && testAudio.readyState >= 2) finisci(true); }, 500); });
-  testAudio.addEventListener('error', function(){ finisci(false); });
-  testAudio.addEventListener('stalled', function(){ finisci(false); });
-  testAudio.addEventListener('abort', function(){ finisci(false); });
-  timer = setTimeout(function(){ finisci(false); }, 3000);
-  testAudio.src = STREAM + '?check=' + Date.now();
-  try{ testAudio.load(); }catch(e){ finisci(false); }
-}
-mostraLive(false);
-checkLive(); setInterval(checkLive,4000);
-document.addEventListener('visibilitychange', function(){ if(!document.hidden) checkLive(); });
-window.addEventListener('online', checkLive);
-window.addEventListener('focus', checkLive);
+
+// Avvia: carica e poi aggiorna ogni secondo - QUESTO FA MUOVERE IL COUNTDOWN
+carica();
+setInterval(aggiorna, 1000);
+setInterval(carica, 60000); // ricarica foglio ogni minuto
 </script>
 </body>
 </html>
