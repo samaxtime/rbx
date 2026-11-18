@@ -75,13 +75,31 @@ heartbeat();
 function parseDataOra(dataStr, oraStr){
   if(!dataStr) return null;
   var mesi = {"gennaio":0,"febbraio":1,"marzo":2,"aprile":3,"maggio":4,"giugno":5,"luglio":6,"agosto":7,"settembre":8,"ottobre":9,"novembre":10,"dicembre":11,"gen":0,"feb":1,"mar":2,"apr":3,"mag":4,"giu":5,"lug":6,"ago":7,"set":8,"ott":9,"nov":10,"dic":11};
-  var d = dataStr.toLowerCase().trim(); var giorno=0, mese=0, anno=0;
-  if((d.indexOf("/")>-1 || d.indexOf("-")>-1) && d.match(/^\d/)){
-    var sep = d.indexOf("/")>-1 ? "/" : "-"; var p = d.split(sep);
-    if(p.length===3){ if(p[0].length===4){ anno=parseInt(p[0]); mese=parseInt(p[1])-1; giorno=parseInt(p[2]); } else { giorno=parseInt(p[0]); mese=parseInt(p[1])-1; anno=parseInt(p[2]); } }
-  } else { var parti = d.split(/\s+/); if(parti.length>=2){ giorno = parseInt(parti[0]); mese = mesi[parti[1]]; anno = parti.length>=3 ? parseInt(parti[2]) : new Date().getFullYear(); } }
-  if(!giorno || mese===undefined || isNaN(mese) || !anno) return null;
-  var oraParts = (oraStr||"21:00").split(":"); return new Date(anno, mese, giorno, parseInt(oraParts[0])||0, parseInt(oraParts[1])||0, 0);
+  var d = (""+dataStr).toLowerCase().trim().replace(/\./g,"").replace(/"/g,"");
+  var giorno=0, mese=-1, anno=0;
+  if(d.match(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/)){
+    var p = d.split(/[-/]/);
+    anno = parseInt(p[0]); mese = parseInt(p[1])-1; giorno = parseInt(p[2]);
+  } else if(d.match(/^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$/)){
+    var p2 = d.split(/[-/]/);
+    giorno = parseInt(p2[0]); mese = parseInt(p2[1])-1; anno = parseInt(p2[2]);
+    if(anno < 100) anno += 2000;
+  } else if(d.match(/^\d{1,2}[- ]?[a-z]+[- ]?\d{2,4}$/)){
+    var parti = d.split(/[\s-]+/);
+    giorno = parseInt(parti[0]);
+    var nomeMese = parti[1].substring(0,3);
+    for(var k in mesi){ if(k.substring(0,3) === nomeMese){ mese = mesi[k]; break; } }
+    anno = parseInt(parti[2]);
+    if(anno < 100) anno += 2000;
+  } else {
+    return null;
+  }
+  if(!giorno || mese < 0 || mese > 11 || !anno) return null;
+  var oraTxt = (""+(oraStr||"21:00")).replace(".",":").trim();
+  var oraParts = oraTxt.split(":");
+  var h = parseInt(oraParts[0])||0;
+  var m = parseInt(oraParts[1])||0;
+  return new Date(anno, mese, giorno, h, m, 0);
 }
 function formattaCountdown(diffMs){
   var totSec = Math.floor(diffMs/1000); var gg = Math.floor(totSec/86400); var hh = Math.floor((totSec%86400)/3600); var mm = Math.floor((totSec%3600)/60); var ss = totSec%60;
@@ -95,13 +113,28 @@ function mostraProgrammi(lista){
   for(var i=0;i<lista.length;i++){
     var dataHtml = lista[i].data ? "<br><span style='font-size:11px;color:#fff;background:#333;padding:2px 6px;border-radius:10px'>"+lista[i].data+"</span>" : "";
     var countMini = ""; var dt2 = parseDataOra(lista[i].data, lista[i].ora);
-    if(dt2){ var diff2 = dt2 - oraNow; if(i===prossimoIdx && diff2>0) countMini = "<span class='count-mini'>⏳ tra " + formattaCountdown(diff2) + "</span>"; else if(diff2<=0 && diff2>-2*60*60*1000) countMini = "<span class='count-mini' style='background:#00ff5a'>🔴 IN ONDA</span>"; }
+    if(dt2){ var diff2 = dt2 - oraNow; if(i===prossimoIdx && diff2>0) countMini = "<span class='count-mini' data-count='"+dt2.getTime()+"'>⏳ tra " + formattaCountdown(diff2) + "</span>"; else if(diff2<=0 && diff2>-2*60*60*1000) countMini = "<span class='count-mini' style='background:#00ff5a'>🔴 IN ONDA</span>"; }
     var classe = (i===prossimoIdx) ? "card prossimo" : "card";
     html += '<div class="'+classe+'"><div class="mini-vinyl">RS</div><div><b>'+lista[i].nome+'</b><span>'+lista[i].desc+'</span>'+countMini+'</div><div class="ora">'+lista[i].ora+dataHtml+'</div></div>';
   }
   document.getElementById('listaProgrammi').innerHTML = html;
   document.getElementById('aggiornato').innerText = "Ultimo aggiornamento: " + new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
 }
+function aggiornaCountdown(){
+  var oraNow = new Date().getTime();
+  var els = document.querySelectorAll('[data-count]');
+  for(var k=0;k<els.length;k++){
+    var diff = parseInt(els[k].getAttribute('data-count')) - oraNow;
+    if(diff>0){
+      els[k].textContent = "⏳ tra " + formattaCountdown(diff);
+    } else {
+      els[k].textContent = "🔴 IN ONDA";
+      els[k].style.background = "#00ff5a";
+    }
+  }
+}
+setInterval(aggiornaCountdown, 1000);
+
 async function caricaDaSheet(){
   try{
     var r = await fetch(SHEET_URL + '&t=' + Date.now()); if(!r.ok) throw new Error('sheet');
@@ -124,8 +157,6 @@ var isOnline = false; var failCount = 0; var staControllando = false; var testAu
 var fermatoManualmente = false;
 var autoPlayBloccato = false;
 var timerAutoPlay = null;
-
-// --- NUOVO: PLAY AUTOMATICO ---
 function avviaAudio(){
   if(!audio.paused) return;
   if(timerAutoPlay) clearTimeout(timerAutoPlay);
@@ -137,7 +168,6 @@ function avviaAudio(){
       vinyl.classList.add('playing'); btn.textContent='⏸️ STOP'; oraEl.textContent='Stai ascoltando RADIO SAMAX 🎶';
       stoAscoltando=true; heartbeat(); autoPlayBloccato = false;
     }).catch(function(){
-      // Browser ha bloccato l'autoplay: serve 1 tocco
       autoPlayBloccato = true;
       oraEl.textContent='Radio online! Tocca PLAY per attivare l\'audio 🔊';
       btn.textContent='▶️ PLAY';
@@ -145,7 +175,6 @@ function avviaAudio(){
   }
 }
 function tentaAutoPlay(){
-  // Se OFFLINE non fa niente. Se ONLINE e non sta suonando e l'utente non ha premuto STOP, parte da solo
   if(!isOnline || !audio.paused || fermatoManualmente) return;
   if(timerAutoPlay) clearTimeout(timerAutoPlay);
   timerAutoPlay = setTimeout(avviaAudio, 800);
@@ -161,7 +190,7 @@ function mostraLive(online){
       btn.textContent='⏸️ STOP'; titoloLive.textContent='';
     } else {
       btn.textContent='▶️ PLAY'; titoloLive.textContent='';
-      tentaAutoPlay(); // <-- QUI PARTE DA SOLO QUANDO DIVENTA VERDE
+      tentaAutoPlay();
     }
   } else {
     if(timerAutoPlay) clearTimeout(timerAutoPlay);
@@ -189,7 +218,6 @@ btn.onclick = function(){
   autoPlayBloccato = false;
   avviaAudio();
 };
-// Se il browser aveva bloccato, al primo tocco ovunque parte da solo
 document.addEventListener('click', function(){
   if(isOnline && audio.paused && !fermatoManualmente && autoPlayBloccato){
     avviaAudio();
