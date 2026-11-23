@@ -38,13 +38,13 @@
 <div class="logo">RADIO <span>SAMAX</span></div>
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 
-<div id="stato" class="badge online">● IN ONDA - LIVE</div>
+<div id="stato" class="badge offline">● RADIO SPENTA - OFF LINE</div>
 <div id="debug" class="debug">Controllo Mixxx...</div>
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
-  <button id="playBtn" class="play-btn" onclick="avviaAudio()">▶️ ASCOLTA RADIO SAMAX</button>
-  <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Premi PLAY per ascoltare</div>
+  <button id="playBtn" class="play-btn offline" onclick="avviaAudio()">🔴 ASCOLTA RADIO SAMAX - OFF LINE</button>
+  <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Controllo se Mixxx è in onda...</div>
 </div>
 
 <div class="card">
@@ -65,21 +65,20 @@
 
 <script>
 let staSuonando = false;
-let mixxxOnline = true;
+let mixxxOnline = false; // PARTIAMO DA SPENTO, NON DA ACCESO, COSÌ SE NON RISPONDE RESTA ROSSO
 let controlloInCorso = false;
+let tentativiFalliti = 0;
 
-// CONTROLLO CORRETTO - RIFATTO
 async function controllaLive(){
   if(controlloInCorso || staSuonando) return;
   controlloInCorso = true;
   let oraTxt = new Date().toLocaleTimeString('it-IT');
-  let trovato = null; // true = acceso, false = spento, null = non so
+  let trovato = null;
 
-  // METODO 1 - 7.html in HTTP (non HTTPS!) - quello giusto per la porta 18404
+  // METODO 1 - 7.html in HTTP
   try{
     let controller = new AbortController();
     let t = setTimeout(()=>controller.abort(), 4000);
-    // Proviamo 2 proxy, se uno non va proviamo l'altro
     let urls = [
       "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
       "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
@@ -88,37 +87,43 @@ async function controllaLive(){
       try{
         let res = await fetch(url, {cache:"no-store", signal:controller.signal});
         let text = (await res.text()).trim();
-        // Se è HTML di errore, non è 7.html, saltiamo
         if(text.startsWith("<") || text.length > 200) continue;
-        // 7.html deve essere così: ascoltatori, stato, picco, ...
-        // Es: "1,1,4,200,0,128,Canzone"
         let parti = text.split(",");
         if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0")){
           trovato = (parti[1] === "1");
-          document.getElementById('debug').textContent = "Ultimo controllo " + oraTxt + " - Server dice: " + text.substring(0,60);
+          document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Server dice: " + text.substring(0,60);
           break;
         }
-      }catch(e){ }
+      }catch(e){}
     }
     clearTimeout(t);
   }catch(e){}
 
-  // METODO 2 - Se il 7.html non risponde, proviamo a vedere se lo stream manda dati
-  // Senza aprire audio, solo 1 pezzettino di dati, così non gracchia
+  // METODO 2 - Controllo stream: deve essere AUDIO, non TESTO
   if(trovato === null){
     try{
       let controller2 = new AbortController();
       let t2 = setTimeout(()=>controller2.abort(), 4000);
-      // Chiediamo solo i primi byte dello stream
       let res2 = await fetch("https://s1.free-shoutcast.com/stream/18404?x=" + Date.now(), {signal:controller2.signal, cache:"no-store"});
-      if(res2.ok || res2.type === "opaque"){
-        // Se il server risponde, proviamo a leggere 1 pezzo
+      let tipo = (res2.headers.get("content-type") || "").toLowerCase();
+      // Se è testo/html = è la pagina "Stream non disponibile" = SPENTO
+      if(tipo.includes("text") || tipo.includes("html")){
+        trovato = false;
+        document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Stream è testo, non musica: SPENTO";
+      } else if(tipo.includes("audio") || tipo.includes("mpeg") || tipo.includes("octet")){
+        // Se è audio, leggiamo 1 pezzo per essere sicuri che non sia vuoto
         if(res2.body){
           let reader = res2.body.getReader();
           let r = await reader.read();
           if(r.value && r.value.length > 0){
-            trovato = true;
-            document.getElementById('debug').textContent = "Ultimo controllo " + oraTxt + " - Stream manda dati: ON";
+            // Se i primi byte sono testo "Stream" o "<" = SPENTO
+            let inizio = new TextDecoder().decode(r.value.slice(0,20));
+            if(inizio.includes("Stream") || inizio.includes("<") || inizio.includes("error")){
+              trovato = false;
+            } else {
+              trovato = true;
+            }
+            document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Stream è audio: " + (trovato ? "ON" : "OFF");
           } else {
             trovato = false;
           }
@@ -127,18 +132,27 @@ async function controllaLive(){
           trovato = true;
         }
       } else {
-        trovato = false;
+        // Se non sappiamo il tipo, proviamo a leggere
+        if(res2.ok){
+          trovato = true;
+        } else {
+          trovato = false;
+        }
       }
       clearTimeout(t2);
     }catch(e){
-      // Se fetch abortisce per timeout, vuol dire che non manda dati
-      // Ma se Mixxx è acceso, lo stream manda dati subito, quindi se timeout = spento
-      // Però non vogliamo dire SPENTA se è solo internet lento, quindi lasciamo trovato = null
-      // e non cambiamo il badge
+      // Se non risponde proprio, contiamo un fallimento
+      tentativiFalliti++;
+      // Dopo 2 fallimenti di fila = SPENTO, perché se Mixxx fosse acceso dovrebbe rispondere
+      if(tentativiFalliti >= 2){
+        trovato = false;
+        document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Nessuna risposta 2 volte: SPENTO";
+      }
     }
   }
 
   if(trovato !== null){
+    if(trovato) tentativiFalliti = 0;
     mixxxOnline = trovato;
     aggiornaBadge();
   }
@@ -170,14 +184,16 @@ function aggiornaBadge(){
     btn.textContent = "🔴 ASCOLTA RADIO SAMAX - OFF LINE";
     btn.className = "play-btn offline";
     btn.disabled = true;
-    statoTxt.textContent = "Mixxx è spento - Radio spenta";
+    statoTxt.textContent = "Mixxx è spento - Radio spenta - Premi di nuovo PLAY";
   }
 }
 
 function avviaAudio(){
   if(staSuonando) return;
   if(!mixxxOnline){
-    document.getElementById('playStato').textContent = "Mixxx è spento - Radio spenta";
+    document.getElementById('playStato').textContent = "Premi di nuovo PLAY - Mixxx è spento";
+    // Riproviamo subito il controllo, magari nel frattempo hai acceso Mixxx
+    controllaLive();
     return;
   }
   let audio = document.getElementById('radioAudio');
