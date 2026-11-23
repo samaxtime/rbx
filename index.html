@@ -30,6 +30,7 @@
   .play-btn{background:#00c853;color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px}
   .play-btn.offline{background:#ff1e1e !important;opacity:1}
   .play-btn.inonda{background:#ff1e1e}
+  .debug{font-size:11px;color:#666;margin-top:6px}
 </style>
 </head>
 <body>
@@ -38,6 +39,7 @@
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 
 <div id="stato" class="badge online">● IN ONDA - LIVE</div>
+<div id="debug" class="debug">Controllo Mixxx...</div>
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
@@ -64,28 +66,83 @@
 <script>
 let staSuonando = false;
 let mixxxOnline = true;
-let fallimenti = 0;
+let controlloInCorso = false;
 
+// CONTROLLO CORRETTO - RIFATTO
 async function controllaLive(){
+  if(controlloInCorso || staSuonando) return;
+  controlloInCorso = true;
+  let oraTxt = new Date().toLocaleTimeString('it-IT');
+  let trovato = null; // true = acceso, false = spento, null = non so
+
+  // METODO 1 - 7.html in HTTP (non HTTPS!) - quello giusto per la porta 18404
   try{
     let controller = new AbortController();
-    let timeout = setTimeout(()=>controller.abort(), 1500);
-    let url = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://s1.free-shoutcast.com:18404/7.html?x=" + Date.now());
-    let res = await fetch(url, {cache:"no-store", signal:controller.signal});
-    clearTimeout(timeout);
-    let text = await res.text();
-    let parti = text.trim().split(",");
-    let statoMixxx = parti[1];
-    if(statoMixxx === "1"){ mixxxOnline = true; fallimenti = 0; }
-    else if(statoMixxx === "0"){ mixxxOnline = false; fallimenti = 0; }
-    else { return; }
-    aggiornaBadge();
-  }catch(e){
-    fallimenti++;
-    if(fallimenti < 3) return;
-    mixxxOnline = true;
+    let t = setTimeout(()=>controller.abort(), 4000);
+    // Proviamo 2 proxy, se uno non va proviamo l'altro
+    let urls = [
+      "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
+      "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
+    ];
+    for(let url of urls){
+      try{
+        let res = await fetch(url, {cache:"no-store", signal:controller.signal});
+        let text = (await res.text()).trim();
+        // Se è HTML di errore, non è 7.html, saltiamo
+        if(text.startsWith("<") || text.length > 200) continue;
+        // 7.html deve essere così: ascoltatori, stato, picco, ...
+        // Es: "1,1,4,200,0,128,Canzone"
+        let parti = text.split(",");
+        if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0")){
+          trovato = (parti[1] === "1");
+          document.getElementById('debug').textContent = "Ultimo controllo " + oraTxt + " - Server dice: " + text.substring(0,60);
+          break;
+        }
+      }catch(e){ }
+    }
+    clearTimeout(t);
+  }catch(e){}
+
+  // METODO 2 - Se il 7.html non risponde, proviamo a vedere se lo stream manda dati
+  // Senza aprire audio, solo 1 pezzettino di dati, così non gracchia
+  if(trovato === null){
+    try{
+      let controller2 = new AbortController();
+      let t2 = setTimeout(()=>controller2.abort(), 4000);
+      // Chiediamo solo i primi byte dello stream
+      let res2 = await fetch("https://s1.free-shoutcast.com/stream/18404?x=" + Date.now(), {signal:controller2.signal, cache:"no-store"});
+      if(res2.ok || res2.type === "opaque"){
+        // Se il server risponde, proviamo a leggere 1 pezzo
+        if(res2.body){
+          let reader = res2.body.getReader();
+          let r = await reader.read();
+          if(r.value && r.value.length > 0){
+            trovato = true;
+            document.getElementById('debug').textContent = "Ultimo controllo " + oraTxt + " - Stream manda dati: ON";
+          } else {
+            trovato = false;
+          }
+          try{ reader.cancel(); }catch(e){}
+        } else {
+          trovato = true;
+        }
+      } else {
+        trovato = false;
+      }
+      clearTimeout(t2);
+    }catch(e){
+      // Se fetch abortisce per timeout, vuol dire che non manda dati
+      // Ma se Mixxx è acceso, lo stream manda dati subito, quindi se timeout = spento
+      // Però non vogliamo dire SPENTA se è solo internet lento, quindi lasciamo trovato = null
+      // e non cambiamo il badge
+    }
+  }
+
+  if(trovato !== null){
+    mixxxOnline = trovato;
     aggiornaBadge();
   }
+  controlloInCorso = false;
 }
 
 function aggiornaBadge(){
@@ -228,7 +285,7 @@ carica();
 controllaLive();
 setInterval(aggiorna, 1000);
 setInterval(carica, 1800000); // foglio ogni 30 minuti
-setInterval(controllaLive, 5000); // controllo Mixxx ogni 5 secondi - non troppi, non troppo lento
+setInterval(controllaLive, 5000); // controllo Mixxx ogni 5 secondi
 </script>
 </body>
 </html>
