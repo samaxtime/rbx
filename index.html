@@ -66,35 +66,28 @@ let staSuonando = false;
 let mixxxOnline = true;
 let fallimenti = 0;
 
-// CONTROLLO MIXXX OGNI 1 SECONDO
 async function controllaLive(){
   try{
     let controller = new AbortController();
-    let timeout = setTimeout(()=>controller.abort(), 3000);
+    let timeout = setTimeout(()=>controller.abort(), 1500);
     let url = "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://s1.free-shoutcast.com:18404/7.html?x=" + Date.now());
     let res = await fetch(url, {cache:"no-store", signal:controller.signal});
     clearTimeout(timeout);
     let text = await res.text();
     let parti = text.trim().split(",");
     let statoMixxx = parti[1];
-    if(statoMixxx === "1"){
-      mixxxOnline = true;
-      fallimenti = 0;
-    } else if(statoMixxx === "0"){
-      mixxxOnline = false;
-      fallimenti = 0;
-    } else { return; }
+    if(statoMixxx === "1"){ mixxxOnline = true; fallimenti = 0; }
+    else if(statoMixxx === "0"){ mixxxOnline = false; fallimenti = 0; }
+    else { return; }
     aggiornaBadge();
   }catch(e){
     fallimenti++;
-    // Se il proxy non risponde, non diciamo spenta, restiamo come prima
     if(fallimenti < 3) return;
     mixxxOnline = true;
     aggiornaBadge();
   }
 }
 
-// BADGE + BOTTONE INSIEME - VERDE SE ON, ROSSO SE OFF
 function aggiornaBadge(){
   let statoEl = document.getElementById('stato');
   let btn = document.getElementById('playBtn');
@@ -108,7 +101,6 @@ function aggiornaBadge(){
     return;
   }
   if(mixxxOnline){
-    // MIXXX ACCESO = VERDE
     statoEl.textContent = "● IN ONDA - LIVE";
     statoEl.className = "badge online";
     btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
@@ -116,7 +108,6 @@ function aggiornaBadge(){
     btn.disabled = false;
     statoTxt.textContent = "Mixxx è in onda! Premi PLAY per ascoltare";
   } else {
-    // MIXXX SPENTO = ROSSO
     statoEl.textContent = "● RADIO SPENTA - OFF LINE";
     statoEl.className = "badge offline";
     btn.textContent = "🔴 ASCOLTA RADIO SAMAX - OFF LINE";
@@ -128,7 +119,6 @@ function aggiornaBadge(){
 
 function avviaAudio(){
   if(staSuonando) return;
-  // Se è OFF LINE, non parte
   if(!mixxxOnline){
     document.getElementById('playStato').textContent = "Mixxx è spento - Radio spenta";
     return;
@@ -148,10 +138,7 @@ function avviaAudio(){
 }
 document.getElementById('radioAudio').volume = 0.8;
 document.getElementById('radioAudio').addEventListener('error', ()=>{
-  if(staSuonando){
-    mixxxOnline = false;
-    aggiornaBadge();
-  }
+  if(staSuonando){ mixxxOnline = false; aggiornaBadge(); }
 });
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
@@ -241,7 +228,7 @@ carica();
 controllaLive();
 setInterval(aggiorna, 1000);
 setInterval(carica, 1800000); // foglio ogni 30 minuti
-setInterval(controllaLive, 1000); // controllo Mixxx ogni 1 secondo
+setInterval(controllaLive, 5000); // controllo Mixxx ogni 5 secondi - non troppi, non troppo lento
 </script>
 </body>
 </html>
