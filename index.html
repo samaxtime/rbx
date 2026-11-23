@@ -28,7 +28,7 @@
   .prog-item span{font-size:12px;color:#aaa;display:block;margin-top:3px}
   .footer{margin-top:30px;color:#666;font-size:12px}
   .play-btn{background:#00c853;color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px}
-  .play-btn.inonda{background:#ff1e1e}
+  .play-btn.paused{background:#ff1e1e}
 </style>
 </head>
 <body>
@@ -36,11 +36,11 @@
 <div class="logo">RADIO <span>SAMAX</span></div>
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 
-<div id="stato" class="badge online">● ON LINE</div>
+<div id="stato" class="badge offline">● OFFLINE - RADIO SPENTA</div>
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
-  <button id="playBtn" class="play-btn" onclick="avviaAudio()">▶️ ASCOLTA RADIO SAMAX</button>
+  <button id="playBtn" class="play-btn" onclick="togglePlay()">▶️ ASCOLTA RADIO SAMAX</button>
   <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Premi PLAY per ascoltare</div>
 </div>
 
@@ -61,28 +61,32 @@
 <div class="footer">© RADIO SAMAX - radiosamax.com<br><span id="orologio"></span></div>
 
 <script>
+// STREAM - SEMPLICE, COME PRIMA
 let staSuonando = false;
-
-// PLAY SEMPLICE - UNA SOLA VOLTA, SENZA RIPROVE, SENZA SCROLL
-function avviaAudio(){
-  if(staSuonando) return;
+function togglePlay(){
   let audio = document.getElementById('radioAudio');
   let btn = document.getElementById('playBtn');
   let stato = document.getElementById('playStato');
-  audio.play().then(()=>{
-    staSuonando = true;
-    btn.textContent = "🔴 IN ONDA - STAI ASCOLTANDO";
-    btn.classList.add('inonda');
-    btn.disabled = true;
-    stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
-    document.getElementById('stato').textContent = "● IN ONDA - LIVE";
-    document.getElementById('stato').className = "badge online";
-  }).catch(()=>{
-    stato.textContent = "Premi di nuovo PLAY";
-  });
+  if(!staSuonando){
+    audio.play().then(()=>{
+      btn.textContent = "⏸️ PAUSA";
+      btn.classList.add('paused');
+      stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
+      staSuonando = true;
+    }).catch(()=>{
+      stato.textContent = "Radio non in onda in questo momento, riprova più tardi.";
+    });
+  } else {
+    audio.pause();
+    btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
+    btn.classList.remove('paused');
+    stato.textContent = "Premi PLAY per ascoltare";
+    staSuonando = false;
+  }
 }
 document.getElementById('radioAudio').volume = 0.8;
 
+// FOGLIO GOOGLE - QUESTO DECIDE SE SEI ACCESO O SPENTO
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
 function parseDataOra(dataStr, oraStr){
@@ -133,15 +137,25 @@ function aggiorna(){
   if(programmi.length === 0) return;
   let prossimo = null; let inOnda = null;
   for(let p of programmi){ let diff = p.quando - ora; if(diff <= 0 && diff > -2*60*60*1000){ inOnda = p; } if(diff > 0 && !prossimo){ prossimo = p; } }
-  let titoloEl = document.getElementById('titolo'); let countEl = document.getElementById('countdown'); let labelEl = document.getElementById('count-label'); let detEl = document.getElementById('dettaglio');
-  if(staSuonando){
-    if(inOnda){ titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`; }
-    else { titoloEl.innerHTML = `<h2>🔴 RadioSamax in Onda</h2><p>Musica in diretta - Mixxx</p>`; }
-    countEl.textContent = "IN ONDA"; labelEl.textContent = "Stai ascoltando ora"; return;
+  let statoEl = document.getElementById('stato'); let titoloEl = document.getElementById('titolo'); let countEl = document.getElementById('countdown'); let labelEl = document.getElementById('count-label'); let detEl = document.getElementById('dettaglio');
+  if(inOnda){
+    statoEl.textContent = "● IN ONDA - LIVE";
+    statoEl.className = "badge online";
+    titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`;
+    countEl.textContent = "IN ONDA";
+    labelEl.textContent = "Stai ascoltando ora";
+    detEl.innerHTML = `<div class="ora">📅 ${inOnda.data} - 🕒 ${inOnda.ora}</div>`;
+  } else if(prossimo){
+    statoEl.textContent = "● OFFLINE - RADIO SPENTA";
+    statoEl.className = "badge offline";
+    titoloEl.innerHTML = `<h2>${prossimo.titolo}</h2><p>${prossimo.descrizione}</p>`;
+    countEl.textContent = formatCountdown(prossimo.quando - ora);
+    labelEl.textContent = "⏳ tra";
+    detEl.innerHTML = `<div class="ora">📅 ${prossimo.data} - 🕒 ${prossimo.ora}</div>`;
+  } else {
+    titoloEl.innerHTML = `<h2>Nessun programma in arrivo</h2>`;
+    countEl.textContent = "--:--:--";
   }
-  if(inOnda){ titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`; countEl.textContent = "IN ONDA"; labelEl.textContent = "Stai ascoltando ora"; detEl.innerHTML = `<div class="ora">📅 ${inOnda.data} - 🕒 ${inOnda.ora}</div>`; }
-  else if(prossimo){ titoloEl.innerHTML = `<h2>${prossimo.titolo}</h2><p>${prossimo.descrizione}</p>`; countEl.textContent = formatCountdown(prossimo.quando - ora); labelEl.textContent = "⏳ tra"; detEl.innerHTML = `<div class="ora">📅 ${prossimo.data} - 🕒 ${prossimo.ora}</div>`; }
-  else { titoloEl.innerHTML = `<h2>Nessun programma in arrivo</h2><p>Ma la radio è ON LINE, premi PLAY</p>`; countEl.textContent = "--:--:--"; }
 }
 carica();
 setInterval(aggiorna, 1000);
