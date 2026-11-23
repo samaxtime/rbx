@@ -29,10 +29,6 @@
   .footer{margin-top:30px;color:#666;font-size:12px}
   .play-btn{background:#00c853;color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px}
   .play-btn.inonda{background:#ff1e1e}
-  .play-btn.autoplay-pulse{animation:pulseAuto 1s infinite}
-  @keyframes pulseAuto{50%{transform:scale(1.04);box-shadow:0 0 25px #00c853}}
-  .play-btn:disabled{background:#444;color:#888;cursor:not-allowed}
-  .play-btn.inonda:disabled{background:#ff1e1e;color:#fff;opacity:1}
 </style>
 </head>
 <body>
@@ -40,7 +36,7 @@
 <div class="logo">RADIO <span>SAMAX</span></div>
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 
-<div id="stato" class="badge online">● ON LINE - PREMI PLAY</div>
+<div id="stato" class="badge online">● ON LINE</div>
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
@@ -66,78 +62,26 @@
 
 <script>
 let staSuonando = false;
-let autoplayTentato = false;
 
-function aggiornaBadge(online){
-  let statoEl = document.getElementById('stato');
-  if(staSuonando){
-    statoEl.textContent = "● IN ONDA - LIVE";
-    statoEl.className = "badge online";
-  } else if(online === false){
-    statoEl.textContent = "● RADIO SPENTA";
-    statoEl.className = "badge offline";
-  } else {
-    statoEl.textContent = "● ON LINE - PREMI PLAY";
-    statoEl.className = "badge online";
-  }
-}
-
-// PLAY SENZA PAUSA, SENZA SECONDO STREAM, SENZA SONDA
+// PLAY SEMPLICE - UNA SOLA VOLTA, SENZA RIPROVE, SENZA SCROLL
 function avviaAudio(){
   if(staSuonando) return;
   let audio = document.getElementById('radioAudio');
   let btn = document.getElementById('playBtn');
   let stato = document.getElementById('playStato');
-  return audio.play().then(()=>{
+  audio.play().then(()=>{
+    staSuonando = true;
     btn.textContent = "🔴 IN ONDA - STAI ASCOLTANDO";
     btn.classList.add('inonda');
-    btn.classList.remove('autoplay-pulse');
     btn.disabled = true;
     stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
-    staSuonando = true;
-    aggiornaBadge(true);
+    document.getElementById('stato').textContent = "● IN ONDA - LIVE";
+    document.getElementById('stato').className = "badge online";
   }).catch(()=>{
-    // Se il browser blocca, diventa pulsante e parte al primo tocco
-    btn.classList.add('autoplay-pulse');
-    btn.textContent = "🔴 IN ONDA - TOCCA PER ASCOLTARE";
-    stato.textContent = "🔴 Tocca ovunque per ascoltare subito";
-    staSuonando = false;
+    stato.textContent = "Premi di nuovo PLAY";
   });
 }
-let audioEl = document.getElementById('radioAudio');
-audioEl.volume = 0.8;
-// Se lo stream si interrompe davvero, allora diciamo SPENTA
-audioEl.addEventListener('error', ()=>{
-  if(staSuonando){
-    staSuonando = false;
-    let btn = document.getElementById('playBtn');
-    btn.disabled = false;
-    btn.classList.remove('inonda');
-    btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
-    document.getElementById('playStato').textContent = "Radio spenta - riprova tra poco";
-    aggiornaBadge(false);
-  }
-});
-audioEl.addEventListener('stalled', ()=>{
-  // Se si blocca per più di 5 sec e stava suonando, non facciamo niente, aspettiamo che riparta
-  console.log("buffer...");
-});
-
-function provaAutoplay(){
-  if(autoplayTentato || staSuonando) return;
-  // Autoplay solo se c'è un programma in onda nel foglio
-  let ora = new Date();
-  let inOnda = programmi.find(p => { let diff = p.quando - ora; return diff <= 0 && diff > -2*60*60*1000; });
-  if(inOnda){
-    autoplayTentato = true;
-    avviaAudio();
-  }
-}
-['click','touchstart','scroll','keydown'].forEach(ev=>{
-  document.addEventListener(ev, ()=>{
-    if(!staSuonando) avviaAudio();
-  }, {passive:true, once:false});
-});
+document.getElementById('radioAudio').volume = 0.8;
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
@@ -177,7 +121,7 @@ async function carica(){
     let res = await fetch(SHEET_CSV_URL); let text = await res.text(); let righe = parseCSV(text);
     programmi = [];
     for(let i=1;i<righe.length;i++){ let r = righe[i]; if(!r[0] || !r[2] || !r[3]) continue; let dataOra = parseDataOra(r[3], r[2]); if(!dataOra) continue; programmi.push({ titolo:r[0], descrizione:r[1]||'', ora:r[2], data:r[3], quando:dataOra }); }
-    programmi.sort((a,b)=>a.quando - b.quando); mostraLista(); provaAutoplay();
+    programmi.sort((a,b)=>a.quando - b.quando); mostraLista();
   }catch(e){ document.getElementById('lista').innerHTML = "Non riesco a caricare il foglio."; }
 }
 function mostraLista(){
