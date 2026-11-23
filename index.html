@@ -29,10 +29,11 @@
   .prog-item span{font-size:12px;color:#aaa;display:block;margin-top:3px}
   .footer{margin-top:30px;color:#666;font-size:12px}
   .play-btn{background:#00c853;color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px}
-  .play-btn.paused{background:#ff1e1e}
+  .play-btn.inonda{background:#ff1e1e}
   .play-btn.autoplay-pulse{animation:pulseAuto 1s infinite}
   @keyframes pulseAuto{50%{transform:scale(1.04);box-shadow:0 0 25px #00c853}}
   .play-btn:disabled{background:#444;color:#888;cursor:not-allowed}
+  .play-btn.inonda:disabled{background:#ff1e1e;color:#fff;opacity:1}
 </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
-  <button id="playBtn" class="play-btn" onclick="togglePlay()">▶️ ASCOLTA RADIO SAMAX</button>
+  <button id="playBtn" class="play-btn" onclick="avviaAudio()">▶️ ASCOLTA RADIO SAMAX</button>
   <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Controllo se la radio è in onda...</div>
 </div>
 
@@ -94,7 +95,6 @@ function aggiornaBadge(){
   }
 }
 
-// CONTROLLO VERO - prova a caricare 2 secondi di stream in muto, senza far sentire niente
 let controlloInCorso = false;
 async function controllaRadio(){
   if(controlloInCorso || staSuonando) return;
@@ -110,46 +110,29 @@ async function controllaRadio(){
     probe.onplaying = ()=>{ if(!fatto){ fatto=true; clearTimeout(timeout); probe.pause(); probe.src=""; resolve(true); } };
     probe.onerror = ()=>{ if(!fatto){ fatto=true; clearTimeout(timeout); resolve(false); } };
     probe.src = STREAM_URL + "?probe=" + Date.now();
-    probe.play().catch(()=>{ /* se blocca, aspettiamo canplay */ });
+    probe.play().catch(()=>{});
   });
   radioOnline = online;
   controlloInCorso = false;
   aggiornaBadge();
-  // Se è online e non abbiamo ancora provato autoplay, proviamo
-  if(online && !autoplayTentato){
-    provaAutoplay();
-  }
+  if(online && !autoplayTentato){ provaAutoplay(); }
 }
 
-function togglePlay(){
-  if(!radioOnline && !staSuonando){
+// PLAY SENZA PAUSA - una volta partito resta in onda
+function avviaAudio(){
+  if(staSuonando) return;
+  if(!radioOnline){
     document.getElementById('playStato').textContent = "Radio spenta, non posso far partire la musica";
     return;
   }
   let audio = document.getElementById('radioAudio');
   let btn = document.getElementById('playBtn');
   let stato = document.getElementById('playStato');
-  if(!staSuonando){ avviaAudio(); }
-  else {
-    audio.pause();
-    btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
-    btn.classList.remove('paused');
-    btn.classList.remove('autoplay-pulse');
-    stato.textContent = radioOnline ? "Radio accesa! Premi PLAY per ascoltare" : "Radio spenta";
-    staSuonando = false;
-    aggiornaBadge();
-    setTimeout(controllaRadio, 500);
-  }
-}
-
-function avviaAudio(){
-  let audio = document.getElementById('radioAudio');
-  let btn = document.getElementById('playBtn');
-  let stato = document.getElementById('playStato');
   return audio.play().then(()=>{
-    btn.textContent = "⏸️ PAUSA";
-    btn.classList.add('paused');
+    btn.textContent = "🔴 IN ONDA - STAI ASCOLTANDO";
+    btn.classList.add('inonda');
     btn.classList.remove('autoplay-pulse');
+    btn.disabled = true; // niente pausa, resta in onda
     stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
     staSuonando = true;
     radioOnline = true;
@@ -241,7 +224,7 @@ carica();
 controllaRadio();
 setInterval(aggiorna, 1000);
 setInterval(carica, 60000);
-setInterval(controllaRadio, 15000); // ricontrolla ogni 15 sec se è accesa o spenta
+setInterval(controllaRadio, 15000);
 </script>
 </body>
 </html>
