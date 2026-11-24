@@ -90,6 +90,7 @@ let mixxxOnline = false;
 let controlloInCorso = false;
 let tentativiFalliti = 0;
 let ultimaCanzone = "";
+let canzoneInCorso = false;
 
 async function controllaLive(){
   if(controlloInCorso || staSuonando) return;
@@ -98,7 +99,7 @@ async function controllaLive(){
   let trovato = null;
   try{
     let controller = new AbortController();
-    let t = setTimeout(()=>controller.abort(), 4000);
+    let t = setTimeout(()=>controller.abort(), 3000);
     let urls = [
       "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
       "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
@@ -122,7 +123,7 @@ async function controllaLive(){
   if(trovato === null){
     try{
       let controller2 = new AbortController();
-      let t2 = setTimeout(()=>controller2.abort(), 4000);
+      let t2 = setTimeout(()=>controller2.abort(), 3000);
       let res2 = await fetch("https://s1.free-shoutcast.com/stream/18404?x=" + Date.now(), {signal:controller2.signal, cache:"no-store"});
       let tipo = (res2.headers.get("content-type") || "").toLowerCase();
       if(tipo.includes("text") || tipo.includes("html")){
@@ -160,6 +161,8 @@ function aggiornaBadge(){
   let statoTxt = document.getElementById('playStato');
   document.getElementById('vinile').classList.toggle('on', mixxxOnline || staSuonando);
   document.getElementById('eq').classList.toggle('on', mixxxOnline || staSuonando);
+  // Appena va in onda, chiama subito la canzone, senza aspettare
+  if(mixxxOnline || staSuonando){ aggiornaCanzone(); }
   if(staSuonando){
     statoEl.textContent = "● IN ONDA - LIVE";
     statoEl.className = "badge online";
@@ -203,6 +206,7 @@ function avviaAudio(){
     btn.disabled = true;
     stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
     aggiornaBadge();
+    aggiornaCanzone();
   }).catch(()=>{ stato.textContent = "Premi di nuovo PLAY"; });
 }
 document.getElementById('radioAudio').volume = 0.8;
@@ -210,12 +214,10 @@ document.getElementById('radioAudio').addEventListener('error', ()=>{
   if(staSuonando){ mixxxOnline = false; aggiornaBadge(); }
 });
 
-// CANZONE DA MIXXX - FIX HTML + SCORRIMENTO
+// CANZONE DA MIXXX - VELOCE, SENZA ASPETTARE
 async function aggiornaCanzone(){
-  if(!mixxxOnline && !staSuonando){
-    document.getElementById('boxCanzone').style.display = "none";
-    return;
-  }
+  if(canzoneInCorso) return;
+  canzoneInCorso = true;
   let urls = [
     "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
     "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
@@ -224,9 +226,13 @@ async function aggiornaCanzone(){
     try{
       let res = await fetch(u, {cache:"no-store"});
       let text = (await res.text()).trim();
-      // FIX: pulisci HTML prima di tagliare, toglie </body></html>
       text = text.replace(/<[^>]*>/g, "").trim();
       let parti = text.split(",");
+      if(parti[1] === "0"){
+        document.getElementById('boxCanzone').style.display = "none";
+        canzoneInCorso = false;
+        return;
+      }
       let titolo = parti.slice(6).join(",").trim();
       if(titolo && titolo !== "" && titolo.toLowerCase() !== "radio samax"){
         let el = document.getElementById('scrittaCanzone');
@@ -238,10 +244,12 @@ async function aggiornaCanzone(){
           el.style.animation = "";
         }
         document.getElementById('boxCanzone').style.display = "block";
+        canzoneInCorso = false;
         return;
       }
     }catch(e){}
   }
+  canzoneInCorso = false;
 }
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
@@ -331,8 +339,8 @@ controllaLive();
 aggiornaCanzone();
 setInterval(aggiorna, 1000);
 setInterval(carica, 1800000);
-setInterval(controllaLive, 5000);
-setInterval(aggiornaCanzone, 10000);
+setInterval(controllaLive, 3000);
+setInterval(aggiornaCanzone, 3000);
 </script>
 </body>
 </html>
