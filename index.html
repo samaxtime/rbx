@@ -55,7 +55,7 @@
 
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none" src="https://s1.free-shoutcast.com/stream/18404"></audio>
-  <button id="playBtn" class="play-btn offline" onclick="avviaAudio()">🔴 ASCOLTA RADIO SAMAX - OFF LINE</button>
+  <button id="playBtn" class="play-btn" onclick="avviaAudio()">▶️ ASCOLTA RADIO SAMAX</button>
   <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Controllo se Mixxx è in onda...</div>
 </div>
 
@@ -87,33 +87,31 @@ let tentativiFalliti = 0;
 let ultimaCanzone = "";
 let controlloInCorso = false;
 
-// 1 SOLA RICHIESTA PER STATO + CANZONE - VELOCE
+// 1 SOLA RICHIESTA PER STATO + CANZONE - 3 PROXY
 async function controllaTutto(){
   if(controlloInCorso) return;
   controlloInCorso = true;
+  let base = "http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now();
   let urls = [
-    "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
+    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base),
+    "https://corsproxy.io/?url=" + encodeURIComponent(base),
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(base)
   ];
   for(let u of urls){
     try{
-      let controller = new AbortController();
-      let t = setTimeout(()=>controller.abort(), 4000);
-      let res = await fetch(u, {cache:"no-store", signal:controller.signal});
-      clearTimeout(t);
+      let res = await fetch(u, {cache:"no-store"});
       let text = (await res.text()).trim();
       text = text.replace(/<[^>]*>/g, "").trim();
       let parti = text.split(",");
       if(parti.length < 2) continue;
-      if(!(parti[1] === "1" || parti[1] === "0")) continue;
-
-      // STATO
+      if(!(parti[1] === "1" || parti[1] === "0")){
+        document.getElementById('debug').textContent = "Proxy risponde ma dato strano: " + text.substring(0,80);
+        continue;
+      }
       let trovato = (parti[1] === "1");
       if(trovato) tentativiFalliti = 0;
       mixxxOnline = trovato;
       aggiornaBadge();
-
-      // CANZONE - dalla stessa richiesta, senza rifare fetch!
       let titolo = parti.slice(6).join(",").trim();
       if(trovato && titolo && titolo !== "" && titolo.toLowerCase() !== "radio samax"){
         let el = document.getElementById('scrittaCanzone');
@@ -125,12 +123,13 @@ async function controllaTutto(){
       } else if(!trovato){
         document.getElementById('boxCanzone').style.display = "none";
       }
-      document.getElementById('debug').textContent = "Controllo " + new Date().toLocaleTimeString('it-IT') + " - " + text.substring(0,60);
+      document.getElementById('debug').textContent = "OK " + new Date().toLocaleTimeString('it-IT') + " - " + text.substring(0,60);
       controlloInCorso = false;
       return;
-    }catch(e){}
+    }catch(e){
+      document.getElementById('debug').textContent = "Proxy fallito, provo prossimo...";
+    }
   }
-  // Se nessun proxy risponde, prova a capire se è spento dallo stream
   tentativiFalliti++;
   if(tentativiFalliti >= 2 && !staSuonando){
     mixxxOnline = false;
@@ -159,27 +158,24 @@ function aggiornaBadge(){
     btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
     btn.className = "play-btn";
     btn.disabled = false;
-    statoTxt.textContent = "Mixxx è in onda! Premi PLAY per ascoltare";
+    statoTxt.textContent = "Mixxx è in onda! Premi PLAY";
   } else {
-    statoEl.textContent = "● RADIO SPENTA - OFF LINE";
+    statoEl.textContent = "● RADIO SPENTA - OFF LINE?";
     statoEl.className = "badge offline";
-    btn.textContent = "🔴 ASCOLTA RADIO SAMAX - OFF LINE";
-    btn.className = "play-btn offline";
-    btn.disabled = true;
-    statoTxt.textContent = "Mixxx è spento - Radio spenta - Premi di nuovo PLAY";
+    btn.textContent = "▶️ PROVA AD ASCOLTARE COMUNQUE";
+    btn.className = "play-btn";
+    btn.disabled = false;
+    statoTxt.textContent = "Controllo non riesce a collegarsi, ma premi PLAY lo stesso, magari Mixxx è in onda!";
   }
 }
 
 function avviaAudio(){
   if(staSuonando) return;
-  if(!mixxxOnline){
-    document.getElementById('playStato').textContent = "Premi di nuovo PLAY - Mixxx è spento";
-    controllaTutto();
-    return;
-  }
   let audio = document.getElementById('radioAudio');
   let btn = document.getElementById('playBtn');
   let stato = document.getElementById('playStato');
+  stato.textContent = "Connessione in corso...";
+  audio.src = "https://s1.free-shoutcast.com/stream/18404?x=" + Date.now();
   audio.play().then(()=>{
     staSuonando = true;
     mixxxOnline = true;
@@ -189,7 +185,11 @@ function avviaAudio(){
     stato.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE";
     aggiornaBadge();
     controllaTutto();
-  }).catch(()=>{ stato.textContent = "Premi di nuovo PLAY"; });
+  }).catch((e)=>{
+    stato.textContent = "Premi di nuovo PLAY - Errore: " + e.message;
+    mixxxOnline = false;
+    aggiornaBadge();
+  });
 }
 document.getElementById('radioAudio').volume = 0.8;
 document.getElementById('radioAudio').addEventListener('error', ()=>{
