@@ -40,8 +40,8 @@
   .play-btn.offline{background:linear-gradient(90deg,#ff1e1e,#ff5a00) !important;opacity:1}
   .play-btn.inonda{background:linear-gradient(90deg,#ff1e1e,#ff0033)}
   .debug{font-size:11px;color:#666;margin-top:6px}
-  @keyframes scorri{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-  #scrittaCanzone{animation:scorri 12s linear infinite}
+  @keyframes scorri{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+  #scrittaCanzone{display:inline-block;white-space:nowrap;animation:scorri 12s linear infinite}
 </style>
 </head>
 <body>
@@ -64,7 +64,7 @@
 <div id="boxCanzone" style="display:none;max-width:520px;margin:14px auto;background:#111;border:1px solid #ff1e1e;border-radius:12px;padding:10px 0;overflow:hidden;">
   <div style="font-size:11px;color:#ffcc00;font-weight:800;letter-spacing:1px;">🎵 IN ONDA ADESSO</div>
   <div style="overflow:hidden;white-space:nowrap;margin-top:6px;">
-    <div id="scrittaCanzone" style="display:inline-block;font-size:18px;font-weight:900;color:#fff;padding-left:100%;white-space:nowrap;">In attesa...</div>
+    <div id="scrittaCanzone" style="display:inline-block;font-size:18px;font-weight:900;color:#fff;white-space:nowrap;">In attesa...</div>
   </div>
 </div>
 
@@ -96,7 +96,6 @@ async function controllaLive(){
   controlloInCorso = true;
   let oraTxt = new Date().toLocaleTimeString('it-IT');
   let trovato = null;
-
   try{
     let controller = new AbortController();
     let t = setTimeout(()=>controller.abort(), 4000);
@@ -108,7 +107,8 @@ async function controllaLive(){
       try{
         let res = await fetch(url, {cache:"no-store", signal:controller.signal});
         let text = (await res.text()).trim();
-        if(text.startsWith("<") || text.length > 500) continue;
+        text = text.replace(/<[^>]*>/g, "").trim();
+        if(text.length > 500) continue;
         let parti = text.split(",");
         if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0")){
           trovato = (parti[1] === "1");
@@ -119,7 +119,6 @@ async function controllaLive(){
     }
     clearTimeout(t);
   }catch(e){}
-
   if(trovato === null){
     try{
       let controller2 = new AbortController();
@@ -128,39 +127,25 @@ async function controllaLive(){
       let tipo = (res2.headers.get("content-type") || "").toLowerCase();
       if(tipo.includes("text") || tipo.includes("html")){
         trovato = false;
-        document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Stream è testo, non musica: SPENTO";
       } else if(tipo.includes("audio") || tipo.includes("mpeg") || tipo.includes("octet")){
         if(res2.body){
           let reader = res2.body.getReader();
           let r = await reader.read();
           if(r.value && r.value.length > 0){
             let inizio = new TextDecoder().decode(r.value.slice(0,20));
-            if(inizio.includes("Stream") || inizio.includes("<") || inizio.includes("error")){
-              trovato = false;
-            } else {
-              trovato = true;
-            }
-            document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Stream è audio: " + (trovato ? "ON" : "OFF");
-          } else {
-            trovato = false;
-          }
+            if(inizio.includes("Stream") || inizio.includes("<") || inizio.includes("error")){ trovato = false; } else { trovato = true; }
+          } else { trovato = false; }
           try{ reader.cancel(); }catch(e){}
-        } else {
-          trovato = true;
-        }
+        } else { trovato = true; }
       } else {
         if(res2.ok){ trovato = true; } else { trovato = false; }
       }
       clearTimeout(t2);
     }catch(e){
       tentativiFalliti++;
-      if(tentativiFalliti >= 2){
-        trovato = false;
-        document.getElementById('debug').textContent = "Controllo " + oraTxt + " - Nessuna risposta 2 volte: SPENTO";
-      }
+      if(tentativiFalliti >= 2){ trovato = false; }
     }
   }
-
   if(trovato !== null){
     if(trovato) tentativiFalliti = 0;
     mixxxOnline = trovato;
@@ -225,30 +210,38 @@ document.getElementById('radioAudio').addEventListener('error', ()=>{
   if(staSuonando){ mixxxOnline = false; aggiornaBadge(); }
 });
 
-// CANZONE DA MIXXX - 7.html
+// CANZONE DA MIXXX - FIX HTML + SCORRIMENTO
 async function aggiornaCanzone(){
   if(!mixxxOnline && !staSuonando){
     document.getElementById('boxCanzone').style.display = "none";
     return;
   }
-  try{
-    let url = "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now());
-    let res = await fetch(url, {cache:"no-store"});
-    let text = (await res.text()).trim();
-    let parti = text.split(",");
-    let titolo = parti.slice(6).join(",").trim();
-    if(titolo && titolo !== "" && titolo !== ultimaCanzone){
-      ultimaCanzone = titolo;
-      let el = document.getElementById('scrittaCanzone');
-      el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
-      el.style.animation = "none";
-      el.offsetHeight;
-      el.style.animation = "";
-      document.getElementById('boxCanzone').style.display = "block";
-    } else if(titolo){
-      document.getElementById('boxCanzone').style.display = "block";
-    }
-  }catch(e){}
+  let urls = [
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now()),
+    "https://corsproxy.io/?url=" + encodeURIComponent("http://s1.free-shoutcast.com:18404/7.html?x=" + Date.now())
+  ];
+  for(let u of urls){
+    try{
+      let res = await fetch(u, {cache:"no-store"});
+      let text = (await res.text()).trim();
+      // FIX: pulisci HTML prima di tagliare, toglie </body></html>
+      text = text.replace(/<[^>]*>/g, "").trim();
+      let parti = text.split(",");
+      let titolo = parti.slice(6).join(",").trim();
+      if(titolo && titolo !== "" && titolo.toLowerCase() !== "radio samax"){
+        let el = document.getElementById('scrittaCanzone');
+        if(titolo !== ultimaCanzone){
+          ultimaCanzone = titolo;
+          el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
+          el.style.animation = "none";
+          el.offsetHeight;
+          el.style.animation = "";
+        }
+        document.getElementById('boxCanzone').style.display = "block";
+        return;
+      }
+    }catch(e){}
+  }
 }
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
