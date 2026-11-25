@@ -71,11 +71,8 @@ let ultimaCanzone = "";
 let controlloInCorso = false;
 const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
 const HOST7 = "http://s1.free-shoutcast.com:18404/7.html";
-
-// === CONTROLLO DEL TEST CHE FUNZIONA - 5 proxy in gara, vince il primo ===
 async function controllaTutto(){
   if(controlloInCorso) return;
-  // Se stai ascoltando, sei già ON, non controllare
   if(staSuonando) return;
   controlloInCorso = true;
   let base = HOST7 + "?x=" + Date.now();
@@ -87,8 +84,7 @@ async function controllaTutto(){
     "https://api.allorigins.win/get?url=" + encodeURIComponent(base)
   ];
   let risultato = await new Promise((res)=>{
-    let fatto = false;
-    let cont = 0;
+    let fatto = false; let cont = 0;
     proxies.forEach(u=>{
       fetch(u, {cache:"no-store"}).then(r=>r.text()).then(t=>{
         if(fatto) return;
@@ -98,23 +94,18 @@ async function controllaTutto(){
         t = t.replace(/<[^>]*>/g,"").trim().split("\n")[0];
         let p = t.split(",");
         if(p.length >= 2 && (p[1]==="1" || p[1]==="0") && !isNaN(parseInt(p[2]))){
-          fatto = true;
-          res({on: p[1]==="1", parti: p});
+          fatto = true; res({on: p[1]==="1", parti: p});
         }
       }).catch(()=>{}).finally(()=>{
-        cont++;
-        if(cont===proxies.length && !fatto) res(null);
+        cont++; if(cont===proxies.length && !fatto) res(null);
       });
     });
     setTimeout(()=>{ if(!fatto){ fatto=true; res(null); } }, 3000);
   });
-
   if(risultato === null){
     document.getElementById('debug').textContent = "Proxy lenti... riprovo - " + new Date().toLocaleTimeString('it-IT');
-    controlloInCorso = false;
-    return; // non cambiare stato se non so
+    controlloInCorso = false; return;
   }
-
   mixxxOnline = risultato.on;
   let titolo = risultato.parti.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
   if(mixxxOnline){
@@ -140,7 +131,6 @@ async function controllaTutto(){
   aggiornaBadge();
   controlloInCorso = false;
 }
-
 function aggiornaBadge(){
   let statoEl = document.getElementById('stato');
   let btn = document.getElementById('playBtn');
