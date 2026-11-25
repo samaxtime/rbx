@@ -34,7 +34,7 @@
   .footer{margin-top:30px;color:#666;font-size:12px}
   .play-btn{background:linear-gradient(90deg,#00c853,#00e676);color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px;box-shadow:0 5px 20px rgba(0,200,83,.4)}
   .play-btn.inonda{background:linear-gradient(90deg,#ff1e1e,#ff0033)}
-  .play-btn.spento{background:linear-gradient(90deg,#555,#777);box-shadow:none;opacity:.9}
+  .play-btn.spento{background:linear-gradient(90deg,#555,#777);box-shadow:none;opacity:.9;cursor:default}
   .debug{font-size:11px;color:#666;margin-top:6px}
   .ticker-wrap{overflow:hidden;white-space:nowrap;position:relative}
   .ticker-text{display:inline-block;padding-left:100%;animation:scorri 12s linear infinite;font-size:18px;font-weight:900;color:#fff}
@@ -70,10 +70,9 @@ let staSuonando = false;
 let mixxxOnline = false;
 let ultimaCanzone = "";
 let controlloInCorso = false;
-let utenteVolevaAscoltare = false; // true se l'utente ha premuto PLAY e non ha premuto STOP
+let utenteVolevaAscoltare = false;
 const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
 const HOST7 = "http://s1.free-shoutcast.com:18404/7.html";
-
 async function controllaTutto(){
   if(controlloInCorso) return;
   controlloInCorso = true;
@@ -104,16 +103,12 @@ async function controllaTutto(){
     });
     setTimeout(()=>{ if(!fatto){ fatto=true; res(null); } }, 3000);
   });
-
   if(risultato === null){
-    document.getElementById('debug').textContent = "Proxy lenti... riprovo - " + new Date().toLocaleTimeString('it-IT');
+    document.getElementById('debug').textContent = "Controllo in corso... " + new Date().toLocaleTimeString('it-IT');
     controlloInCorso = false; return;
   }
-
-  let eraOnline = mixxxOnline;
   mixxxOnline = risultato.on;
   let titolo = risultato.parti.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
-
   if(mixxxOnline){
     document.getElementById('debug').textContent = "Mixxx ON - Ascoltatori: " + risultato.parti[2] + " - " + new Date().toLocaleTimeString('it-IT');
     if(titolo && titolo.toLowerCase() !== "radio samax"){
@@ -129,27 +124,22 @@ async function controllaTutto(){
       document.getElementById('boxCanzone').style.display = "block";
       document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
     }
-    // AUTO-RIPARTENZA: se l'utente stava ascoltando e Mixxx è tornato ON, riparte da sola
     if(utenteVolevaAscoltare && !staSuonando){
-      document.getElementById('debug').textContent = "Mixxx tornato ON - riparto in automatico...";
       avviaAudioAuto();
     }
   } else {
     document.getElementById('debug').textContent = "Mixxx OFF - " + new Date().toLocaleTimeString('it-IT');
     document.getElementById('boxCanzone').style.display = "none";
     ultimaCanzone = "";
-    // Se stavi ascoltando e Mixxx si spegne -> ferma audio, ma ricorda che volevi ascoltare
     if(staSuonando){
       let audio = document.getElementById('radioAudio');
       audio.pause(); audio.src = ""; audio.load();
       staSuonando = false;
-      // utenteVolevaAscoltare resta true, così quando Mixxx torna riparte
     }
   }
   aggiornaBadge();
   controlloInCorso = false;
 }
-
 function aggiornaBadge(){
   let statoEl = document.getElementById('stato');
   let btn = document.getElementById('playBtn');
@@ -166,56 +156,47 @@ function aggiornaBadge(){
     statoTxt.textContent = "Mixxx è in onda! Premi PLAY";
   } else {
     statoEl.textContent = "● RADIO SPENTA - OFF LINE"; statoEl.className = "badge offline";
-    btn.textContent = "● RADIO SPENTA"; btn.className = "play-btn spento"; btn.disabled = false;
+    btn.textContent = "● RADIO SPENTA"; btn.className = "play-btn spento"; btn.disabled = true;
     if(utenteVolevaAscoltare){
       statoTxt.textContent = "Mixxx si è spento - appena torna live, la musica riparte da sola...";
     } else {
-      statoTxt.textContent = "Radio spenta in questo momento - torna quando siamo live";
+      statoTxt.textContent = "Radio spenta - aspetta il controllo, quando siamo live il bottone diventa verde";
     }
   }
 }
+// PLAY solo se LIVE, altrimenti niente - aspetta il controllo
 function toggleAudio(){
   if(staSuonando){
-    // STOP manuale: l'utente non vuole più ascoltare, non far ripartire da sola
     utenteVolevaAscoltare = false;
     fermaAudio();
     return;
   }
   if(!mixxxOnline){
-    alert("RadioSamax non è on line live in questo momento..");
-    return;
+    return; // niente, aspetta il controllo automatico
   }
   utenteVolevaAscoltare = true;
   avviaAudio();
 }
 function avviaAudio(){
-  if(!mixxxOnline){
-    alert("RadioSamax non è on line live in questo momento..");
-    return;
-  }
+  if(!mixxxOnline) return;
   let audio = document.getElementById('radioAudio');
   let stato = document.getElementById('playStato');
   stato.textContent = "Connessione in corso...";
   audio.src = STREAM_URL + "?x=" + Date.now();
-  audio.play().then(()=>{ staSuonando = true; aggiornaBadge(); }).catch((e)=>{ stato.textContent = "Premi di nuovo PLAY - Errore: " + e.message; });
+  audio.play().then(()=>{ staSuonando = true; aggiornaBadge(); }).catch(()=>{ stato.textContent = "Premi di nuovo PLAY"; });
 }
-// Ripartenza automatica senza alert, senza chiedere
 function avviaAudioAuto(){
   let audio = document.getElementById('radioAudio');
   audio.src = STREAM_URL + "?x=" + Date.now();
-  audio.play().then(()=>{ staSuonando = true; aggiornaBadge(); }).catch(()=>{ /* riprovo al prossimo controllo */ });
+  audio.play().then(()=>{ staSuonando = true; aggiornaBadge(); }).catch(()=>{});
 }
 function fermaAudio(){
   let audio = document.getElementById('radioAudio');
   audio.pause(); audio.src = ""; audio.load(); staSuonando = false; aggiornaBadge(); controllaTutto();
 }
 document.getElementById('radioAudio').volume = 0.8;
-document.getElementById('radioAudio').addEventListener('error', ()=>{
-  if(staSuonando){ staSuonando = false; aggiornaBadge(); }
-});
-document.getElementById('radioAudio').addEventListener('ended', ()=>{
-  if(staSuonando){ staSuonando = false; aggiornaBadge(); }
-});
+document.getElementById('radioAudio').addEventListener('error', ()=>{ if(staSuonando){ staSuonando = false; aggiornaBadge(); } });
+document.getElementById('radioAudio').addEventListener('ended', ()=>{ if(staSuonando){ staSuonando = false; aggiornaBadge(); } });
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
 function parseDataOra(dataStr, oraStr){
