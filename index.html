@@ -174,7 +174,7 @@ function aggiornaBadge(){
   document.getElementById('vinile').classList.toggle('on', mixxxOnline || staSuonando);
   if(staSuonando){
     statoEl.textContent = "● IN ONDA - LIVE"; statoEl.className = "badge online";
-    btn.textContent = "⏹️ STOP - SPEGNI RADIO"; btn.className = "play-btn inonda"; btn.disabled = false;
+    btn.textContent = "⏹️ STOP LIVE "; btn.className = "play-btn inonda"; btn.disabled = false;
     statoTxt.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE"; return;
   }
   if(mixxxOnline){
