@@ -1,366 +1,101 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - In Diretta</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:radial-gradient(600px 300px at 50% -50px, #2a0000, #0a0a0a 60%);color:#fff;font-family:Arial,Helvetica,sans-serif;text-align:center;padding:20px 12px 60px}
-  .logo{font-size:46px;font-weight:900;letter-spacing:2px;color:#ff1e1e;text-shadow:0 0 20px #ff1e1e, 0 0 40px #ff1e1e}
-  .logo span{color:#fff;text-shadow:0 0 15px #fff}
-  .sottotitolo{color:#ccc;margin-top:4px;font-size:14px}
-  .badge{display:inline-block;margin:18px auto;padding:8px 18px;border-radius:20px;font-weight:800;font-size:14px}
-  .offline{background:#333;color:#ff5555}
-  .online{background:#00c853;color:#fff;animation:blink 1s infinite;box-shadow:0 0 20px #00c853}
-  .verifica{background:#444;color:#ffcc00}
-  @keyframes blink{50%{opacity:.6}}
-  .vinile{width:110px;height:110px;margin:16px auto 0;border-radius:50%;background:repeating-radial-gradient(circle at center, #111 0 2px, #222 2px 4px);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 30px rgba(255,30,30,.4);animation:gira 4s linear infinite;animation-play-state:paused}
-  .vinile.on{animation-play-state:running}
-  .vinile:after{content:"";width:36px;height:36px;background:#ff1e1e;border-radius:50%;border:4px solid #fff}
-  @keyframes gira{to{transform:rotate(360deg)}}
-  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid #333;border-radius:20px;max-width:520px;margin:14px auto;padding:20px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-  .card h2{font-size:20px;margin-bottom:6px}
-  .card p{color:#bbb;font-size:14px;line-height:1.5}
-  .ora{font-size:13px;color:#ffcc00;margin-top:8px;font-weight:700}
-  .countdown{font-size:42px;font-weight:900;color:#ffcc00;margin:10px 0 2px;text-align:center;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,.5)}
-  .count-label{text-align:center;color:#aaa;font-size:13px}
-  .btn{display:block;max-width:520px;margin:16px auto;background:linear-gradient(90deg,#ff1e1e,#ff5a00);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-weight:800;font-size:17px;box-shadow:0 5px 20px rgba(255,30,30,.4)}
-  .prog{max-width:520px;margin:20px auto;text-align:left}
-  .prog h3{margin-bottom:10px;font-size:18px}
-  .prog-item{background:#141414;border:1px solid #222;border-radius:14px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #ff1e1e}
-  .prog-item b{font-size:15px}
-  .prog-item span{font-size:12px;color:#aaa;display:block;margin-top:3px}
-  .footer{margin-top:30px;color:#666;font-size:12px}
-  .play-btn{background:linear-gradient(90deg,#00c853,#00e676);color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px;box-shadow:0 5px 20px rgba(0,200,83,.4)}
-  .play-btn.inonda{background:linear-gradient(90deg,#ff1e1e,#ff0033)}
-  .debug{font-size:11px;color:#666;margin-top:6px}
-  .ticker-wrap{overflow:hidden;white-space:nowrap;position:relative}
-  .ticker-text{display:inline-block;padding-left:100%;animation:scorri 12s linear infinite;font-size:18px;font-weight:900;color:#fff}
-  @keyframes scorri{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-</style>
-</head>
-<body>
-
-<div class="logo">RADIO <span>SAMAX</span></div>
-<div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
-
-<div id="vinile" class="vinile"></div>
-
-<div id="stato" class="badge verifica">● VERIFICA IN CORSO...</div>
-<div id="debug" class="debug">Controllo Mixxx...</div>
-
-<div style="margin:6px auto 14px;">
-  <audio id="radioAudio" preload="none"></audio>
-  <button id="playBtn" class="play-btn" onclick="toggleAudio()">▶️ ASCOLTA RADIO SAMAX</button>
-  <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Controllo se Mixxx è in onda...</div>
-</div>
-
-<div id="boxCanzone" style="display:none;max-width:520px;margin:14px auto;background:#111;border:1px solid #ff1e1e;border-radius:12px;padding:10px 0;overflow:hidden;">
-  <div style="font-size:11px;color:#ffcc00;font-weight:800;letter-spacing:1px;">🎵 IN ONDA ADESSO</div>
-  <div class="ticker-wrap"><div id="scrittaCanzone" class="ticker-text">🎵 Caricamento canzone...</div></div>
-</div>
-
-<div class="card">
-  <div id="titolo">Caricamento programma...</div>
-  <div id="countdown" class="countdown" style="display:none;">--:--:--</div>
-  <div id="count-label" class="count-label" style="display:none;">⏳ tra</div>
-  <div id="dettaglio"></div>
-</div>
-
-<a class="btn" href="https://radiosamax.com" onclick="location.reload();return false;">🔄 AGGIORNA</a>
-
-<div class="prog">
-  <h3>📅 Prossimi Programmi</h3>
-  <div id="lista">Caricamento...</div>
-</div>
-
-<div class="footer">© RADIO SAMAX - radiosamax.com<br><span id="orologio"></span></div>
-
-<script>
-let staSuonando = false;
-let mixxxOnline = false;
-let ultimaCanzone = "";
-let controlloInCorso = false;
-let ultimoStatoConfermato = null; // null = mai verificato
-let audioConfermato = false;
-
-const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
-const HOST = "http://s1.free-shoutcast.com:18404";
-
-// --- CONTROLLO NUOVO: NON SI FIDA SOLO DI 7.html ---
-async function provaProxy(urlBase){
-  let proxies = [
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent(urlBase),
-    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(urlBase),
-    "https://corsproxy.io/?url=" + encodeURIComponent(urlBase)
-  ];
-  for(let u of proxies){
-    try{
-      let c = new AbortController();
-      let t = setTimeout(()=>c.abort(), 4000);
-      let res = await fetch(u, {cache:"no-store", signal:c.signal});
-      clearTimeout(t);
-      let txt = (await res.text()).trim();
-      if(txt) return txt;
-    }catch(e){}
-  }
-  return null;
-}
-
 async function controllaTutto(){
   if(controlloInCorso) return;
-  // SE L'UTENTE STA ASCOLTANDO E L'AUDIO FUNZIONA, NON CONTROLLARE OFFLINE
-  if(staSuonando && audioConfermato) return;
+  if(staSuonando) return;
   controlloInCorso = true;
+  let inizio = Date.now();
+  document.getElementById('debug').textContent = "Controllo stream V4...";
 
-  // 1. Prova 7.html
-  let txt7 = await provaProxy(HOST + "/7.html?x=" + Date.now());
-  let trovato = null;
+  let urls = [
+    HOST + "/7.html?x=" + Date.now(),
+    HOST + "/currentsong?sid=1&x=" + Date.now(),
+    HOST + "/stats?sid=1&x=" + Date.now()
+  ];
+
+  async function provaUno(base){
+    let proxies = [
+      "https://api.allorigins.win/raw?url=" + encodeURIComponent(base),
+      "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base)
+    ];
+    for(let p of proxies){
+      try{
+        let c = new AbortController();
+        let t = setTimeout(()=>c.abort(), 2500);
+        let r = await fetch(p, {cache:"no-store", signal:c.signal});
+        clearTimeout(t);
+        let txt = await r.text();
+        if(txt && txt.trim().length > 2) return txt;
+      }catch(e){}
+    }
+    return null;
+  }
+
+  let risultati = await Promise.all([provaUno(urls[0]), provaUno(urls[1]), provaUno(urls[2])]);
+  
+  // SE NESSUN PROXY HA RISPOSTO -> NON SO, NON DIRE OFF
+  if(!risultati[0] && !risultati[1] && !risultati[2]){
+    document.getElementById('debug').textContent = "Proxy non rispondono - in locale da file:// è normale - carica su radiosamax.com e riprova";
+    let statoEl = document.getElementById('stato');
+    statoEl.textContent = "● VERIFICA - PREMI PLAY";
+    statoEl.className = "badge verifica";
+    document.getElementById('playStato').textContent = "Non riesco a verificare da qui, premi PLAY - se senti musica Mixxx è ON";
+    controlloInCorso = false;
+    return;
+  }
+
+  let on = false;
   let titolo = "";
-  let ascoltatori = "";
+  let abbiamoRispostaVera = false;
 
-  if(txt7){
-    let pulito = txt7.replace(/<[^>]*>/g,"").trim().split("\n")[0].trim();
+  if(risultati[0]){
+    let pulito = risultati[0].replace(/<[^>]*>/g,"").trim().split("\n")[0].trim();
     let parti = pulito.split(",");
-    if(parti.length >= 7 && (parti[1]==="1" || parti[1]==="0") && !isNaN(parseInt(parti[2]))){
-      trovato = (parti[1] === "1");
-      ascoltatori = parti[2];
-      titolo = parti.slice(6).join(",").trim();
+    if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0")){
+      abbiamoRispostaVera = true;
+      if(parti[1] === "1"){ on = true; titolo = parti.slice(6).join(",").trim(); }
     }
   }
-
-  // 2. Se 7.html fallisce, prova currentsong - se risponde qualcosa, Mixxx è ON
-  if(trovato === null){
-    let song = await provaProxy(HOST + "/currentsong?sid=1&x=" + Date.now());
-    if(song && song.trim().length > 1 && song.toLowerCase().indexOf("error") === -1 && song.toLowerCase().indexOf("404") === -1){
-      trovato = true;
-      titolo = song.trim();
-    }
+  if(!on && risultati[1] && risultati[1].trim().length > 2 && !risultati[1].toLowerCase().includes("error")){
+    abbiamoRispostaVera = true; on = true; titolo = risultati[1].trim();
+  }
+  if(risultati[2] && risultati[2].includes("<STREAMSTATUS>1</STREAMSTATUS>")){
+    abbiamoRispostaVera = true; on = true;
+    let m = risultati[2].match(/<SONGTITLE>(.*?)<\/SONGTITLE>/);
+    if(m && m[1]) titolo = m[1];
+  }
+  if(risultati[2] && risultati[2].includes("<STREAMSTATUS>0</STREAMSTATUS>")){
+    abbiamoRispostaVera = true; on = false;
   }
 
-  // 3. Se ancora null, prova stats
-  if(trovato === null){
-    let stats = await provaProxy(HOST + "/stats?sid=1&x=" + Date.now());
-    if(stats && stats.indexOf("<STREAMSTATUS>1</STREAMSTATUS>") !== -1){
-      trovato = true;
-      let m = stats.match(/<SONGTITLE>(.*?)<\/SONGTITLE>/);
-      if(m) titolo = m[1];
-    } else if(stats && stats.indexOf("<STREAMSTATUS>0</STREAMSTATUS>") !== -1){
-      trovato = false;
-    }
+  // Se abbiamo avuto risposte ma nessuna dice ON/OFF chiaro -> VERIFICA
+  if(!abbiamoRispostaVera){
+    document.getElementById('debug').textContent = "Risposta strana dai proxy, riprovo...";
+    controlloInCorso = false;
+    return;
   }
 
-  if(trovato !== null){
-    ultimoStatoConfermato = trovato;
-    mixxxOnline = trovato;
-    document.getElementById('debug').textContent = "OK " + new Date().toLocaleTimeString('it-IT') + " - Mixxx: " + (trovato ? "ON" : "OFF") + (ascoltatori ? " - Ascoltatori: " + ascoltatori : "");
-    // Aggiorna brano
+  mixxxOnline = on;
+  let ms = Date.now() - inizio;
+  if(on){
+    document.getElementById('debug').textContent = "OK " + new Date().toLocaleTimeString('it-IT') + " - Mixxx ON in " + ms + "ms";
     titolo = titolo.replace(/^\s*-\s*/,"").trim();
-    if(trovato){
-      if(titolo && titolo.toLowerCase() !== "radio samax" && titolo !== ""){
-        if(titolo !== ultimaCanzone){
-          ultimaCanzone = titolo;
-          let el = document.getElementById('scrittaCanzone');
-          el.style.animation = 'none'; void el.offsetWidth;
-          el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
-          el.style.animation = '';
-        }
-        document.getElementById('boxCanzone').style.display = "block";
-      } else {
-        document.getElementById('boxCanzone').style.display = "block";
-        document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
+    if(titolo && titolo.toLowerCase() !== "radio samax"){
+      if(titolo !== ultimaCanzone){
+        ultimaCanzone = titolo;
+        let el = document.getElementById('scrittaCanzone');
+        el.style.animation = 'none'; void el.offsetWidth;
+        el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
+        el.style.animation = '';
       }
+      document.getElementById('boxCanzone').style.display = "block";
     } else {
-      document.getElementById('boxCanzone').style.display = "none";
-      ultimaCanzone = "";
+      document.getElementById('boxCanzone').style.display = "block";
+      document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
     }
   } else {
-    // PROXY FALLITI -> NON DIRE OFFLINE, RESTA SU VERIFICA
-    document.getElementById('debug').textContent = "Proxy non rispondono - lascio ultimo stato: " + (ultimoStatoConfermato === null ? "mai verificato" : (ultimoStatoConfermato ? "ON" : "OFF")) + " - Premi PLAY per verificare";
-    if(ultimoStatoConfermato === null && !staSuonando){
-      // Prima volta, non sappiamo -> mostra VERIFICA, non OFFLINE
-      let statoEl = document.getElementById('stato');
-      statoEl.textContent = "● VERIFICA IN CORSO - PREMI PLAY";
-      statoEl.className = "badge verifica";
-    }
+    document.getElementById('debug').textContent = "Mixxx OFF - verificato in " + ms + "ms - " + new Date().toLocaleTimeString('it-IT');
+    document.getElementById('boxCanzone').style.display = "none";
+    ultimaCanzone = "";
   }
-
   aggiornaBadge();
   controlloInCorso = false;
 }
-
-function aggiornaBadge(){
-  let statoEl = document.getElementById('stato');
-  let btn = document.getElementById('playBtn');
-  let statoTxt = document.getElementById('playStato');
-  document.getElementById('vinile').classList.toggle('on', mixxxOnline || staSuonando);
-
-  if(staSuonando){
-    statoEl.textContent = "● IN ONDA - LIVE";
-    statoEl.className = "badge online";
-    btn.textContent = "⏹️ STOP - SPEGNI RADIO";
-    btn.className = "play-btn inonda";
-    btn.disabled = false;
-    statoTxt.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE - premi STOP per fermare";
-    return;
-  }
-  if(mixxxOnline){
-    statoEl.textContent = "● IN ONDA - LIVE";
-    statoEl.className = "badge online";
-    btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
-    btn.className = "play-btn";
-    btn.disabled = false;
-    statoTxt.textContent = "Mixxx è in onda! Premi PLAY";
-  } else if(ultimoStatoConfermato === null){
-    statoEl.textContent = "● VERIFICA IN CORSO - PREMI PLAY";
-    statoEl.className = "badge verifica";
-    btn.textContent = "▶️ ASCOLTA RADIO SAMAX";
-    btn.className = "play-btn";
-    btn.disabled = false;
-    statoTxt.textContent = "Controllo proxy lento, premi PLAY - se senti musica, Mixxx è ON";
-  } else {
-    statoEl.textContent = "● RADIO SPENTA - OFF LINE";
-    statoEl.className = "badge offline";
-    btn.textContent = "▶️ PROVA AD ASCOLTARE COMUNQUE";
-    btn.className = "play-btn";
-    btn.disabled = false;
-    statoTxt.textContent = "Mixxx sembra spento, ma premi PLAY lo stesso per verificare.";
-  }
-}
-
-function toggleAudio(){
-  if(staSuonando) fermaAudio(); else avviaAudio();
-}
-
-function avviaAudio(){
-  let audio = document.getElementById('radioAudio');
-  let stato = document.getElementById('playStato');
-  stato.textContent = "Connessione in corso...";
-  audioConfermato = false;
-  audio.src = STREAM_URL + "?x=" + Date.now();
-  audio.play().then(()=>{
-    // Se parte, è la prova che Mixxx è ON - anche se 7.html dice OFF
-    staSuonando = true;
-    mixxxOnline = true;
-    ultimoStatoConfermato = true;
-    audioConfermato = true;
-    aggiornaBadge();
-  }).catch((e)=>{
-    stato.textContent = "Premi di nuovo PLAY - Errore: " + e.message;
-  });
-}
-
-function fermaAudio(){
-  let audio = document.getElementById('radioAudio');
-  audio.pause();
-  audio.src = "";
-  audio.load();
-  staSuonando = false;
-  audioConfermato = false;
-  // Dopo STOP, ricontrolla davvero lo stato
-  ultimoStatoConfermato = null;
-  controllaTutto();
-  aggiornaBadge();
-}
-
-document.getElementById('radioAudio').volume = 0.8;
-// Se l'audio va in errore mentre suona, allora davvero OFF
-document.getElementById('radioAudio').addEventListener('error', ()=>{
-  if(staSuonando){ staSuonando = false; audioConfermato = false; mixxxOnline = false; ultimoStatoConfermato = false; aggiornaBadge(); }
-});
-// Se l'audio si ferma da solo (Mixxx spento), segna OFF
-document.getElementById('radioAudio').addEventListener('ended', ()=>{
-  if(staSuonando){ staSuonando = false; audioConfermato = false; mixxxOnline = false; aggiornaBadge(); }
-});
-
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
-const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
-function parseDataOra(dataStr, oraStr){
-  if(!dataStr) return null;
-  dataStr = String(dataStr).trim().toLowerCase().replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
-  oraStr = String(oraStr || "00:00").trim();
-  let giorno, mese, anno;
-  let m = dataStr.match(/(\d{1,2})\s+([a-zà]+)\s+(\d{4})/);
-  if(m){ giorno = parseInt(m[1]); mese = MESI_ITA[m[2]]; anno = parseInt(m[3]); }
-  else if(dataStr.match(/(\d{1,2})\s+([a-zà]+)/)){
-    let m2 = dataStr.match(/(\d{1,2})\s+([a-zà]+)/);
-    giorno = parseInt(m2[1]); mese = MESI_ITA[m2[2]]; anno = new Date().getFullYear();
-  }
-  else if(dataStr.includes('/') || dataStr.includes('-')){
-    let sep = dataStr.includes('/') ? '/' : '-';
-    let p = dataStr.split(sep);
-    if(p[0].length === 4){ anno=parseInt(p[0]); mese=parseInt(p[1])-1; giorno=parseInt(p[2]); }
-    else {
-      if(parseInt(p[1]) > 12){ mese = parseInt(p[0])-1; giorno = parseInt(p[1]); anno = parseInt(p[2]); }
-      else { giorno=parseInt(p[0]); mese=parseInt(p[1])-1; anno=parseInt(p[2]); }
-    }
-  }
-  else { return null; }
-  if(mese===undefined || isNaN(giorno) || isNaN(anno) || mese<0 || mese>11) return null;
-  if(anno < 100) anno = anno + 2000;
-  let o = oraStr.match(/(\d{1,2})[:.](\d{2})/);
-  let ore = o ? parseInt(o[1]) : 0; let minuti = o ? parseInt(o[2]) : 0;
-  return new Date(anno, mese, giorno, ore, minuti, 0);
-}
-function formatCountdown(ms){
-  if(ms < 0) ms = 0; let tot = Math.floor(ms/1000);
-  let h = Math.floor(tot/3600); let min = Math.floor((tot%3600)/60); let sec = tot%60;
-  return String(h).padStart(2,'0')+":"+String(min).padStart(2,'0')+":"+String(sec).padStart(2,'0');
-}
-function parseCSV(text){
-  let righe = []; let riga = [], campo = '', inVirgolette = false;
-  for(let i=0;i<text.length;i++){ let c = text[i];
-    if(c === '"'){ inVirgolette = !inVirgolette; }
-    else if(c === ',' && !inVirgolette){ riga.push(campo); campo=''; }
-    else if((c === '\n' || c === '\r') && !inVirgolette){ if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); riga=[]; campo=''; } if(c === '\r' && text[i+1] === '\n') i++; }
-    else { campo += c; } }
-  if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); }
-  return righe;
-}
-let programmi = [];
-async function carica(){
-  try{
-    let res = await fetch(SHEET_CSV_URL + "&t=" + Date.now(), {cache:"no-store"}); let text = await res.text(); let righe = parseCSV(text);
-    programmi = [];
-    for(let i=1;i<righe.length;i++){ let r = righe[i]; if(!r[0] || !r[2] || !r[3]) continue; let dataOra = parseDataOra(r[3], r[2]); if(!dataOra) continue; programmi.push({ titolo:r[0], descrizione:r[1]||'', ora:r[2], data:r[3], quando:dataOra }); }
-    programmi.sort((a,b)=>a.quando - b.quando); mostraLista(); aggiorna();
-  }catch(e){ document.getElementById('lista').innerHTML = "Non riesco a caricare il foglio."; }
-}
-function mostraLista(){
-  let html = ""; programmi.forEach(p=>{ html += `<div class="prog-item"><b>${p.titolo}</b><span>📅 ${p.data} - 🕒 ${p.ora}</span><span>${p.descrizione}</span></div>`; });
-  document.getElementById('lista').innerHTML = html || "Nessun programma";
-}
-function aggiorna(){
-  let ora = new Date(); document.getElementById('orologio').textContent = "Ora: " + ora.toLocaleTimeString('it-IT') + " - " + ora.toLocaleDateString('it-IT');
-  let countEl = document.getElementById('countdown');
-  let labelEl = document.getElementById('count-label');
-  let titoloEl = document.getElementById('titolo');
-  let detEl = document.getElementById('dettaglio');
-  let futuri = programmi.filter(p => (p.quando - ora) > -2*60*60*1000);
-  let prossimo = futuri.find(p => (p.quando - ora) > 0);
-  let inOnda = futuri.find(p => (p.quando - ora) <= 0);
-  if(staSuonando || mixxxOnline){
-    if(inOnda){ titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`; }
-    else { titoloEl.innerHTML = `<h2>🔴 RadioSamax in Onda</h2><p>Musica in diretta - Mixxx</p>`; }
-    countEl.style.display = "none"; labelEl.style.display = "none"; return;
-  }
-  if(prossimo){
-    titoloEl.innerHTML = `<h2>${prossimo.titolo}</h2><p>${prossimo.descrizione}</p>`;
-    countEl.style.display = "block"; labelEl.style.display = "block";
-    countEl.textContent = formatCountdown(prossimo.quando - ora);
-    labelEl.textContent = "⏳ tra";
-    detEl.innerHTML = `<div class="ora">📅 ${prossimo.data} - 🕒 ${prossimo.ora}</div>`;
-  } else {
-    titoloEl.innerHTML = `<h2>Nessun programma in arrivo</h2>`;
-    countEl.style.display = "none"; labelEl.style.display = "none";
-  }
-}
-carica();
-controllaTutto();
-setInterval(aggiorna, 1000);
-setInterval(carica, 1800000);
-setInterval(controllaTutto, 15000);
-</script>
-</body>
-</html>
