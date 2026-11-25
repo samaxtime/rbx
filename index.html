@@ -3,293 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RADIO SAMAX - In Diretta</title>
+<title>TEST RADIO SAMAX</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:radial-gradient(600px 300px at 50% -50px, #2a0000, #0a0a0a 60%);color:#fff;font-family:Arial,Helvetica,sans-serif;text-align:center;padding:20px 12px 60px}
-  .logo{font-size:46px;font-weight:900;letter-spacing:2px;color:#ff1e1e;text-shadow:0 0 20px #ff1e1e, 0 0 40px #ff1e1e}
-  .logo span{color:#fff;text-shadow:0 0 15px #fff}
-  .sottotitolo{color:#ccc;margin-top:4px;font-size:14px}
-  .badge{display:inline-block;margin:18px auto;padding:8px 18px;border-radius:20px;font-weight:800;font-size:14px}
+  body{background:#111;color:#fff;font-family:Arial;text-align:center;padding:40px 15px}
+  .badge{padding:15px 25px;border-radius:25px;font-weight:900;font-size:20px;display:inline-block}
+  .online{background:#00c853;box-shadow:0 0 25px #00c853}
   .offline{background:#333;color:#ff5555}
-  .online{background:#00c853;color:#fff;animation:blink 1s infinite;box-shadow:0 0 20px #00c853}
   .verifica{background:#444;color:#ffcc00}
-  @keyframes blink{50%{opacity:.6}}
-  .vinile{width:110px;height:110px;margin:16px auto 0;border-radius:50%;background:repeating-radial-gradient(circle at center, #111 0 2px, #222 2px 4px);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 30px rgba(255,30,30,.4);animation:gira 4s linear infinite;animation-play-state:paused}
-  .vinile.on{animation-play-state:running}
-  .vinile:after{content:"";width:36px;height:36px;background:#ff1e1e;border-radius:50%;border:4px solid #fff}
-  @keyframes gira{to{transform:rotate(360deg)}}
-  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(8px);border:1px solid #333;border-radius:20px;max-width:520px;margin:14px auto;padding:20px;text-align:left;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-  .card h2{font-size:20px;margin-bottom:6px}
-  .card p{color:#bbb;font-size:14px;line-height:1.5}
-  .ora{font-size:13px;color:#ffcc00;margin-top:8px;font-weight:700}
-  .countdown{font-size:42px;font-weight:900;color:#ffcc00;margin:10px 0 2px;text-align:center;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,.5)}
-  .count-label{text-align:center;color:#aaa;font-size:13px}
-  .btn{display:block;max-width:520px;margin:16px auto;background:linear-gradient(90deg,#ff1e1e,#ff5a00);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-weight:800;font-size:17px;box-shadow:0 5px 20px rgba(255,30,30,.4)}
-  .prog{max-width:520px;margin:20px auto;text-align:left}
-  .prog h3{margin-bottom:10px;font-size:18px}
-  .prog-item{background:#141414;border:1px solid #222;border-radius:14px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #ff1e1e}
-  .prog-item b{font-size:15px}
-  .prog-item span{font-size:12px;color:#aaa;display:block;margin-top:3px}
-  .footer{margin-top:30px;color:#666;font-size:12px}
-  .play-btn{background:linear-gradient(90deg,#00c853,#00e676);color:#fff;border:none;padding:16px 30px;border-radius:30px;font-size:19px;font-weight:800;cursor:pointer;width:100%;max-width:520px;box-shadow:0 5px 20px rgba(0,200,83,.4)}
-  .play-btn.inonda{background:linear-gradient(90deg,#ff1e1e,#ff0033)}
-  .debug{font-size:11px;color:#666;margin-top:6px}
-  .ticker-wrap{overflow:hidden;white-space:nowrap;position:relative}
-  .ticker-text{display:inline-block;padding-left:100%;animation:scorri 12s linear infinite;font-size:18px;font-weight:900;color:#fff}
-  @keyframes scorri{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+  button{background:#00c853;color:#fff;border:none;padding:15px 30px;border-radius:30px;font-size:18px;font-weight:800;margin-top:20px;cursor:pointer;width:100%;max-width:400px}
+  button.stop{background:#ff1e1e}
+  #debug{color:#888;font-size:12px;margin-top:15px}
 </style>
 </head>
 <body>
-<div class="logo">RADIO <span>SAMAX</span></div>
-<div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
-<div id="vinile" class="vinile"></div>
-<div id="stato" class="badge verifica">● VERIFICA IN CORSO...</div>
-<div id="debug" class="debug">Controllo in tempo reale...</div>
-<div style="margin:6px auto 14px;">
-  <audio id="radioAudio" preload="none"></audio>
-  <button id="playBtn" class="play-btn" onclick="toggleAudio()">▶️ ASCOLTA RADIO SAMAX</button>
-  <div id="playStato" style="font-size:12px;color:#aaa;margin-top:8px;">Controllo se Mixxx è in onda...</div>
-</div>
-<div id="boxCanzone" style="display:none;max-width:520px;margin:14px auto;background:#111;border:1px solid #ff1e1e;border-radius:12px;padding:10px 0;overflow:hidden;">
-  <div style="font-size:11px;color:#ffcc00;font-weight:800;letter-spacing:1px;">🎵 IN ONDA ADESSO</div>
-  <div class="ticker-wrap"><div id="scrittaCanzone" class="ticker-text">🎵 Caricamento canzone...</div></div>
-</div>
-<div class="card">
-  <div id="titolo">Caricamento programma...</div>
-  <div id="countdown" class="countdown" style="display:none;">--:--:--</div>
-  <div id="count-label" class="count-label" style="display:none;">⏳ tra</div>
-  <div id="dettaglio"></div>
-</div>
-<a class="btn" href="https://radiosamax.com" onclick="location.reload();return false;">🔄 AGGIORNA</a>
-<div class="prog"><h3>📅 Prossimi Programmi</h3><div id="lista">Caricamento...</div></div>
-<div class="footer">© RADIO SAMAX - radiosamax.com<br><span id="orologio"></span></div>
+<h1>TEST RADIO SAMAX</h1>
+<div id="stato" class="badge verifica">● VERIFICA...</div>
+<br>
+<div id="debug">Avvio controllo...</div>
+<br>
+<audio id="audio" preload="none"></audio>
+<button id="btn" onclick="toggle()">▶️ ASCOLTA</button>
+
 <script>
-let staSuonando = false;
-let mixxxOnline = false;
-let ultimaCanzone = "";
-let controlloInCorso = false;
-let ultimoProxyBuono = null; // ricorda il proxy più veloce
-const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
-const HOST = "http://s1.free-shoutcast.com:18404";
+const STREAM = "https://s1.free-shoutcast.com/stream/18404";
+const HOST = "http://s1.free-shoutcast.com:18404/7.html";
+let suona = false;
+let online = false;
+let inCorso = false;
 
-function listaProxy(base){
-  let tutti = [
+// Controllo più veloce: 5 proxy in gara, vince il primo che risponde
+async function check(){
+  if(inCorso) return;
+  inCorso = true;
+  let base = HOST + "?x=" + Date.now();
+  let proxies = [
     "https://api.allorigins.win/raw?url=" + encodeURIComponent(base),
-    "https://api.allorigins.win/get?url=" + encodeURIComponent(base),
-    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base),
     "https://corsproxy.io/?url=" + encodeURIComponent(base),
-    "https://api.cors.lol/?url=" + encodeURIComponent(base)
+    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base),
+    "https://api.cors.lol/?url=" + encodeURIComponent(base),
+    "https://api.allorigins.win/get?url=" + encodeURIComponent(base)
   ];
-  // Metti per primo il proxy che ha funzionato l'ultima volta = più veloce
-  if(ultimoProxyBuono !== null){
-    let p = tutti.splice(ultimoProxyBuono, 1)[0];
-    tutti.unshift(p);
-  }
-  return tutti;
-}
-
-// CONTROLLO IN TEMPO REALE - prende il primo proxy che risponde, non aspetta tutti
-async function prendi7htmlVeloce(){
-  let base = HOST + "/7.html?x=" + Date.now();
-  let proxies = listaProxy(base);
-  // Promise.race: vince il primo che da 7.html valido
-  return new Promise((resolve)=>{
-    let risolti = 0;
+  let risultato = await new Promise((res)=>{
     let fatto = false;
-    proxies.forEach((u, idx)=>{
-      (async ()=>{
-        try{
-          let c = new AbortController();
-          let t = setTimeout(()=>c.abort(), 3500);
-          let r = await fetch(u, {cache:"no-store", signal:c.signal});
-          clearTimeout(t);
-          let txt = await r.text();
-          if(txt.trim().startsWith("{") && txt.includes("contents")){
-            try{ txt = JSON.parse(txt).contents || ""; }catch(e){}
-          }
-          txt = txt.replace(/<[^>]*>/g,"").trim().split("\n")[0].trim();
-          let parti = txt.split(",");
-          if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0") && !isNaN(parseInt(parti[2]))){
-            if(!fatto){ fatto = true; ultimoProxyBuono = idx; resolve({parti: parti, txt: txt}); }
-            return;
-          }
-        }catch(e){}
-        risolti++;
-        if(risolti === proxies.length && !fatto){ resolve(null); }
-      })();
+    let cont = 0;
+    proxies.forEach(u=>{
+      fetch(u, {cache:"no-store"}).then(r=>r.text()).then(t=>{
+        if(fatto) return;
+        if(t.trim().startsWith("{") && t.includes("contents")){
+          try{ t = JSON.parse(t).contents || ""; }catch(e){}
+        }
+        t = t.replace(/<[^>]*>/g,"").trim().split("\n")[0];
+        let p = t.split(",");
+        if(p.length >= 2 && (p[1]==="1" || p[1]==="0")){
+          fatto = true;
+          res(p[1]==="1");
+        }
+      }).catch(()=>{}).finally(()=>{
+        cont++;
+        if(cont===proxies.length && !fatto) res(null);
+      });
     });
-    // Se dopo 4 sec nessuno ha risposto, dai null
-    setTimeout(()=>{ if(!fatto){ fatto = true; resolve(null); } }, 4000);
+    setTimeout(()=>{ if(!fatto){ fatto=true; res(null); } }, 3000);
   });
+
+  if(risultato === null){
+    document.getElementById('debug').textContent = "Proxy lenti... riprovo - " + new Date().toLocaleTimeString('it-IT');
+    inCorso = false;
+    return; // non cambiare stato se non so
+  }
+  online = risultato;
+  aggiorna();
+  inCorso = false;
 }
 
-async function controllaTutto(){
-  if(controlloInCorso) return;
-  controlloInCorso = true;
-  let res = await prendi7htmlVeloce();
-  if(!res){
-    // Nessun proxy -> non cambiare stato, resta quello di prima, ma scrivi che sta controllando
-    document.getElementById('debug').textContent = "Controllo in corso... " + new Date().toLocaleTimeString('it-IT') + " - proxy lenti, riprovo tra 3s";
-    controlloInCorso = false;
+function aggiorna(){
+  let s = document.getElementById('stato');
+  let b = document.getElementById('btn');
+  if(suona){
+    s.textContent = "● IN ONDA - LIVE";
+    s.className = "badge online";
+    b.textContent = "⏹️ STOP";
+    b.className = "stop";
     return;
   }
-  let on = (res.parti[1] === "1");
-  let cambiato = (on !== mixxxOnline);
-  mixxxOnline = on;
-  let titolo = res.parti.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
-  if(on){
-    document.getElementById('debug').textContent = "● LIVE - Controllo: " + new Date().toLocaleTimeString('it-IT') + " - Ascoltatori: " + res.parti[2];
-    if(titolo && titolo.toLowerCase() !== "radio samax"){
-      if(titolo !== ultimaCanzone){
-        ultimaCanzone = titolo;
-        let el = document.getElementById('scrittaCanzone');
-        el.style.animation = 'none'; void el.offsetWidth;
-        el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
-        el.style.animation = '';
-      }
-      document.getElementById('boxCanzone').style.display = "block";
-    } else {
-      document.getElementById('boxCanzone').style.display = "block";
-      document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
-    }
+  if(online){
+    s.textContent = "● IN ONDA - LIVE";
+    s.className = "badge online";
+    b.textContent = "▶️ ASCOLTA";
+    b.className = "";
+    document.getElementById('debug').textContent = "Mixxx ON - " + new Date().toLocaleTimeString('it-IT');
   } else {
-    document.getElementById('debug').textContent = "● OFF - Controllo: " + new Date().toLocaleTimeString('it-IT');
-    document.getElementById('boxCanzone').style.display = "none";
-    ultimaCanzone = "";
+    s.textContent = "● RADIO SPENTA";
+    s.className = "badge offline";
+    b.textContent = "▶️ PROVA AD ASCOLTARE";
+    b.className = "";
+    document.getElementById('debug').textContent = "Mixxx OFF - " + new Date().toLocaleTimeString('it-IT');
   }
-  // Aggiorna badge solo se serve, ma sempre aggiorna per sicurezza
-  aggiornaBadge();
-  controlloInCorso = false;
 }
 
-function aggiornaBadge(){
-  let statoEl = document.getElementById('stato');
-  let btn = document.getElementById('playBtn');
-  let statoTxt = document.getElementById('playStato');
-  document.getElementById('vinile').classList.toggle('on', mixxxOnline || staSuonando);
-  if(staSuonando){
-    statoEl.textContent = "● IN ONDA - LIVE"; statoEl.className = "badge online";
-    btn.textContent = "⏹️ STOP - SPEGNI RADIO"; btn.className = "play-btn inonda"; btn.disabled = false;
-    statoTxt.textContent = "🎧 Stai ascoltando RADIO SAMAX LIVE"; return;
-  }
-  if(mixxxOnline){
-    statoEl.textContent = "● IN ONDA - LIVE"; statoEl.className = "badge online";
-    btn.textContent = "▶️ ASCOLTA RADIO SAMAX"; btn.className = "play-btn"; btn.disabled = false;
-    statoTxt.textContent = "Mixxx è in onda! Premi PLAY";
+function toggle(){
+  let a = document.getElementById('audio');
+  if(suona){
+    a.pause(); a.src=""; suona=false; aggiorna(); check();
   } else {
-    statoEl.textContent = "● RADIO SPENTA - OFF LINE"; statoEl.className = "badge offline";
-    btn.textContent = "▶️ PROVA AD ASCOLTARE COMUNQUE"; btn.className = "play-btn"; btn.disabled = false;
-    statoTxt.textContent = "Mixxx è spento - controllo automatico ogni 3s";
+    a.src = STREAM + "?x=" + Date.now();
+    a.play().then(()=>{ suona=true; online=true; aggiorna(); }).catch(e=>{ alert(e.message); });
   }
 }
-function toggleAudio(){ if(staSuonando) fermaAudio(); else avviaAudio(); }
-function avviaAudio(){
-  let audio = document.getElementById('radioAudio');
-  let stato = document.getElementById('playStato');
-  stato.textContent = "Connessione in corso...";
-  audio.src = STREAM_URL + "?x=" + Date.now();
-  audio.play().then(()=>{ staSuonando = true; mixxxOnline = true; aggiornaBadge(); }).catch((e)=>{ stato.textContent = "Premi di nuovo PLAY - Errore: " + e.message; });
-}
-function fermaAudio(){
-  let audio = document.getElementById('radioAudio');
-  audio.pause(); audio.src = ""; audio.load(); staSuonando = false; aggiornaBadge(); controllaTutto();
-}
-document.getElementById('radioAudio').volume = 0.8;
-document.getElementById('radioAudio').addEventListener('error', ()=>{ if(staSuonando){ staSuonando = false; mixxxOnline = false; aggiornaBadge(); } });
-document.getElementById('radioAudio').addEventListener('ended', ()=>{ if(staSuonando){ staSuonando = false; mixxxOnline = false; aggiornaBadge(); } });
+document.getElementById('audio').addEventListener('error', ()=>{
+  if(suona){ suona=false; online=false; aggiorna(); }
+});
 
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
-const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
-function parseDataOra(dataStr, oraStr){
-  if(!dataStr) return null;
-  dataStr = String(dataStr).trim().toLowerCase().replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
-  oraStr = String(oraStr || "00:00").trim();
-  let giorno, mese, anno;
-  let m = dataStr.match(/(\d{1,2})\s+([a-zà]+)\s+(\d{4})/);
-  if(m){ giorno = parseInt(m[1]); mese = MESI_ITA[m[2]]; anno = parseInt(m[3]); }
-  else if(dataStr.match(/(\d{1,2})\s+([a-zà]+)/)){
-    let m2 = dataStr.match(/(\d{1,2})\s+([a-zà]+)/);
-    giorno = parseInt(m2[1]); mese = MESI_ITA[m2[2]]; anno = new Date().getFullYear();
-  }
-  else if(dataStr.includes('/') || dataStr.includes('-')){
-    let sep = dataStr.includes('/') ? '/' : '-';
-    let p = dataStr.split(sep);
-    if(p[0].length === 4){ anno=parseInt(p[0]); mese=parseInt(p[1])-1; giorno=parseInt(p[2]); }
-    else {
-      if(parseInt(p[1]) > 12){ mese = parseInt(p[0])-1; giorno = parseInt(p[1]); anno = parseInt(p[2]); }
-      else { giorno=parseInt(p[0]); mese=parseInt(p[1])-1; anno=parseInt(p[2]); }
-    }
-  }
-  else { return null; }
-  if(mese===undefined || isNaN(giorno) || isNaN(anno) || mese<0 || mese>11) return null;
-  if(anno < 100) anno = anno + 2000;
-  let o = oraStr.match(/(\d{1,2})[:.](\d{2})/);
-  let ore = o ? parseInt(o[1]) : 0; let minuti = o ? parseInt(o[2]) : 0;
-  return new Date(anno, mese, giorno, ore, minuti, 0);
-}
-function formatCountdown(ms){
-  if(ms < 0) ms = 0; let tot = Math.floor(ms/1000);
-  let h = Math.floor(tot/3600); let min = Math.floor((tot%3600)/60); let sec = tot%60;
-  return String(h).padStart(2,'0')+":"+String(min).padStart(2,'0')+":"+String(sec).padStart(2,'0');
-}
-function parseCSV(text){
-  let righe = []; let riga = [], campo = '', inVirgolette = false;
-  for(let i=0;i<text.length;i++){ let c = text[i];
-    if(c === '"'){ inVirgolette = !inVirgolette; }
-    else if(c === ',' && !inVirgolette){ riga.push(campo); campo=''; }
-    else if((c === '\n' || c === '\r') && !inVirgolette){ if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); riga=[]; campo=''; } if(c === '\r' && text[i+1] === '\n') i++; }
-    else { campo += c; } }
-  if(campo !== '' || riga.length>0){ riga.push(campo); righe.push(riga); }
-  return righe;
-}
-let programmi = [];
-async function carica(){
-  try{
-    let res = await fetch(SHEET_CSV_URL + "&t=" + Date.now(), {cache:"no-store"}); let text = await res.text(); let righe = parseCSV(text);
-    programmi = [];
-    for(let i=1;i<righe.length;i++){ let r = righe[i]; if(!r[0] || !r[2] || !r[3]) continue; let dataOra = parseDataOra(r[3], r[2]); if(!dataOra) continue; programmi.push({ titolo:r[0], descrizione:r[1]||'', ora:r[2], data:r[3], quando:dataOra }); }
-    programmi.sort((a,b)=>a.quando - b.quando); mostraLista(); aggiorna();
-  }catch(e){ document.getElementById('lista').innerHTML = "Non riesco a caricare il foglio."; }
-}
-function mostraLista(){
-  let html = ""; programmi.forEach(p=>{ html += `<div class="prog-item"><b>${p.titolo}</b><span>📅 ${p.data} - 🕒 ${p.ora}</span><span>${p.descrizione}</span></div>`; });
-  document.getElementById('lista').innerHTML = html || "Nessun programma";
-}
-function aggiorna(){
-  let ora = new Date(); document.getElementById('orologio').textContent = "Ora: " + ora.toLocaleTimeString('it-IT') + " - " + ora.toLocaleDateString('it-IT');
-  let countEl = document.getElementById('countdown');
-  let labelEl = document.getElementById('count-label');
-  let titoloEl = document.getElementById('titolo');
-  let detEl = document.getElementById('dettaglio');
-  let futuri = programmi.filter(p => (p.quando - ora) > -2*60*60*1000);
-  let prossimo = futuri.find(p => (p.quando - ora) > 0);
-  let inOnda = futuri.find(p => (p.quando - ora) <= 0);
-  if(staSuonando || mixxxOnline){
-    if(inOnda){ titoloEl.innerHTML = `<h2>🔴 ${inOnda.titolo}</h2><p>${inOnda.descrizione}</p>`; }
-    else { titoloEl.innerHTML = `<h2>🔴 RadioSamax in Onda</h2><p>Musica in diretta - Mixxx</p>`; }
-    countEl.style.display = "none"; labelEl.style.display = "none"; return;
-  }
-  if(prossimo){
-    titoloEl.innerHTML = `<h2>${prossimo.titolo}</h2><p>${prossimo.descrizione}</p>`;
-    countEl.style.display = "block"; labelEl.style.display = "block";
-    countEl.textContent = formatCountdown(prossimo.quando - ora);
-    labelEl.textContent = "⏳ tra";
-    detEl.innerHTML = `<div class="ora">📅 ${prossimo.data} - 🕒 ${prossimo.ora}</div>`;
-  } else {
-    titoloEl.innerHTML = `<h2>Nessun programma in arrivo</h2>`;
-    countEl.style.display = "none"; labelEl.style.display = "none";
-  }
-}
-carica();
-controllaTutto();
-// --- TEMPO REALE ---
-setInterval(aggiorna, 1000);
-setInterval(carica, 1800000);
-setInterval(controllaTutto, 3000); // ogni 3 secondi controlla Mixxx
-// Quando torni sulla pagina, controlla subito
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) controllaTutto(); });
-window.addEventListener('focus', ()=>{ controllaTutto(); });
+check();
+setInterval(check, 2000); // ogni 2 secondi
 </script>
 </body>
 </html>
