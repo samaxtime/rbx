@@ -46,7 +46,7 @@
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 <div id="vinile" class="vinile"></div>
 <div id="stato" class="badge verifica">● VERIFICA IN CORSO...</div>
-<div id="debug" class="debug">Controllo TEST - 7.html ogni 2s...</div>
+<div id="debug" class="debug">Controllo LIVE indipendente...</div>
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none"></audio>
   <button id="playBtn" class="play-btn" onclick="toggleAudio()">▶️ ASCOLTA RADIO SAMAX</button>
@@ -67,15 +67,61 @@
 <div class="footer">© RADIO SAMAX - radiosamax.com<br><span id="orologio"></span></div>
 <script>
 let staSuonando = false;
-let mixxxOnline = false;
+let mixxxOnline = false; // LIVE - indipendente dai dati
 let ultimaCanzone = "";
-let controlloInCorso = false;
 let utenteVolevaAscoltare = false;
+let liveCheckInCorso = false;
+let titoloCheckInCorso = false;
 const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
 const HOST7 = "http://s1.free-shoutcast.com:18404/7.html";
-async function controllaTutto(){
-  if(controlloInCorso) return;
-  controlloInCorso = true;
+
+// ===== 1. LIVE - INDIPENDENTE DAI DATI =====
+// Prova se lo stream suona davvero, con un audio di test muto
+// Se suona -> verde subito, senza aspettare 7.html
+async function controllaLive(){
+  if(liveCheckInCorso) return;
+  if(staSuonando) return; // se stai già ascoltando, sei già LIVE
+  liveCheckInCorso = true;
+  let vivo = await new Promise((resolve)=>{
+    let test = new Audio();
+    test.preload = "auto";
+    test.volume = 0;
+    test.muted = true;
+    let fatto = false;
+    let timer = setTimeout(()=>{ if(!fatto){ fatto=true; test.pause(); test.src=""; resolve(false); } }, 2500);
+    test.addEventListener('canplay', ()=>{ if(!fatto){ fatto=true; clearTimeout(timer); test.pause(); test.src=""; resolve(true); } });
+    test.addEventListener('playing', ()=>{ if(!fatto){ fatto=true; clearTimeout(timer); test.pause(); test.src=""; resolve(true); } });
+    test.addEventListener('error', ()=>{ if(!fatto){ fatto=true; clearTimeout(timer); resolve(false); } });
+    test.src = STREAM_URL + "?livecheck=" + Date.now();
+    test.play().catch(()=>{});
+  });
+  // Se vivo, diventa verde SUBITO, non aspetta i dati
+  if(vivo !== mixxxOnline){
+    mixxxOnline = vivo;
+    document.getElementById('debug').textContent = vivo ? "LIVE - Stream suona - " + new Date().toLocaleTimeString('it-IT') : "OFF - Stream non suona - " + new Date().toLocaleTimeString('it-IT');
+    // Se era in attesa e ora è LIVE, riparte da sola
+    if(vivo && utenteVolevaAscoltare && !staSuonando){
+      avviaAudioAuto();
+    }
+    // Se stavi ascoltando e ora è OFF, ferma
+    if(!vivo && staSuonando){
+      let a = document.getElementById('radioAudio');
+      a.pause(); a.src=""; a.load(); staSuonando=false;
+    }
+    aggiornaBadge();
+  } else {
+    // Anche se non è cambiato, aggiorna debug
+    if(vivo) document.getElementById('debug').textContent = "LIVE - Stream suona - " + new Date().toLocaleTimeString('it-IT');
+  }
+  liveCheckInCorso = false;
+}
+
+// ===== 2. DATI / TITOLO - INDIPENDENTE DAL LIVE =====
+// Arriva quando arriva, scorre per conto suo, non tocca il LIVE
+async function controllaTitolo(){
+  if(titoloCheckInCorso) return;
+  if(!mixxxOnline) return; // se non è LIVE, non serve il titolo
+  titoloCheckInCorso = true;
   let base = HOST7 + "?x=" + Date.now();
   let proxies = [
     "https://api.allorigins.win/raw?url=" + encodeURIComponent(base),
@@ -84,7 +130,7 @@ async function controllaTutto(){
     "https://api.cors.lol/?url=" + encodeURIComponent(base),
     "https://api.allorigins.win/get?url=" + encodeURIComponent(base)
   ];
-  let risultato = await new Promise((res)=>{
+  let titolo = await new Promise((res)=>{
     let fatto = false; let cont = 0;
     proxies.forEach(u=>{
       fetch(u, {cache:"no-store"}).then(r=>r.text()).then(t=>{
@@ -94,52 +140,33 @@ async function controllaTutto(){
         }
         t = t.replace(/<[^>]*>/g,"").trim().split("\n")[0];
         let p = t.split(",");
-        if(p.length >= 2 && (p[1]==="1" || p[1]==="0") && !isNaN(parseInt(p[2]))){
-          fatto = true; res({on: p[1]==="1", parti: p});
+        if(p.length >= 7 && p[1]==="1"){
+          let tit = p.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
+          if(tit){
+            fatto = true; res(tit);
+          }
         }
       }).catch(()=>{}).finally(()=>{
-        cont++; if(cont===proxies.length && !fatto) res(null);
+        cont++; if(cont===proxies.length && !fatto) res("");
       });
     });
-    setTimeout(()=>{ if(!fatto){ fatto=true; res(null); } }, 3000);
+    setTimeout(()=>{ if(!fatto){ fatto=true; res(""); } }, 3000);
   });
-  if(risultato === null){
-    document.getElementById('debug').textContent = "Controllo in corso... " + new Date().toLocaleTimeString('it-IT');
-    controlloInCorso = false; return;
+  if(titolo && titolo.toLowerCase() !== "radio samax" && titolo !== ultimaCanzone){
+    ultimaCanzone = titolo;
+    let el = document.getElementById('scrittaCanzone');
+    el.style.animation = 'none'; void el.offsetWidth;
+    el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
+    el.style.animation = '';
+    document.getElementById('boxCanzone').style.display = "block";
+  } else if(mixxxOnline){
+    // Se non arriva il titolo, mostra comunque LIVE generico, ma NON togliere il LIVE
+    document.getElementById('boxCanzone').style.display = "block";
+    if(!ultimaCanzone) document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
   }
-  mixxxOnline = risultato.on;
-  let titolo = risultato.parti.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
-  if(mixxxOnline){
-    document.getElementById('debug').textContent = "Mixxx ON - Ascoltatori: " + risultato.parti[2] + " - " + new Date().toLocaleTimeString('it-IT');
-    if(titolo && titolo.toLowerCase() !== "radio samax"){
-      if(titolo !== ultimaCanzone){
-        ultimaCanzone = titolo;
-        let el = document.getElementById('scrittaCanzone');
-        el.style.animation = 'none'; void el.offsetWidth;
-        el.textContent = "🎵 " + titolo + "  •  RADIO SAMAX  •  ";
-        el.style.animation = '';
-      }
-      document.getElementById('boxCanzone').style.display = "block";
-    } else {
-      document.getElementById('boxCanzone').style.display = "block";
-      document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
-    }
-    if(utenteVolevaAscoltare && !staSuonando){
-      avviaAudioAuto();
-    }
-  } else {
-    document.getElementById('debug').textContent = "Mixxx OFF - " + new Date().toLocaleTimeString('it-IT');
-    document.getElementById('boxCanzone').style.display = "none";
-    ultimaCanzone = "";
-    if(staSuonando){
-      let audio = document.getElementById('radioAudio');
-      audio.pause(); audio.src = ""; audio.load();
-      staSuonando = false;
-    }
-  }
-  aggiornaBadge();
-  controlloInCorso = false;
+  titoloCheckInCorso = false;
 }
+
 function aggiornaBadge(){
   let statoEl = document.getElementById('stato');
   let btn = document.getElementById('playBtn');
@@ -162,18 +189,18 @@ function aggiornaBadge(){
     } else {
       statoTxt.textContent = "Radio spenta - aspetta il controllo, quando siamo live il bottone diventa verde";
     }
+    // Se è OFF, nascondi box canzone
+    document.getElementById('boxCanzone').style.display = "none";
+    ultimaCanzone = "";
   }
 }
-// PLAY solo se LIVE, altrimenti niente - aspetta il controllo
 function toggleAudio(){
   if(staSuonando){
     utenteVolevaAscoltare = false;
     fermaAudio();
     return;
   }
-  if(!mixxxOnline){
-    return; // niente, aspetta il controllo automatico
-  }
+  if(!mixxxOnline) return; // se non è LIVE, niente - aspetta controllo
   utenteVolevaAscoltare = true;
   avviaAudio();
 }
@@ -183,7 +210,11 @@ function avviaAudio(){
   let stato = document.getElementById('playStato');
   stato.textContent = "Connessione in corso...";
   audio.src = STREAM_URL + "?x=" + Date.now();
-  audio.play().then(()=>{ staSuonando = true; aggiornaBadge(); }).catch(()=>{ stato.textContent = "Premi di nuovo PLAY"; });
+  audio.play().then(()=>{
+    staSuonando = true;
+    mixxxOnline = true; // se suona, è LIVE subito
+    aggiornaBadge();
+  }).catch(()=>{ stato.textContent = "Premi di nuovo PLAY"; });
 }
 function avviaAudioAuto(){
   let audio = document.getElementById('radioAudio');
@@ -192,10 +223,10 @@ function avviaAudioAuto(){
 }
 function fermaAudio(){
   let audio = document.getElementById('radioAudio');
-  audio.pause(); audio.src = ""; audio.load(); staSuonando = false; aggiornaBadge(); controllaTutto();
+  audio.pause(); audio.src = ""; audio.load(); staSuonando = false; aggiornaBadge(); controllaLive();
 }
 document.getElementById('radioAudio').volume = 0.8;
-document.getElementById('radioAudio').addEventListener('error', ()=>{ if(staSuonando){ staSuonando = false; aggiornaBadge(); } });
+document.getElementById('radioAudio').addEventListener('error', ()=>{ if(staSuonando){ staSuonando = false; mixxxOnline = false; aggiornaBadge(); } });
 document.getElementById('radioAudio').addEventListener('ended', ()=>{ if(staSuonando){ staSuonando = false; aggiornaBadge(); } });
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
@@ -280,12 +311,14 @@ function aggiorna(){
   }
 }
 carica();
-controllaTutto();
+controllaLive();
+controllaTitolo();
 setInterval(aggiorna, 1000);
 setInterval(carica, 1800000);
-setInterval(controllaTutto, 2000);
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) controllaTutto(); });
-window.addEventListener('focus', ()=>{ controllaTutto(); });
+setInterval(controllaLive, 2500); // LIVE ogni 2,5s - indipendente
+setInterval(controllaTitolo, 5000); // TITOLO ogni 5s - indipendente, scorre da solo
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ controllaLive(); controllaTitolo(); } });
+window.addEventListener('focus', ()=>{ controllaLive(); controllaTitolo(); });
 </script>
 </body>
 </html>
