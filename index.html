@@ -45,7 +45,7 @@
 <div class="sottotitolo">🎧 La tua radio - Musica, Dirette e Tanto Altro</div>
 <div id="vinile" class="vinile"></div>
 <div id="stato" class="badge verifica">● VERIFICA IN CORSO...</div>
-<div id="debug" class="debug">Controllo senza proxy V5...</div>
+<div id="debug" class="debug">Controllo in tempo reale...</div>
 <div style="margin:6px auto 14px;">
   <audio id="radioAudio" preload="none"></audio>
   <button id="playBtn" class="play-btn" onclick="toggleAudio()">▶️ ASCOLTA RADIO SAMAX</button>
@@ -69,67 +69,77 @@ let staSuonando = false;
 let mixxxOnline = false;
 let ultimaCanzone = "";
 let controlloInCorso = false;
+let ultimoProxyBuono = null; // ricorda il proxy più veloce
 const STREAM_URL = "https://s1.free-shoutcast.com/stream/18404";
 const HOST = "http://s1.free-shoutcast.com:18404";
 
-// CONTROLLO SENZA PROXY - usa lo stream diretto
-async function streamVivo(){
-  return new Promise((resolve)=>{
-    let controller = new AbortController();
-    // Se in 2.5 sec non ha dato errore, lo stream è vivo
-    let timer = setTimeout(()=>{ controller.abort(); resolve(true); }, 2500);
-    fetch(STREAM_URL + "?check=" + Date.now(), {mode:"no-cors", cache:"no-store", signal:controller.signal})
-    .then(()=>{
-      // In no-cors non arriva mai qui subito se lo stream è infinito, ma se arriva è ON
-      clearTimeout(timer); resolve(true);
-    })
-    .catch((e)=>{
-      // Se abort è per timeout, è ON. Se è errore di rete vero, è OFF
-      clearTimeout(timer);
-      if(e.name === "AbortError"){ resolve(true); }
-      else { resolve(false); }
-    });
-  });
+function listaProxy(base){
+  let tutti = [
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(base),
+    "https://api.allorigins.win/get?url=" + encodeURIComponent(base),
+    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base),
+    "https://corsproxy.io/?url=" + encodeURIComponent(base),
+    "https://api.cors.lol/?url=" + encodeURIComponent(base)
+  ];
+  // Metti per primo il proxy che ha funzionato l'ultima volta = più veloce
+  if(ultimoProxyBuono !== null){
+    let p = tutti.splice(ultimoProxyBuono, 1)[0];
+    tutti.unshift(p);
+  }
+  return tutti;
 }
 
-async function prendiTitoloProxy(){
+// CONTROLLO IN TEMPO REALE - prende il primo proxy che risponde, non aspetta tutti
+async function prendi7htmlVeloce(){
   let base = HOST + "/7.html?x=" + Date.now();
-  let proxies = [
-    "https://api.allorigins.win/raw?url=" + encodeURIComponent(base),
-    "https://corsproxy.io/?url=" + encodeURIComponent(base),
-    "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(base)
-  ];
-  for(let p of proxies){
-    try{
-      let c = new AbortController();
-      let t = setTimeout(()=>c.abort(), 2000);
-      let r = await fetch(p, {cache:"no-store", signal:c.signal});
-      clearTimeout(t);
-      let txt = await r.text();
-      let pulito = txt.replace(/<[^>]*>/g,"").trim().split("\n")[0].trim();
-      let parti = pulito.split(",");
-      if(parti.length >= 7 && parti[1] === "1"){
-        return parti.slice(6).join(",").trim();
-      }
-    }catch(e){}
-  }
-  return "";
+  let proxies = listaProxy(base);
+  // Promise.race: vince il primo che da 7.html valido
+  return new Promise((resolve)=>{
+    let risolti = 0;
+    let fatto = false;
+    proxies.forEach((u, idx)=>{
+      (async ()=>{
+        try{
+          let c = new AbortController();
+          let t = setTimeout(()=>c.abort(), 3500);
+          let r = await fetch(u, {cache:"no-store", signal:c.signal});
+          clearTimeout(t);
+          let txt = await r.text();
+          if(txt.trim().startsWith("{") && txt.includes("contents")){
+            try{ txt = JSON.parse(txt).contents || ""; }catch(e){}
+          }
+          txt = txt.replace(/<[^>]*>/g,"").trim().split("\n")[0].trim();
+          let parti = txt.split(",");
+          if(parti.length >= 2 && (parti[1] === "1" || parti[1] === "0") && !isNaN(parseInt(parti[2]))){
+            if(!fatto){ fatto = true; ultimoProxyBuono = idx; resolve({parti: parti, txt: txt}); }
+            return;
+          }
+        }catch(e){}
+        risolti++;
+        if(risolti === proxies.length && !fatto){ resolve(null); }
+      })();
+    });
+    // Se dopo 4 sec nessuno ha risposto, dai null
+    setTimeout(()=>{ if(!fatto){ fatto = true; resolve(null); } }, 4000);
+  });
 }
 
 async function controllaTutto(){
   if(controlloInCorso) return;
-  if(staSuonando) return;
   controlloInCorso = true;
-  let inizio = Date.now();
-  document.getElementById('debug').textContent = "Controllo stream diretto...";
-  let on = await streamVivo();
+  let res = await prendi7htmlVeloce();
+  if(!res){
+    // Nessun proxy -> non cambiare stato, resta quello di prima, ma scrivi che sta controllando
+    document.getElementById('debug').textContent = "Controllo in corso... " + new Date().toLocaleTimeString('it-IT') + " - proxy lenti, riprovo tra 3s";
+    controlloInCorso = false;
+    return;
+  }
+  let on = (res.parti[1] === "1");
+  let cambiato = (on !== mixxxOnline);
   mixxxOnline = on;
-  let ms = Date.now() - inizio;
+  let titolo = res.parti.slice(6).join(",").trim().replace(/^\s*-\s*/,"").trim();
   if(on){
-    document.getElementById('debug').textContent = "OK " + new Date().toLocaleTimeString('it-IT') + " - Stream vivo = Mixxx ON in " + ms + "ms";
-    // Titolo è bonus, se i proxy non vanno mostro LIVE generico
-    let titolo = await prendiTitoloProxy();
-    titolo = (titolo||"").replace(/^\s*-\s*/,"").trim();
+    document.getElementById('debug').textContent = "● LIVE - Controllo: " + new Date().toLocaleTimeString('it-IT') + " - Ascoltatori: " + res.parti[2];
     if(titolo && titolo.toLowerCase() !== "radio samax"){
       if(titolo !== ultimaCanzone){
         ultimaCanzone = titolo;
@@ -144,13 +154,15 @@ async function controllaTutto(){
       document.getElementById('scrittaCanzone').textContent = "🎵 RADIO SAMAX LIVE  •  ";
     }
   } else {
-    document.getElementById('debug').textContent = "Stream non risponde - Mixxx OFF - " + new Date().toLocaleTimeString('it-IT');
+    document.getElementById('debug').textContent = "● OFF - Controllo: " + new Date().toLocaleTimeString('it-IT');
     document.getElementById('boxCanzone').style.display = "none";
     ultimaCanzone = "";
   }
+  // Aggiorna badge solo se serve, ma sempre aggiorna per sicurezza
   aggiornaBadge();
   controlloInCorso = false;
 }
+
 function aggiornaBadge(){
   let statoEl = document.getElementById('stato');
   let btn = document.getElementById('playBtn');
@@ -168,7 +180,7 @@ function aggiornaBadge(){
   } else {
     statoEl.textContent = "● RADIO SPENTA - OFF LINE"; statoEl.className = "badge offline";
     btn.textContent = "▶️ PROVA AD ASCOLTARE COMUNQUE"; btn.className = "play-btn"; btn.disabled = false;
-    statoTxt.textContent = "Mixxx sembra spento, premi PLAY per verificare.";
+    statoTxt.textContent = "Mixxx è spento - controllo automatico ogni 3s";
   }
 }
 function toggleAudio(){ if(staSuonando) fermaAudio(); else avviaAudio(); }
@@ -181,10 +193,12 @@ function avviaAudio(){
 }
 function fermaAudio(){
   let audio = document.getElementById('radioAudio');
-  audio.pause(); audio.src = ""; audio.load(); staSuonando = false; controllaTutto(); aggiornaBadge();
+  audio.pause(); audio.src = ""; audio.load(); staSuonando = false; aggiornaBadge(); controllaTutto();
 }
 document.getElementById('radioAudio').volume = 0.8;
 document.getElementById('radioAudio').addEventListener('error', ()=>{ if(staSuonando){ staSuonando = false; mixxxOnline = false; aggiornaBadge(); } });
+document.getElementById('radioAudio').addEventListener('ended', ()=>{ if(staSuonando){ staSuonando = false; mixxxOnline = false; aggiornaBadge(); } });
+
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ctJ-v_F97KUQj0ZKeawqdMzsSqdfd31y3zh-t1qIQsM/export?format=csv";
 const MESI_ITA = {'gennaio':0,'febbraio':1,'marzo':2,'aprile':3,'maggio':4,'giugno':5,'luglio':6,'agosto':7,'settembre':8,'ottobre':9,'novembre':10,'dicembre':11,'gen':0,'feb':1,'mar':2,'apr':3,'mag':4,'giu':5,'lug':6,'ago':7,'set':8,'ott':9,'nov':10,'dic':11};
 function parseDataOra(dataStr, oraStr){
@@ -269,9 +283,13 @@ function aggiorna(){
 }
 carica();
 controllaTutto();
+// --- TEMPO REALE ---
 setInterval(aggiorna, 1000);
 setInterval(carica, 1800000);
-setInterval(controllaTutto, 20000);
+setInterval(controllaTutto, 3000); // ogni 3 secondi controlla Mixxx
+// Quando torni sulla pagina, controlla subito
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) controllaTutto(); });
+window.addEventListener('focus', ()=>{ controllaTutto(); });
 </script>
 </body>
 </html>
